@@ -383,14 +383,21 @@ $(document).on('click','[data-cmd="plot"]',popupPlot);
 $(document).on('click','[data-cmd="scene-edit"]',popupSceneEdit);
 
 render();
-// Hide all older status bars, only show the latest one
-(function hideOldStatusBars(){
+// Only show status bar on the latest AI message
+(function showOnlyLatest(){
 try{
-var allBars=$('.status-bar');
-if(allBars.length>1){
-allBars.each(function(i){
-if(i<allBars.length-1)$(this).closest('.mes,.mes_text,.chat-row,.message-row,div[class*="mes"]').css('display','none');
-});
+// Access parent window to find all status bars in chat
+var parentDoc=window.parent.document;
+var allBars=parentDoc.querySelectorAll('.status-bar');
+if(allBars.length<=1)return;
+// Find which index this bar is
+var thisBar=document.querySelector('.status-bar');
+var myIndex=-1;
+for(var i=0;i<allBars.length;i++){if(allBars[i]===thisBar){myIndex=i;break}}
+// If this is not the last bar, hide it
+if(myIndex>=0&&myIndex<allBars.length-1){
+var container=thisBar.closest('.mes,.mes_text,.chat-row,.message-row,div[class*="mes"]');
+if(container)container.style.display='none';
 }
 }catch(e){}
 })();

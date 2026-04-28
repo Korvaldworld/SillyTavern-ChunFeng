@@ -514,10 +514,15 @@
         }
         txt += '【系统初始化指令 - 必须执行】\n' +
           '请根据以上设定开始游戏，同时必须执行以下操作：\n' +
-          '1. 使用 JSON-Patch 初始化玩家信息和环境变量\n' +
+          '1. 使用 JSON-Patch 初始化以下变量：\n' +
+          '   - /玩家：主角信息（名称、年龄、身高、外观、角色背景、当前地点、性能力、性癖、持有金钱、物品栏）\n' +
+          '   - /环境：当前日期=2005年4月1日，当前时间=08:00，天气=晴，地点=长乐公寓101室\n' +
+          '   - /世界观/重要地点：从【世界描述】中提取的所有地点列表\n' +
+          '   - /世界观/用户自定义规则：从【用户自定义规则】中提取的所有规则\n' +
+          '   - /NPC：初始化主要角色（施美玉、梁惠、雪婉、雪柔、颜媚、茵曼）的基本信息\n' +
           '2. 输出 <StatusPlaceHolder/> 触发状态栏渲染\n' +
-          '3. 在 <UpdateVariable> 中输出初始化用的 JSON-Patch\n' +
-          '示例格式：<UpdateVariable><Analysis>Initialize game state</Analysis><JSONPatch>[{"op":"insert","path":"/玩家","value":{"名称":"' + c.名称 + '","年龄":' + (parseInt(c.年龄)||0) + ',"身高":"' + c.身高 + '","外观":"' + c.外观 + '","角色背景":"' + c.角色背景 + '","当前地点":"' + c.当前地点 + '","性能力":"' + c.性能力 + '","性癖":"' + c.性癖 + '","持有金钱":0,"物品栏":[]}}]</JSONPatch></UpdateVariable>';
+          '3. 在 <UpdateVariable> 中输出所有初始化用的 JSON-Patch\n' +
+          '示例格式：<UpdateVariable><Analysis>Initialize all game variables</Analysis><JSONPatch>[{"op":"insert","path":"/玩家","value":{...}},{"op":"insert","path":"/环境","value":{...}},{"op":"insert","path":"/世界观","value":{...}}]</JSONPatch></UpdateVariable>';
 
         $('#confirmContent').text(txt);
       }
