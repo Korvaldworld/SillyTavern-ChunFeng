@@ -222,6 +222,22 @@
       background: rgba(15, 52, 96, 0.5);
       border-color: #64ffda;
     }
+    .btn-success {
+      background: rgba(100, 255, 218, 0.12);
+      border: 1px solid rgba(100, 255, 218, 0.25);
+      color: #64ffda;
+    }
+    .btn-success:hover {
+      background: rgba(100, 255, 218, 0.25);
+    }
+    .btn-danger {
+      background: rgba(233, 69, 96, 0.12);
+      border: 1px solid rgba(233, 69, 96, 0.25);
+      color: #e94560;
+    }
+    .btn-danger:hover {
+      background: rgba(233, 69, 96, 0.25);
+    }
     /* 底部全局按钮 */
     .global-actions {
       padding: 8px 10px;
@@ -252,6 +268,150 @@
       padding: 12px;
       font-size: 11px;
       font-style: italic;
+    }
+
+    /* ===== 弹出编辑面板 ===== */
+    .popup-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.7);
+      z-index: 9999;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .popup-overlay.active {
+      display: flex;
+    }
+    .popup-panel {
+      background: #112240;
+      border: 1px solid #233554;
+      border-radius: 8px;
+      max-width: 600px;
+      width: 100%;
+      max-height: 90vh;
+      overflow: auto;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+    }
+    .popup-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 16px;
+      border-bottom: 1px solid #233554;
+      position: sticky;
+      top: 0;
+      background: #112240;
+      z-index: 1;
+    }
+    .popup-title {
+      font-size: 14px;
+      color: #64ffda;
+      font-weight: bold;
+    }
+    .popup-close {
+      background: none;
+      border: none;
+      color: #8892b0;
+      font-size: 18px;
+      cursor: pointer;
+      line-height: 1;
+      padding: 0 4px;
+    }
+    .popup-close:hover {
+      color: #e94560;
+    }
+    .popup-body {
+      padding: 16px;
+    }
+    .form-row {
+      margin-bottom: 12px;
+    }
+    .form-row:last-child {
+      margin-bottom: 0;
+    }
+    .form-label {
+      display: block;
+      font-size: 11px;
+      color: #64ffda;
+      margin-bottom: 4px;
+    }
+    .form-input,
+    .form-textarea {
+      width: 100%;
+      background: #0a192f;
+      border: 1px solid #233554;
+      border-radius: 4px;
+      padding: 8px 10px;
+      color: #ccd6f6;
+      font-family: inherit;
+      font-size: 12px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .form-input:focus,
+    .form-textarea:focus {
+      border-color: #64ffda;
+    }
+    .form-textarea {
+      min-height: 100px;
+      resize: vertical;
+    }
+    .form-actions {
+      display: flex;
+      gap: 8px;
+      justify-content: flex-end;
+      margin-top: 16px;
+      padding-top: 12px;
+      border-top: 1px solid #233554;
+    }
+    .npc-edit-card {
+      background: rgba(10, 25, 47, 0.5);
+      border: 1px solid #233554;
+      border-radius: 6px;
+      padding: 12px;
+      margin-bottom: 12px;
+    }
+    .npc-edit-card:last-child {
+      margin-bottom: 0;
+    }
+    .npc-edit-name {
+      font-size: 13px;
+      color: #e94560;
+      font-weight: bold;
+      margin-bottom: 8px;
+    }
+    .npc-edit-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+    .npc-edit-grid .form-row {
+      margin-bottom: 8px;
+    }
+    .item-list {
+      margin-bottom: 8px;
+    }
+    .item-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: rgba(15, 52, 96, 0.4);
+      padding: 2px 8px;
+      border-radius: 3px;
+      font-size: 11px;
+      color: #a8b2d1;
+      margin: 0 4px 4px 0;
+    }
+    .item-tag-remove {
+      cursor: pointer;
+      color: #e94560;
+      font-size: 12px;
+      line-height: 1;
+    }
+    .item-tag-remove:hover {
+      color: #ff6b6b;
     }
   </style>
 </head>
@@ -302,15 +462,29 @@
     </div>
   </div>
 
+  <!-- 弹出编辑面板 -->
+  <div class="popup-overlay" id="popupOverlay">
+    <div class="popup-panel" id="popupPanel">
+      <div class="popup-header">
+        <span class="popup-title" id="popupTitle">编辑</span>
+        <button class="popup-close" id="popupClose">&times;</button>
+      </div>
+      <div class="popup-body" id="popupBody"></div>
+    </div>
+  </div>
+
   <script>
     $(function() {
       // 硬编码默认值（首次加载时使用）
       var defaults = {
         环境: { 当前日期: '2005年4月1日', 当前时间: '08:00', 天气: '晴', 地点: '长乐公寓101室', 当前交互角色ID: '' },
         玩家: { 名称: '张浩', 年龄: 19, 持有金钱: 0, 当前地点: '长乐公寓101室',
-          角色背景: '天雄集团董事长张天雄的独子，被父亲安排管理长乐公寓。性格懒散但内心善良，对公寓中的租客们有着复杂的情感。' },
+          外观: '', 角色背景: '天雄集团董事长张天雄的独子，被父亲安排管理长乐公寓。性格懒散但内心善良，对公寓中的租客们有着复杂的情感。',
+          性能力: '', 性癖: '', 物品: [] },
+        剧情: '',
         NPC: {}
       };
+      var mains = { 'NPC1': '施美玉', 'NPC2': '梁惠', 'NPC3': '雪婉', 'NPC4': '雪柔', 'NPC5': '颜媚', 'NPC6': '茵曼' };
 
       // 读取变量
       function readVar() {
@@ -321,7 +495,322 @@
         } catch(e) { return {}; }
       }
 
-      // 渲染状态栏
+      // 发送命令
+      function sendCmd(text) {
+        try {
+          triggerSlash('/setinput ' + text);
+          if (typeof toastr !== 'undefined') toastr.success('已写入输入框，请发送');
+        } catch(e) {
+          var el = document.createElement('div');
+          el.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#112240;border:1px solid #233554;padding:16px;z-index:99999;max-width:90%;max-height:80%;overflow:auto;border-radius:8px;color:#ccd6f6;';
+          el.innerHTML = '<div style="color:#e94560;font-weight:bold;margin-bottom:8px;">请复制以下命令并发送：</div>' +
+            '<textarea readonly style="width:100%;min-height:100px;background:#0a192f;border:1px solid #233554;color:#ccd6f6;padding:8px;font-family:inherit;font-size:12px;" onclick="this.select()">' + $('<div>').text(text).html() + '</textarea>' +
+            '<button class="btn" style="margin-top:8px;" id="fallbackCloseBtn">关闭</button>';
+          document.body.appendChild(el);
+          $('#fallbackCloseBtn').on('click', function() { el.remove(); });
+        }
+      }
+
+      function esc(t) { return $('<div>').text(t || '').html(); }
+      function trunc(t) {
+        if (!t) return '--';
+        return t.length > 20 ? t.substring(0, 20) + '...' : t;
+      }
+
+      // ===== 弹出面板 =====
+      var $overlay = $('#popupOverlay');
+      var $body = $('#popupBody');
+      var $title = $('#popupTitle');
+
+      function openPopup(title, contentHtml, onSave) {
+        $title.text(title);
+        $body.html(contentHtml);
+        $overlay.addClass('active');
+
+        var $panel = $body.closest('.popup-panel');
+        $panel.off('click.popup-save');
+        $panel.on('click.popup-save', '[data-action="save"]', function() {
+          var text = onSave();
+          if (text) {
+            sendCmd(text);
+            closePopup();
+          }
+        });
+      }
+
+      function closePopup() {
+        $overlay.removeClass('active');
+        $body.empty();
+      }
+
+      $('#popupClose').on('click', closePopup);
+      $overlay.on('click', function(e) {
+        if (e.target === this) closePopup();
+      });
+
+      // 生成表单字段
+      function makeInput(label, name, value, opts) {
+        opts = opts || {};
+        var type = opts.type || 'text';
+        var id = 'field_' + name;
+        var val = esc(value !== undefined && value !== null ? value : '');
+        if (type === 'textarea') {
+          return '<div class="form-row"><label class="form-label" for="' + id + '">' + esc(label) + '</label><textarea class="form-textarea" id="' + id + '" data-field="' + esc(name) + '">' + val + '</textarea></div>';
+        }
+        return '<div class="form-row"><label class="form-label" for="' + id + '">' + esc(label) + '</label><input type="' + type + '" class="form-input" id="' + id + '" data-field="' + esc(name) + '" value="' + val + '"></div>';
+      }
+
+      function getField(name) {
+        return $body.find('[data-field="' + name + '"]').val().trim();
+      }
+
+      function getFieldNum(name) {
+        var v = parseFloat(getField(name));
+        return isNaN(v) ? 0 : v;
+      }
+
+      // ===== 各弹窗逻辑 =====
+
+      // 1. 编辑玩家信息
+      function popupEditPlayer() {
+        var d = readVar();
+        var p = $.extend({}, defaults.玩家, d.玩家 || {});
+        var html =
+          makeInput('名称', '名称', p.名称) +
+          makeInput('年龄', '年龄', p.年龄, {type:'number'}) +
+          makeInput('持有金钱', '持有金钱', p.持有金钱, {type:'number'}) +
+          makeInput('当前地点', '当前地点', p.当前地点) +
+          makeInput('外观', '外观', p.外观) +
+          makeInput('角色背景', '角色背景', p.角色背景, {type:'textarea'}) +
+          makeInput('性能力', '性能力', p.性能力) +
+          makeInput('性癖', '性癖', p.性癖) +
+          '<div class="form-actions"><button class="btn btn-danger" data-action="close">取消</button><button class="btn btn-success" data-action="save">保存</button></div>';
+
+        openPopup('✏️ 编辑玩家信息', html, function() {
+          return '【编辑玩家信息】\n更新后的信息：\n- 名称：' + getField('名称') +
+            '\n- 年龄：' + getFieldNum('年龄') +
+            '\n- 持有金钱：' + getFieldNum('持有金钱') +
+            '\n- 当前地点：' + getField('当前地点') +
+            '\n- 外观：' + getField('外观') +
+            '\n- 角色背景：' + getField('角色背景') +
+            '\n- 性能力：' + getField('性能力') +
+            '\n- 性癖：' + getField('性癖') +
+            '\n\n请输出 JSON-Patch 更新玩家信息。';
+        });
+
+        $body.find('[data-action="close"]').on('click', closePopup);
+      }
+
+      // 2. 物品
+      function popupEditInv() {
+        var d = readVar();
+        var p = $.extend({}, defaults.玩家, d.玩家 || {});
+        var items = p.物品 || [];
+        var itemsText = items.length ? items.join('\n') : '';
+        var html =
+          '<div class="form-row"><label class="form-label">当前物品</label><div class="item-list" id="itemList"></div></div>' +
+          makeInput('添加/编辑物品（每行一个）', 'items', itemsText, {type:'textarea'}) +
+          '<div class="form-actions"><button class="btn btn-danger" data-action="close">取消</button><button class="btn btn-success" data-action="save">保存</button></div>';
+
+        openPopup('🎒 物品栏', html, function() {
+          var text = getField('items');
+          var list = text.split(/\n/).map(function(s){ return s.trim(); }).filter(function(s){ return s; });
+          return '【编辑物品栏】\n更新后的物品列表：\n' + (list.length ? list.map(function(i){ return '- ' + i; }).join('\n') : '（空）') +
+            '\n\n请输出 JSON-Patch 更新物品栏。';
+        });
+
+        $body.find('[data-action="close"]').on('click', closePopup);
+
+        // 渲染物品标签
+        function renderItemTags() {
+          var text = $body.find('[data-field="items"]').val();
+          var list = text.split(/\n/).map(function(s){ return s.trim(); }).filter(function(s){ return s; });
+          var $list = $('#itemList');
+          if (!list.length) { $list.html('<span style="color:#8892b0;font-size:11px;">暂无物品</span>'); return; }
+          $list.html(list.map(function(it) {
+            return '<span class="item-tag">' + esc(it) + '<span class="item-tag-remove" data-item="' + esc(it) + '">&times;</span></span>';
+          }).join(''));
+          $list.find('.item-tag-remove').on('click', function() {
+            var rem = $(this).data('item');
+            var arr = $body.find('[data-field="items"]').val().split(/\n/).map(function(s){ return s.trim(); }).filter(function(s){ return s && s !== rem; });
+            $body.find('[data-field="items"]').val(arr.join('\n'));
+            renderItemTags();
+          });
+        }
+        renderItemTags();
+        $body.find('[data-field="items"]').on('input', renderItemTags);
+      }
+
+      // 3. 角色管理
+      function popupCharMgr() {
+        var d = readVar();
+        var npcs = $.extend({}, d.NPC || {});
+        var html = '';
+        $.each(mains, function(key, defaultName) {
+          var npc = npcs[key] || {};
+          if (!npc.名称) return;
+          html += '<div class="npc-edit-card">' +
+            '<div class="npc-edit-name">' + esc(npc.名称) + ' (' + key + ')</div>' +
+            '<div class="npc-edit-grid">' +
+            makeInput('名称', key + '_名称', npc.名称) +
+            makeInput('年龄', key + '_年龄', npc.年龄, {type:'number'}) +
+            makeInput('职业', key + '_职业', npc.职业) +
+            makeInput('外貌', key + '_外貌', npc.外貌) +
+            makeInput('身材', key + '_身材', npc.身材) +
+            makeInput('性格', key + '_性格', npc.性格) +
+            '</div>' +
+            makeInput('角色背景', key + '_角色背景', npc.角色背景, {type:'textarea'}) +
+            '</div>';
+        });
+        if (!html) html = '<div class="empty-state">暂无NPC数据</div>';
+        html += '<div class="form-actions"><button class="btn btn-danger" data-action="close">取消</button><button class="btn btn-success" data-action="save">保存</button></div>';
+
+        openPopup('👥 角色管理', html, function() {
+          var lines = [];
+          $.each(mains, function(key, defaultName) {
+            var npc = npcs[key] || {};
+            if (!npc.名称) return;
+            lines.push('【' + esc(getField(key + '_名称') || npc.名称) + '】');
+            lines.push('- 名称：' + getField(key + '_名称'));
+            lines.push('- 年龄：' + getFieldNum(key + '_年龄'));
+            lines.push('- 职业：' + getField(key + '_职业'));
+            lines.push('- 外貌：' + getField(key + '_外貌'));
+            lines.push('- 身材：' + getField(key + '_身材'));
+            lines.push('- 性格：' + getField(key + '_性格'));
+            lines.push('- 角色背景：' + getField(key + '_角色背景'));
+            lines.push('');
+          });
+          return '【角色管理】\n更新后的角色信息：\n' + lines.join('\n') + '\n请输出 JSON-Patch 更新所有NPC信息。';
+        });
+
+        $body.find('[data-action="close"]').on('click', closePopup);
+      }
+
+      // 4. 世界管理
+      function popupWorldMgr() {
+        var d = readVar();
+        var env = $.extend({}, defaults.环境, d.环境 || {});
+        var html =
+          makeInput('当前日期', '当前日期', env.当前日期) +
+          makeInput('当前时间', '当前时间', env.当前时间) +
+          makeInput('天气', '天气', env.天气) +
+          makeInput('地点', '地点', env.地点) +
+          '<div class="form-actions"><button class="btn btn-danger" data-action="close">取消</button><button class="btn btn-success" data-action="save">保存</button></div>';
+
+        openPopup('🌍 世界管理', html, function() {
+          return '【世界管理】\n更新后的环境：\n- 日期：' + getField('当前日期') +
+            '\n- 时间：' + getField('当前时间') +
+            '\n- 天气：' + getField('天气') +
+            '\n- 地点：' + getField('地点') +
+            '\n\n请输出 JSON-Patch 更新环境变量。';
+        });
+
+        $body.find('[data-action="close"]').on('click', closePopup);
+      }
+
+      // 5. 剧情
+      function popupPlot() {
+        var d = readVar();
+        var plot = d.剧情 || defaults.剧情;
+        var html =
+          makeInput('剧情记录', '剧情', plot, {type:'textarea'}) +
+          '<div class="form-actions"><button class="btn btn-danger" data-action="close">取消</button><button class="btn btn-success" data-action="save">保存</button></div>';
+
+        openPopup('📖 剧情编辑', html, function() {
+          return '【剧情编辑】\n更新后的剧情记录：\n' + getField('剧情') +
+            '\n\n请输出 JSON-Patch 更新剧情变量。';
+        });
+
+        $body.find('[data-action="close"]').on('click', closePopup);
+      }
+
+      // 6. NPC 好感度
+      function popupEditAff(npcId) {
+        var d = readVar();
+        var npc = (d.NPC || {})[npcId] || {};
+        var html =
+          makeInput('好感度', '好感度', npc.好感度 || 0, {type:'number'}) +
+          makeInput('厌恶度', '厌恶度', npc.厌恶度 || 0, {type:'number'}) +
+          makeInput('堕落度', '堕落度', npc.堕落度 || 0, {type:'number'}) +
+          makeInput('快感', '快感', npc.快感 || 0, {type:'number'}) +
+          makeInput('情绪状态', '情绪状态', npc.情绪状态 || '平静') +
+          '<div class="form-actions"><button class="btn btn-danger" data-action="close">取消</button><button class="btn btn-success" data-action="save">保存</button></div>';
+
+        openPopup('❤️ 编辑好感度：' + esc(npc.名称 || npcId), html, function() {
+          return '【编辑好感度：' + (npc.名称 || npcId) + '】\n更新后的数值：\n- 好感度：' + getFieldNum('好感度') +
+            '\n- 厌恶度：' + getFieldNum('厌恶度') +
+            '\n- 堕落度：' + getFieldNum('堕落度') +
+            '\n- 快感：' + getFieldNum('快感') +
+            '\n- 情绪状态：' + getField('情绪状态') +
+            '\n\n请输出 JSON-Patch 更新 ' + npcId + ' 的好感度数值。';
+        });
+
+        $body.find('[data-action="close"]').on('click', closePopup);
+      }
+
+      // 7. NPC 角色信息
+      function popupNpcInfo(npcId) {
+        var d = readVar();
+        var npc = (d.NPC || {})[npcId] || {};
+        var html =
+          makeInput('名称', '名称', npc.名称) +
+          makeInput('年龄', '年龄', npc.年龄, {type:'number'}) +
+          makeInput('职业', '职业', npc.职业) +
+          makeInput('外貌', '外貌', npc.外貌) +
+          makeInput('身材', '身材', npc.身材) +
+          makeInput('性格', '性格', npc.性格) +
+          makeInput('角色背景', '角色背景', npc.角色背景, {type:'textarea'}) +
+          '<div class="form-actions"><button class="btn btn-danger" data-action="close">取消</button><button class="btn btn-success" data-action="save">保存</button></div>';
+
+        openPopup('📋 角色信息：' + esc(npc.名称 || npcId), html, function() {
+          return '【编辑NPC信息：' + (npc.名称 || npcId) + '】\n更新后的信息：\n- 名称：' + getField('名称') +
+            '\n- 年龄：' + getFieldNum('年龄') +
+            '\n- 职业：' + getField('职业') +
+            '\n- 外貌：' + getField('外貌') +
+            '\n- 身材：' + getField('身材') +
+            '\n- 性格：' + getField('性格') +
+            '\n- 角色背景：' + getField('角色背景') +
+            '\n\n请输出 JSON-Patch 更新 ' + npcId + ' 的信息。';
+        });
+
+        $body.find('[data-action="close"]').on('click', closePopup);
+      }
+
+      // 8. NPC 服装
+      function popupNpcCloth(npcId) {
+        var d = readVar();
+        var npc = (d.NPC || {})[npcId] || {};
+        var html =
+          makeInput('当前服装', '服装', npc.服装) +
+          '<div class="form-actions"><button class="btn btn-danger" data-action="close">取消</button><button class="btn btn-success" data-action="save">保存</button></div>';
+
+        openPopup('👗 当前服装：' + esc(npc.名称 || npcId), html, function() {
+          return '【编辑NPC服装：' + (npc.名称 || npcId) + '】\n更新后的服装：' + getField('服装') +
+            '\n\n请输出 JSON-Patch 更新 ' + npcId + ' 的服装。';
+        });
+
+        $body.find('[data-action="close"]').on('click', closePopup);
+      }
+
+      // 9. NPC 事件记录
+      function popupNpcEvent(npcId) {
+        var d = readVar();
+        var npc = (d.NPC || {})[npcId] || {};
+        var events = npc.事件记录 || [];
+        var eventsText = Array.isArray(events) ? events.join('\n') : (typeof events === 'string' ? events : '');
+        var html =
+          makeInput('事件记录（每行一个）', '事件记录', eventsText, {type:'textarea'}) +
+          '<div class="form-actions"><button class="btn btn-danger" data-action="close">取消</button><button class="btn btn-success" data-action="save">保存</button></div>';
+
+        openPopup('📜 事件记录：' + esc(npc.名称 || npcId), html, function() {
+          return '【编辑NPC事件：' + (npc.名称 || npcId) + '】\n更新后的事件记录：\n' + getField('事件记录') +
+            '\n\n请输出 JSON-Patch 更新 ' + npcId + ' 的事件记录。';
+        });
+
+        $body.find('[data-action="close"]').on('click', closePopup);
+      }
+
+      // ===== 渲染状态栏 =====
       function render() {
         var d = readVar();
         var env = $.extend({}, defaults.环境, d.环境 || {});
@@ -339,7 +828,7 @@
         $('#eChar').text(charName);
 
         $('#pName').text(plr.名称 || defaults.玩家.名称);
-        $('#pAge').text((plr.年龄 || defaults.玩家.年龄) + '岁');
+        $('#pAge').text((plr.年龄 !== undefined ? plr.年龄 : defaults.玩家.年龄) + '岁');
         $('#pMoney').text('💰 ' + (plr.持有金钱 !== undefined ? plr.持有金钱 : defaults.玩家.持有金钱));
         $('#pLoc').text('📍 ' + (plr.当前地点 || defaults.玩家.当前地点));
         $('#pDesc').text(plr.角色背景 || defaults.玩家.角色背景);
@@ -351,7 +840,6 @@
         var container = $('#npcContainer');
         var hasNPC = false;
         var html = '';
-        var mains = { 'NPC1': '施美玉', 'NPC2': '梁惠', 'NPC3': '雪婉', 'NPC4': '雪柔', 'NPC5': '颜媚', 'NPC6': '茵曼' };
 
         $.each(mains, function(key, defaultName) {
           var npc = npcs[key];
@@ -362,18 +850,18 @@
           html += '<div class="npc-card">' +
             '<div class="npc-top"><div class="npc-avatar">👩</div>' +
             '<div class="npc-basic"><div class="npc-name">' + esc(npc.名称) + '</div>' +
-            '<div class="npc-sub">' + (npc.年龄 || '--') + '岁 · ' + (npc.职业 || '未知职业') + '</div></div></div>' +
+            '<div class="npc-sub">' + (npc.年龄 !== undefined ? npc.年龄 : '--') + '岁 · ' + (npc.职业 || '未知职业') + '</div></div></div>' +
             '<div class="npc-details">' +
             '<div class="npc-detail"><label>外貌</label>' + trunc(npc.外貌) + '</div>' +
             '<div class="npc-detail"><label>身材</label>' + trunc(npc.身材) + '</div>' +
             '<div class="npc-detail"><label>服装</label>' + trunc(npc.服装) + '</div>' +
             '<div class="npc-detail"><label>性格</label>' + trunc(npc.性格) + '</div></div>' +
             '<div class="affinity-bar">' +
-            '<div class="affinity-item"><div class="affinity-value" style="color:#ff6b6b">' + (npc.好感度 || 0) + '</div><div class="affinity-label">好感</div></div>' +
-            '<div class="affinity-item"><div class="affinity-value" style="color:#ffd93d">' + (npc.厌恶度 || 0) + '</div><div class="affinity-label">厌恶</div></div>' +
-            '<div class="affinity-item"><div class="affinity-value" style="color:#c084fc">' + (npc.堕落度 || 0) + '</div><div class="affinity-label">堕落</div></div>' +
-            '<div class="affinity-item"><div class="affinity-value" style="color:#ff9f43">' + (npc.快感 || 0) + '</div><div class="affinity-label">快感</div></div>' +
-            '<div style="margin-left:auto;"><span class="mood-badge">' + (npc.情绪状态 || '平静') + '</span></div>' +
+            '<div class="affinity-item"><div class="affinity-value" style="color:#ff6b6b">' + (npc.好感度 !== undefined ? npc.好感度 : 0) + '</div><div class="affinity-label">好感</div></div>' +
+            '<div class="affinity-item"><div class="affinity-value" style="color:#ffd93d">' + (npc.厌恶度 !== undefined ? npc.厌恶度 : 0) + '</div><div class="affinity-label">厌恶</div></div>' +
+            '<div class="affinity-item"><div class="affinity-value" style="color:#c084fc">' + (npc.堕落度 !== undefined ? npc.堕落度 : 0) + '</div><div class="affinity-label">堕落</div></div>' +
+            '<div class="affinity-item"><div class="affinity-value" style="color:#ff9f43">' + (npc.快感 !== undefined ? npc.快感 : 0) + '</div><div class="affinity-label">快感</div></div>' +
+            '<div style="margin-left:auto;"><span class="mood-badge">' + esc(npc.情绪状态 || '平静') + '</span></div>' +
             '<button class="btn btn-sm btn-edit-npc" data-npc="' + key + '" data-cmd="edit-aff">编辑</button></div>' +
             '<div class="npc-actions">' +
             '<button class="btn btn-secondary btn-sm btn-edit-npc" data-npc="' + key + '" data-cmd="npc-info">📋 角色信息</button>' +
@@ -384,78 +872,28 @@
         container.html(hasNPC ? html : '<div class="empty-state">暂无交互中的主要角色</div>');
       }
 
-      function esc(t) { return $('<div>').text(t || '--').html(); }
-      function trunc(t) {
-        if (!t) return '--';
-        return t.length > 20 ? t.substring(0, 20) + '...' : t;
-      }
+      // ===== 按钮事件绑定 =====
+      $(document).on('click', '[data-cmd="edit-player"]', popupEditPlayer);
+      $(document).on('click', '[data-cmd="edit-inv"]', popupEditInv);
+      $(document).on('click', '[data-cmd="char-mgr"]', popupCharMgr);
+      $(document).on('click', '[data-cmd="world-mgr"]', popupWorldMgr);
+      $(document).on('click', '[data-cmd="plot"]', popupPlot);
 
-      // 按钮命令处理
-      function sendCmd(text) {
-        try {
-          triggerSlash('/setinput ' + text);
-          if (typeof toastr !== 'undefined') toastr.success('已写入输入框，请发送');
-        } catch(e) {
-          // Fallback
-          var el = document.createElement('div');
-          el.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#112240;border:1px solid #233554;padding:16px;z-index:99999;max-width:90%;max-height:80%;overflow:auto;border-radius:8px;color:#ccd6f6;';
-          el.innerHTML = '<div style="color:#e94560;font-weight:bold;margin-bottom:8px;">请复制以下命令并发送：</div>' +
-            '<textarea readonly style="width:100%;min-height:100px;background:#0a192f;border:1px solid #233554;color:#ccd6f6;padding:8px;font-family:inherit;font-size:12px;" onclick="this.select()">' + esc(text) + '</textarea>' +
-            '<button class="btn btn-primary btn-sm" style="margin-top:8px;" onclick="this.parentElement.remove()">关闭</button>';
-          document.body.appendChild(el);
-        }
-      }
-
-      // 命令模板
-      var cmds = {
-        'edit-player': function() {
-          var d = readVar();
-          var p = $.extend({}, defaults.玩家, d.玩家 || {});
-          sendCmd('【编辑玩家信息】\n当前信息：\n- 名称：' + (p.名称 || '') + '\n- 年龄：' + (p.年龄 || '') + '\n- 持有金钱：' + (p.持有金钱 || 0) + '\n- 当前地点：' + (p.当前地点 || '') + '\n- 外观：' + (p.外观 || '') + '\n- 角色背景：' + (p.角色背景 || '') + '\n- 性能力：' + (p.性能力 || '') + '\n- 性癖：' + (p.性癖 || '') + '\n\n请输出更新后的 JSON-Patch');
-        },
-        'edit-inv': function() {
-          sendCmd('【查看/编辑物品栏】\n请列出当前所有物品，并允许我添加/删除物品。输出 JSON-Patch 更新物品栏。');
-        },
-        'char-mgr': function() {
-          sendCmd('【角色管理】\n请列出所有NPC角色的当前状态，并允许我编辑各角色的信息。输出 JSON-Patch。');
-        },
-        'world-mgr': function() {
-          var d = readVar();
-          var env = $.extend({}, defaults.环境, d.环境 || {});
-          sendCmd('【世界管理】\n当前环境：\n- 日期：' + (env.当前日期 || '') + '\n- 时间：' + (env.当前时间 || '') + '\n- 天气：' + (env.天气 || '') + '\n- 地点：' + (env.地点 || '') + '\n\n请输出 JSON-Patch 更新环境变量。');
-        },
-        'plot': function() {
-          sendCmd('【剧情编辑】\n请总结当前剧情进度，并允许我推进或修改剧情走向。输出 JSON-Patch 更新剧情变量。');
-        },
-        'npc-info': function(npcId) {
-          var d = readVar();
-          var npc = (d.NPC || {})[npcId] || {};
-          sendCmd('【编辑NPC信息：' + (npc.名称 || npcId) + '】\n当前信息：\n- 名称：' + (npc.名称 || '') + '\n- 年龄：' + (npc.年龄 || '') + '\n- 职业：' + (npc.职业 || '') + '\n- 外貌：' + (npc.外貌 || '') + '\n- 身材：' + (npc.身材 || '') + '\n- 性格：' + (npc.性格 || '') + '\n- 角色背景：' + (npc.角色背景 || '') + '\n\n请输出 JSON-Patch 更新该NPC信息。');
-        },
-        'npc-cloth': function(npcId) {
-          var d = readVar();
-          var npc = (d.NPC || {})[npcId] || {};
-          sendCmd('【编辑NPC服装：' + (npc.名称 || npcId) + '】\n当前服装：' + (npc.服装 || '未设定') + '\n请输出 JSON-Patch 更新服装。');
-        },
-        'npc-event': function(npcId) {
-          var d = readVar();
-          var npc = (d.NPC || {})[npcId] || {};
-          sendCmd('【查看NPC事件：' + (npc.名称 || npcId) + '】\n请列出该角色的重要事件记录，并允许我添加新事件。输出 JSON-Patch 更新事件记录。');
-        },
-        'edit-aff': function(npcId) {
-          var d = readVar();
-          var npc = (d.NPC || {})[npcId] || {};
-          sendCmd('【编辑好感度：' + (npc.名称 || npcId) + '】\n当前好感度：' + (npc.好感度 || 0) + '\n当前厌恶度：' + (npc.厌恶度 || 0) + '\n当前堕落度：' + (npc.堕落度 || 0) + '\n当前快感：' + (npc.快感 || 0) + '\n情绪状态：' + (npc.情绪状态 || '平静') + '\n\n请输出 JSON-Patch 更新数值。');
-        }
-      };
-
-      // 全局按钮事件
-      $(document).on('click', '[data-cmd]', function() {
-        var cmd = $(this).data('cmd');
-        var npc = $(this).data('npc');
-        if (cmds[cmd]) {
-          cmds[cmd](npc);
-        }
+      $(document).on('click', '[data-cmd="edit-aff"]', function() {
+        var npcId = $(this).data('npc');
+        popupEditAff(npcId);
+      });
+      $(document).on('click', '[data-cmd="npc-info"]', function() {
+        var npcId = $(this).data('npc');
+        popupNpcInfo(npcId);
+      });
+      $(document).on('click', '[data-cmd="npc-cloth"]', function() {
+        var npcId = $(this).data('npc');
+        popupNpcCloth(npcId);
+      });
+      $(document).on('click', '[data-cmd="npc-event"]', function() {
+        var npcId = $(this).data('npc');
+        popupNpcEvent(npcId);
       });
 
       // 初始化渲染

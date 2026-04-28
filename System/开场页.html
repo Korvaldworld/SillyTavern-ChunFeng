@@ -308,9 +308,9 @@
           <button class="mode-btn" data-mode="cus">自定义角色</button>
         </div>
         <div id="defDesc" class="desc-text">
-          <strong>张浩</strong>：19岁，身高193cm，天雄集团董事长张天雄的独子。性格懒散但内心善良，对公寓中的租客们有着复杂的情感。将直接开始游戏。
+          <strong>张浩</strong>：19岁，身高193cm，天雄集团董事长张天雄的独子。性格懒散但内心善良，对公寓中的租客们有着复杂的情感。
         </div>
-        <div id="cusForm" style="display:none;">
+        <div id="charForm">
           <div class="char-form">
             <div class="form-group">
               <label>名称</label>
@@ -436,13 +436,35 @@
         $('.mode-btn').removeClass('active');
         $(this).addClass('active');
         if (mode === 'def') {
-          $('#defDesc').show();
-          $('#cusForm').hide();
+          $('#cusName').val(defChar.名称);
+          $('#cusAge').val(defChar.年龄);
+          $('#cusHeight').val(defChar.身高);
+          $('#cusLoc').val(defChar.当前地点);
+          $('#cusApp').val(defChar.外观);
+          $('#cusBg').val(defChar.角色背景);
+          $('#cusAbi').val(defChar.性能力);
+          $('#cusFet').val(defChar.性癖);
         } else {
-          $('#defDesc').hide();
-          $('#cusForm').show();
+          $('#cusName').val('').focus();
+          $('#cusAge').val('');
+          $('#cusHeight').val('');
+          $('#cusLoc').val('');
+          $('#cusApp').val('');
+          $('#cusBg').val('');
+          $('#cusAbi').val('');
+          $('#cusFet').val('');
         }
       });
+
+      // Pre-fill default character on init
+      $('#cusName').val(defChar.名称);
+      $('#cusAge').val(defChar.年龄);
+      $('#cusHeight').val(defChar.身高);
+      $('#cusLoc').val(defChar.当前地点);
+      $('#cusApp').val(defChar.外观);
+      $('#cusBg').val(defChar.角色背景);
+      $('#cusAbi').val(defChar.性能力);
+      $('#cusFet').val(defChar.性癖);
 
       // Navigation
       $('#btnGoS2').on('click', function() { showStep(2); });
