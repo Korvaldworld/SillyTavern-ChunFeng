@@ -545,7 +545,12 @@
       }
 
       $('#btnConfirm').on('click', function() {
+        // Re-generate text to include any changes to openingPlot
         var text = $('#confirmContent').text();
+        var plot = $('#openingPlot').val().trim();
+        if (plot && text.indexOf('【开场剧情要求】') === -1) {
+          text += '\n\n【开场剧情要求】\n' + plot;
+        }
         sendStackedCmd(text);
       });
     });
