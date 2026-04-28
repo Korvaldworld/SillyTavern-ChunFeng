@@ -474,7 +474,8 @@
 
       function renderConfirm() {
         var wd = $('#worldDesc').val().trim();
-        var c = mode === 'def' ? defChar : {
+        // Always read from form - default mode pre-fills the form with defChar values
+        var c = {
           名称: $('#cusName').val().trim() || '未命名',
           年龄: $('#cusAge').val() || '--',
           身高: $('#cusHeight').val().trim() || '--',
@@ -502,18 +503,27 @@
           '- 性能力：' + c.性能力 + '\n' +
           '- 性癖：' + c.性癖 + '\n' +
           '- 是否默认角色：' + isDef + '\n\n' +
-          '请基于以上设定开始游戏，在回复末尾输出 <StatusPlaceHolder/> 和 <UpdateVariable> JSON-Patch 更新变量。';
+          '【系统初始化指令 - 必须执行】\n' +
+          '请根据以上设定开始游戏，同时必须执行以下操作：\n' +
+          '1. 使用 JSON-Patch 初始化玩家信息和环境变量\n' +
+          '2. 输出 <StatusPlaceHolder/> 触发状态栏渲染\n' +
+          '3. 在 <UpdateVariable> 中输出初始化用的 JSON-Patch\n' +
+          '示例格式：<UpdateVariable><Analysis>Initialize game state</Analysis><JSONPatch>[{"op":"insert","path":"/玩家","value":{"名称":"' + c.名称 + '","年龄":' + (parseInt(c.年龄)||0) + ',"身高":"' + c.身高 + '","外观":"' + c.外观 + '","角色背景":"' + c.角色背景 + '","当前地点":"' + c.当前地点 + '","性能力":"' + c.性能力 + '","性癖":"' + c.性癖 + '","持有金钱":0,"物品栏":[]}}]</JSONPatch></UpdateVariable>';
 
         $('#confirmContent').text(txt);
       }
 
-      $('#btnConfirm').on('click', function() {
-        var text = $('#confirmContent').text();
+      // Command stacking - append to existing input instead of replacing
+      function sendStackedCmd(text) {
         try {
-          triggerSlash('/setinput ' + text);
-          toastr.success('已写入输入框，请发送');
+          var current = '';
+          try { current = window.parent.$('#send_textarea').val() || ''; } catch(e) {}
+          var separator = current.trim() ? '\n\n==========\n\n' : '';
+          var newText = current + separator + text;
+          triggerSlash('/setinput ' + newText);
+          if (typeof toastr !== 'undefined') toastr.success('已添加到输入框');
         } catch(e) {
-          // Fallback: show command text
+          // Fallback
           var el = document.createElement('div');
           el.className = 'cmd-box';
           el.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#112240;border:1px solid #233554;padding:16px;z-index:99999;max-width:90%;max-height:80%;overflow:auto;border-radius:8px;color:#ccd6f6;';
@@ -523,6 +533,11 @@
           document.body.appendChild(el);
           $(document).one('click', '#btnCloseCmd', function() { $(el).remove(); });
         }
+      }
+
+      $('#btnConfirm').on('click', function() {
+        var text = $('#confirmContent').text();
+        sendStackedCmd(text);
       });
     });
   </script>
