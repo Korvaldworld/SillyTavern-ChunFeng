@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+      background: linear-gradient(135deg, #0a192f 0%, #112240 100%);
+      color: #ccd6f6;
+      margin: 0;
+      padding: 20px;
+      min-height: 100vh;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    .title {
+      font-size: 20px;
+      color: #e94560;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .plot-list {
+      background: rgba(22, 33, 62, 0.9);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 16px;
+      border: 1px solid rgba(15, 52, 96, 0.5);
+    }
+    .plot-item {
+      background: rgba(15, 52, 96, 0.3);
+      padding: 12px;
+      margin-bottom: 10px;
+      border-radius: 6px;
+      border-left: 3px solid #e94560;
+    }
+    .plot-item.completed {
+      border-left-color: #64ffda;
+      opacity: 0.7;
+    }
+    .plot-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 8px;
+    }
+    .plot-time {
+      color: #64ffda;
+      font-size: 12px;
+    }
+    .plot-loc {
+      color: #8892b0;
+      font-size: 11px;
+    }
+    .plot-people {
+      color: #e94560;
+      font-size: 12px;
+      margin-bottom: 6px;
+    }
+    .plot-desc {
+      color: #a8b2d1;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+    .plot-status {
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 4px;
+      margin-left: 8px;
+    }
+    .status-pending {
+      background: rgba(233, 69, 96, 0.2);
+      color: #e94560;
+    }
+    .status-done {
+      background: rgba(100, 255, 218, 0.2);
+      color: #64ffda;
+    }
+    .add-form {
+      background: rgba(22, 33, 62, 0.9);
+      border-radius: 12px;
+      padding: 16px;
+      border: 1px solid rgba(15, 52, 96, 0.5);
+      margin-bottom: 16px;
+    }
+    .form-group {
+      margin-bottom: 12px;
+    }
+    .form-group label {
+      display: block;
+      margin-bottom: 6px;
+      color: #64ffda;
+      font-size: 13px;
+    }
+    .form-group input,
+    .form-group textarea {
+      width: 100%;
+      padding: 10px;
+      border-radius: 6px;
+      border: 1px solid #0f3460;
+      background: rgba(10, 25, 47, 0.6);
+      color: #ccd6f6;
+      font-family: inherit;
+      font-size: 14px;
+    }
+    .empty-state {
+      text-align: center;
+      color: #8892b0;
+      padding: 20px;
+      font-style: italic;
+    }
+    .btn {
+      background: #e94560;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 12px;
+      font-family: inherit;
+    }
+    .btn-secondary {
+      background: transparent;
+      border: 1px solid #e94560;
+      color: #e94560;
+    }
+    .btn-success {
+      background: transparent;
+      border: 1px solid #64ffda;
+      color: #64ffda;
+    }
+    .btn-danger {
+      background: transparent;
+      border: 1px solid #ff6b6b;
+      color: #ff6b6b;
+    }
+    .bottom-bar {
+      text-align: center;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="title">📖 剧情编辑</div>
+
+    <div class="add-form">
+      <h4 style="color:#64ffda;margin-top:0;">添加剧情条目</h4>
+      <div class="form-group">
+        <label>发生时间</label>
+        <input type="text" id="plotTime" placeholder="例如：2005年4月5日">
+      </div>
+      <div class="form-group">
+        <label>发生地点</label>
+        <input type="text" id="plotLoc" placeholder="例如：长乐公寓">
+      </div>
+      <div class="form-group">
+        <label>相关人物</label>
+        <input type="text" id="plotPeople" placeholder="例如：雪柔、张浩">
+      </div>
+      <div class="form-group">
+        <label>剧情内容</label>
+        <textarea id="plotDesc" rows="3" placeholder="描述将要发生的剧情..."></textarea>
+      </div>
+      <button class="btn" onclick="addPlot()">添加剧情</button>
+    </div>
+
+    <div class="plot-list" id="plotList">
+      <div class="empty-state">暂无剧情条目</div>
+    </div>
+
+    <div class="bottom-bar">
+      <button class="btn btn-secondary" onclick="parentNode.parentNode.parentElement.parentElement.remove()">关闭</button>
+    </div>
+  </div>
+
+  <script>
+    function getStatData() {
+      try {
+        const ctx = window.SillyTavern.getContext();
+        const raw = ctx.chatMetadata.variables['stat_data'];
+        return typeof raw === 'string' ? JSON.parse(raw) : (raw || {});
+      } catch(e) { return {}; }
+    }
+    function renderPlots() {
+      const data = getStatData();
+      const plots = (data.剧情 || {}).未来事件 || [];
+      const list = document.getElementById('plotList');
+      if (plots.length === 0) {
+        list.innerHTML = '<div class="empty-state">暂无剧情条目</div>';
+        return;
+      }
+      list.innerHTML = plots.map((p, i) => `
+        <div class="plot-item ${p.是否已发生 ? 'completed' : ''}">
+          <div class="plot-header">
+            <div>
+              <div class="plot-time">📅 ${escapeHtml(p.时间)} · 📍 ${escapeHtml(p.地点)}</div>
+              <div class="plot-people">👥 ${escapeHtml(p.相关人物)}</div>
+            </div>
+            <div style="display:flex;gap:4px;">
+              <span class="plot-status ${p.是否已发生 ? 'status-done' : 'status-pending'}">${p.是否已发生 ? '已发生' : '未发生'}</span>
+            </div>
+          </div>
+          <div class="plot-desc">${escapeHtml(p.剧情内容)}</div>
+          <div style="margin-top:8px;text-align:right;">
+            ${!p.是否已发生 ? `<button class="btn btn-success" onclick="markDone(${i})">标记已发生</button>` : ''}
+            <button class="btn btn-danger" onclick="removePlot(${i})">删除</button>
+          </div>
+        </div>
+      `).join('');
+    }
+    function escapeHtml(t) { const d=document.createElement('div'); d.textContent=t; return d.innerHTML; }
+    function addPlot() {
+      const time = document.getElementById('plotTime').value.trim();
+      const loc = document.getElementById('plotLoc').value.trim();
+      const people = document.getElementById('plotPeople').value.trim();
+      const desc = document.getElementById('plotDesc').value.trim();
+      if (!time || !loc || !desc) { alert('请填写完整信息'); return; }
+      sendToInput(`/添加剧情: 时间=${time}, 地点=${loc}, 人物=${people || '无'}, 内容=${desc}`);
+      document.getElementById('plotTime').value = '';
+      document.getElementById('plotLoc').value = '';
+      document.getElementById('plotPeople').value = '';
+      document.getElementById('plotDesc').value = '';
+    }
+    function markDone(index) {
+      sendToInput(`/标记剧情已发生: 索引=${index}`);
+    }
+    function removePlot(index) {
+      if (!confirm('确定删除这条剧情吗？')) return;
+      sendToInput(`/删除剧情: 索引=${index}`);
+    }
+    function sendToInput(text) {
+      const inputBox = document.querySelector('#send_textarea');
+      if (inputBox) { inputBox.value = text; inputBox.dispatchEvent(new Event('input', { bubbles: true })); }
+    }
+    renderPlots();
+  </script>
+</body>
+</html>

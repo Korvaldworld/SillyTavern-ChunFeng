@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+      background: linear-gradient(135deg, #0a192f 0%, #112240 100%);
+      color: #ccd6f6;
+      margin: 0;
+      padding: 20px;
+      min-height: 100vh;
+    }
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    .title {
+      font-size: 20px;
+      color: #e94560;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .item-list {
+      background: rgba(22, 33, 62, 0.9);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 16px;
+      border: 1px solid rgba(15, 52, 96, 0.5);
+    }
+    .item-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px;
+      border-bottom: 1px solid rgba(15, 52, 96, 0.3);
+    }
+    .item-row:last-child { border-bottom: none; }
+    .item-name { color: #64ffda; font-weight: bold; }
+    .item-desc { color: #8892b0; font-size: 12px; }
+    .item-count {
+      background: rgba(233, 69, 96, 0.2);
+      color: #e94560;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+    }
+    .item-actions { display: flex; gap: 6px; }
+    .btn {
+      background: #e94560;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 12px;
+      font-family: inherit;
+    }
+    .btn-secondary {
+      background: transparent;
+      border: 1px solid #e94560;
+      color: #e94560;
+    }
+    .btn-danger {
+      background: transparent;
+      border: 1px solid #ff6b6b;
+      color: #ff6b6b;
+    }
+    .add-form {
+      background: rgba(22, 33, 62, 0.9);
+      border-radius: 12px;
+      padding: 16px;
+      border: 1px solid rgba(15, 52, 96, 0.5);
+      margin-bottom: 16px;
+    }
+    .form-group {
+      margin-bottom: 12px;
+    }
+    .form-group label {
+      display: block;
+      margin-bottom: 6px;
+      color: #64ffda;
+      font-size: 13px;
+    }
+    .form-group input,
+    .form-group textarea {
+      width: 100%;
+      padding: 10px;
+      border-radius: 6px;
+      border: 1px solid #0f3460;
+      background: rgba(10, 25, 47, 0.6);
+      color: #ccd6f6;
+      font-family: inherit;
+      font-size: 14px;
+    }
+    .empty-state {
+      text-align: center;
+      color: #8892b0;
+      padding: 20px;
+      font-style: italic;
+    }
+    .bottom-bar {
+      text-align: center;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="title">🎒 物品栏</div>
+
+    <div class="add-form">
+      <h4 style="color:#64ffda;margin-top:0;">添加物品</h4>
+      <div class="form-group">
+        <label>物品名称</label>
+        <input type="text" id="newItemName" placeholder="物品名称">
+      </div>
+      <div class="form-group">
+        <label>描述</label>
+        <input type="text" id="newItemDesc" placeholder="物品描述">
+      </div>
+      <div class="form-group">
+        <label>数量</label>
+        <input type="number" id="newItemCount" value="1" min="1">
+      </div>
+      <button class="btn" onclick="addItem()">添加</button>
+    </div>
+
+    <div class="item-list" id="itemList">
+      <div class="empty-state">暂无物品</div>
+    </div>
+
+    <div class="bottom-bar">
+      <button class="btn btn-secondary" onclick="parentNode.parentNode.parentElement.parentElement.remove()">关闭</button>
+    </div>
+  </div>
+
+  <script>
+    function getStatData() {
+      try {
+        const ctx = window.SillyTavern.getContext();
+        const raw = ctx.chatMetadata.variables['stat_data'];
+        return typeof raw === 'string' ? JSON.parse(raw) : (raw || {});
+      } catch(e) { return {}; }
+    }
+    function renderItems() {
+      const data = getStatData();
+      const items = (data.玩家 || {}).物品栏 || [];
+      const list = document.getElementById('itemList');
+      if (items.length === 0) {
+        list.innerHTML = '<div class="empty-state">暂无物品</div>';
+        return;
+      }
+      list.innerHTML = items.map((item, i) => `
+        <div class="item-row">
+          <div>
+            <div class="item-name">${escapeHtml(item.物品名)}</div>
+            <div class="item-desc">${escapeHtml(item.描述 || '无描述')}</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span class="item-count">×${item.数量}</span>
+            <div class="item-actions">
+              <button class="btn btn-secondary" onclick="useItem(${i})">使用</button>
+              <button class="btn btn-danger" onclick="removeItem(${i})">删除</button>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+    function escapeHtml(t) { const d=document.createElement('div'); d.textContent=t; return d.innerHTML; }
+    function addItem() {
+      const name = document.getElementById('newItemName').value.trim();
+      const desc = document.getElementById('newItemDesc').value.trim() || '无描述';
+      const count = parseInt(document.getElementById('newItemCount').value) || 1;
+      if (!name) { alert('请填写物品名称'); return; }
+      sendToInput(`/添加物品: 物品名=${name}, 描述=${desc}, 数量=${count}`);
+      document.getElementById('newItemName').value = '';
+      document.getElementById('newItemDesc').value = '';
+      document.getElementById('newItemCount').value = '1';
+    }
+    function useItem(index) {
+      sendToInput(`/使用物品: 索引=${index}`);
+    }
+    function removeItem(index) {
+      if (!confirm('确定删除这个物品吗？')) return;
+      sendToInput(`/删除物品: 索引=${index}`);
+    }
+    function sendToInput(text) {
+      const inputBox = document.querySelector('#send_textarea');
+      if (inputBox) { inputBox.value = text; inputBox.dispatchEvent(new Event('input', { bubbles: true })); }
+    }
+    renderItems();
+  </script>
+</body>
+</html>

@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+      background: linear-gradient(135deg, #0a192f 0%, #112240 100%);
+      color: #ccd6f6;
+      margin: 0;
+      padding: 20px;
+      min-height: 100vh;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    .title {
+      font-size: 20px;
+      color: #e94560;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .char-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .char-card {
+      background: rgba(22, 33, 62, 0.9);
+      border-radius: 10px;
+      padding: 14px;
+      border: 1px solid rgba(15, 52, 96, 0.5);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .char-card:hover {
+      border-color: #64ffda;
+      transform: translateY(-2px);
+    }
+    .char-card.empty {
+      border-style: dashed;
+      border-color: #233554;
+      color: #8892b0;
+      text-align: center;
+      padding: 24px 14px;
+    }
+    .char-card.empty:hover {
+      border-color: #e94560;
+    }
+    .char-name {
+      font-size: 15px;
+      color: #e94560;
+      font-weight: bold;
+      margin-bottom: 4px;
+    }
+    .char-info {
+      font-size: 12px;
+      color: #8892b0;
+    }
+    .char-tag {
+      display: inline-block;
+      background: rgba(100, 255, 218, 0.15);
+      color: #64ffda;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 11px;
+      margin-top: 6px;
+    }
+    .add-form {
+      background: rgba(22, 33, 62, 0.9);
+      border-radius: 12px;
+      padding: 20px;
+      border: 1px solid rgba(15, 52, 96, 0.5);
+      margin-bottom: 16px;
+      display: none;
+    }
+    .form-group {
+      margin-bottom: 12px;
+    }
+    .form-group label {
+      display: block;
+      margin-bottom: 6px;
+      color: #64ffda;
+      font-size: 13px;
+    }
+    .form-group input,
+    .form-group textarea {
+      width: 100%;
+      padding: 10px;
+      border-radius: 6px;
+      border: 1px solid #0f3460;
+      background: rgba(10, 25, 47, 0.6);
+      color: #ccd6f6;
+      font-family: inherit;
+      font-size: 14px;
+    }
+    .btn {
+      background: #e94560;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 13px;
+      font-family: inherit;
+    }
+    .btn-secondary {
+      background: transparent;
+      border: 1px solid #e94560;
+      color: #e94560;
+    }
+    .bottom-bar {
+      text-align: center;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="title">👥 角色管理</div>
+
+    <div class="add-form" id="addForm">
+      <h4 style="color:#64ffda;margin-top:0;">添加新角色</h4>
+      <div class="form-group">
+        <label>槽位</label>
+        <input type="text" id="newSlot" readonly>
+      </div>
+      <div class="form-group">
+        <label>名称</label>
+        <input type="text" id="newName" placeholder="角色名称">
+      </div>
+      <div class="form-group">
+        <label>年龄</label>
+        <input type="number" id="newAge" placeholder="年龄">
+      </div>
+      <div class="form-group">
+        <label>职业</label>
+        <input type="text" id="newJob" placeholder="职业">
+      </div>
+      <div class="form-group">
+        <label>外貌</label>
+        <textarea id="newAppearance" rows="2" placeholder="外貌描述..."></textarea>
+      </div>
+      <div style="text-align:right;">
+        <button class="btn btn-secondary" onclick="toggleForm()">取消</button>
+        <button class="btn" onclick="addCharacter()" style="margin-left:8px;">添加</button>
+      </div>
+    </div>
+
+    <div class="char-grid" id="charGrid">加载中...</div>
+
+    <div class="bottom-bar">
+      <button class="btn btn-secondary" onclick="parentNode.parentNode.parentElement.parentElement.remove()">关闭</button>
+    </div>
+  </div>
+
+  <script>
+    let selectedSlot = '';
+    function getStatData() {
+      try {
+        const ctx = window.SillyTavern.getContext();
+        const raw = ctx.chatMetadata.variables['stat_data'];
+        return typeof raw === 'string' ? JSON.parse(raw) : (raw || {});
+      } catch(e) { return {}; }
+    }
+    function renderChars() {
+      const data = getStatData();
+      const npcs = data.NPC || {};
+      const grid = document.getElementById('charGrid');
+      let html = '';
+      for (let i = 1; i <= 20; i++) {
+        const key = 'NPC' + i;
+        const npc = npcs[key];
+        if (npc && npc.名称) {
+          html += `
+            <div class="char-card" onclick="editChar('${key}')">
+              <div class="char-name">${escapeHtml(npc.名称)}</div>
+              <div class="char-info">${npc.年龄 || '--'}岁 · ${npc.职业 || '未知'}</div>
+              <span class="char-tag">${npc.情绪状态 || '平静'}</span>
+            </div>
+          `;
+        } else {
+          html += `
+            <div class="char-card empty" onclick="showAddForm('${key}')">
+              <div style="font-size:24px;margin-bottom:8px;">+</div>
+              <div>添加角色</div>
+              <div style="font-size:11px;margin-top:4px;">${key}</div>
+            </div>
+          `;
+        }
+      }
+      grid.innerHTML = html;
+    }
+    function escapeHtml(t) { const d=document.createElement('div'); d.textContent=t; return d.innerHTML; }
+    function showAddForm(slot) {
+      selectedSlot = slot;
+      document.getElementById('newSlot').value = slot;
+      document.getElementById('addForm').style.display = 'block';
+      document.getElementById('newName').focus();
+    }
+    function toggleForm() {
+      document.getElementById('addForm').style.display = 'none';
+      selectedSlot = '';
+    }
+    function addCharacter() {
+      const name = document.getElementById('newName').value.trim();
+      const age = document.getElementById('newAge').value;
+      const job = document.getElementById('newJob').value.trim();
+      const appearance = document.getElementById('newAppearance').value.trim();
+      if (!name) { alert('请填写角色名称'); return; }
+      let text = `/添加角色 ${selectedSlot}: 名称=${name}`;
+      if (age) text += `, 年龄=${age}`;
+      if (job) text += `, 职业=${job}`;
+      if (appearance) text += `, 外貌=${appearance}`;
+      sendToInput(text);
+      toggleForm();
+    }
+    function editChar(slot) {
+      const data = getStatData();
+      const npc = (data.NPC || {})[slot] || {};
+      const name = prompt('编辑角色名称（留空不修改）：', npc.名称 || '');
+      if (name === null) return;
+      const age = prompt('编辑年龄：', npc.年龄 || '');
+      const job = prompt('编辑职业：', npc.职业 || '');
+      let text = `/更新NPC ${slot}:`;
+      if (name) text += ` 名称=${name},`;
+      if (age) text += ` 年龄=${age},`;
+      if (job) text += ` 职业=${job},`;
+      text = text.replace(/,$/, '');
+      if (text.includes('=')) sendToInput(text);
+    }
+    function sendToInput(text) {
+      const inputBox = document.querySelector('#send_textarea');
+      if (inputBox) { inputBox.value = text; inputBox.dispatchEvent(new Event('input', { bubbles: true })); }
+    }
+    renderChars();
+  </script>
+</body>
+</html>

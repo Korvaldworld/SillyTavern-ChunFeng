@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      color: #eee;
+      margin: 0;
+      padding: 20px;
+      min-height: 100vh;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    .title {
+      font-size: 28px;
+      color: #e94560;
+      text-align: center;
+      margin-bottom: 8px;
+      text-shadow: 0 0 10px rgba(233,69,96,0.3);
+    }
+    .subtitle {
+      text-align: center;
+      color: #8892b0;
+      font-size: 14px;
+      margin-bottom: 24px;
+    }
+    .card {
+      background: rgba(22, 33, 62, 0.9);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 16px;
+      border: 1px solid rgba(15, 52, 96, 0.5);
+      backdrop-filter: blur(10px);
+    }
+    .card h3 {
+      color: #e94560;
+      margin-top: 0;
+      font-size: 18px;
+      border-bottom: 2px solid #0f3460;
+      padding-bottom: 10px;
+      margin-bottom: 16px;
+    }
+    .info-row {
+      display: flex;
+      margin-bottom: 10px;
+      align-items: baseline;
+    }
+    .info-label {
+      color: #64ffda;
+      font-weight: bold;
+      min-width: 80px;
+      flex-shrink: 0;
+    }
+    .info-value {
+      color: #ccd6f6;
+      flex: 1;
+    }
+    .desc-text {
+      line-height: 1.8;
+      color: #a8b2d1;
+    }
+    .rule-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    .rule-item {
+      background: rgba(15, 52, 96, 0.4);
+      padding: 12px;
+      margin-bottom: 8px;
+      border-radius: 6px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      border-left: 3px solid #64ffda;
+    }
+    .rule-content {
+      flex: 1;
+      margin-right: 10px;
+    }
+    .rule-name {
+      color: #64ffda;
+      font-weight: bold;
+      margin-bottom: 4px;
+    }
+    .rule-desc {
+      color: #a8b2d1;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+    .btn {
+      background: #e94560;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: all 0.3s ease;
+      font-family: inherit;
+    }
+    .btn:hover {
+      background: #c73e54;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(233, 69, 96, 0.3);
+    }
+    .btn-secondary {
+      background: transparent;
+      border: 1px solid #e94560;
+      color: #e94560;
+    }
+    .btn-secondary:hover {
+      background: rgba(233, 69, 96, 0.1);
+    }
+    .btn-sm {
+      padding: 6px 12px;
+      font-size: 12px;
+    }
+    .btn-danger {
+      background: transparent;
+      border: 1px solid #ff6b6b;
+      color: #ff6b6b;
+    }
+    .btn-danger:hover {
+      background: rgba(255, 107, 107, 0.1);
+    }
+    .form-group {
+      margin-bottom: 12px;
+    }
+    .form-group label {
+      display: block;
+      margin-bottom: 6px;
+      color: #64ffda;
+      font-size: 13px;
+    }
+    .form-group input,
+    .form-group textarea {
+      width: 100%;
+      padding: 10px;
+      border-radius: 6px;
+      border: 1px solid #0f3460;
+      background: rgba(10, 25, 47, 0.6);
+      color: #ccd6f6;
+      font-family: inherit;
+      font-size: 14px;
+      transition: border-color 0.3s;
+    }
+    .form-group input:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: #64ffda;
+    }
+    .bottom-bar {
+      text-align: center;
+      margin-top: 24px;
+      padding-top: 20px;
+      border-top: 1px solid rgba(15, 52, 96, 0.5);
+    }
+    .bottom-bar .btn {
+      font-size: 16px;
+      padding: 14px 40px;
+    }
+    .empty-state {
+      text-align: center;
+      color: #8892b0;
+      padding: 20px;
+      font-style: italic;
+    }
+    .locations-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 10px;
+      margin-top: 12px;
+    }
+    .location-tag {
+      background: rgba(15, 52, 96, 0.4);
+      padding: 8px 12px;
+      border-radius: 4px;
+      font-size: 13px;
+      color: #a8b2d1;
+    }
+    .location-tag strong {
+      color: #64ffda;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="title">🌆 欢迎来到春风市</div>
+    <div class="subtitle">2005年 · 现代都市 · 人情冷暖</div>
+
+    <div class="card">
+      <h3>📍 世界观设定</h3>
+      <div class="info-row">
+        <span class="info-label">时代</span>
+        <span class="info-value">2005年</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">城市</span>
+        <span class="info-value">春风市（一线城市）</span>
+      </div>
+      <div class="desc-text">
+        在经济高速发展的年代，春风市的表面繁华下隐藏着无数普通人的生活百态。手机还是功能机与翻盖机的时代，宽带网络刚刚进入家庭，现金仍是支付的主流。
+      </div>
+      <div style="margin-top: 16px;">
+        <div class="info-label" style="margin-bottom: 8px;">🏢 重要地点</div>
+        <div class="locations-grid">
+          <div class="location-tag"><strong>长乐公寓</strong><br>三层出租公寓，月租600元</div>
+          <div class="location-tag"><strong>春风市中心医院</strong><br>顶尖三甲医院，700米</div>
+          <div class="location-tag"><strong>春风美容院</strong><br>平民美容院，400米</div>
+          <div class="location-tag"><strong>长乐便利店</strong><br>24小时营业，50米</div>
+          <div class="location-tag"><strong>天雄集团总部</strong><br>CBD地标，6公里</div>
+          <div class="location-tag"><strong>宏发商贸公司</strong><br>天雄旗下子公司，5公里</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>⚙️ 自定义规则 <span style="font-size: 12px; color: #8892b0; font-weight: normal;">（可选）</span></h3>
+      <p style="color: #a8b2d1; font-size: 13px; margin-top: 0;">
+        你可以为这个世界添加额外的社会规则、风俗或设定。例如：特殊的着装习惯、独特的社会制度等。
+      </p>
+      <div id="ruleForm" style="display:none; margin-bottom: 16px;">
+        <div class="form-group">
+          <label>规则名称</label>
+          <input type="text" id="ruleName" placeholder="例如：特殊社会风俗">
+        </div>
+        <div class="form-group">
+          <label>规则内容</label>
+          <textarea id="ruleContent" rows="3" placeholder="描述这条规则的具体内容..."></textarea>
+        </div>
+        <div style="text-align: right;">
+          <button class="btn btn-secondary btn-sm" onclick="toggleForm()">取消</button>
+          <button class="btn btn-sm" onclick="addRule()" style="margin-left: 8px;">添加</button>
+        </div>
+      </div>
+      <button class="btn btn-secondary" id="addRuleBtn" onclick="toggleForm()">+ 添加规则</button>
+      <ul class="rule-list" id="ruleList">
+        <li class="empty-state" id="emptyRules">暂无自定义规则</li>
+      </ul>
+    </div>
+
+    <div class="bottom-bar">
+      <button class="btn" onclick="confirmWorldview()">确认并继续 →</button>
+    </div>
+  </div>
+
+  <script>
+    let rules = [];
+    function toggleForm() {
+      const form = document.getElementById('ruleForm');
+      const btn = document.getElementById('addRuleBtn');
+      const isHidden = form.style.display === 'none' || form.style.display === '';
+      form.style.display = isHidden ? 'block' : 'none';
+      btn.style.display = isHidden ? 'none' : 'inline-block';
+      if (isHidden) document.getElementById('ruleName').focus();
+    }
+    function addRule() {
+      const name = document.getElementById('ruleName').value.trim();
+      const content = document.getElementById('ruleContent').value.trim();
+      if (!name || !content) { alert('请填写完整的规则名称和内容'); return; }
+      rules.push({ 规则名: name, 规则内容: content });
+      renderRules();
+      document.getElementById('ruleName').value = '';
+      document.getElementById('ruleContent').value = '';
+      toggleForm();
+    }
+    function removeRule(index) {
+      rules.splice(index, 1);
+      renderRules();
+    }
+    function renderRules() {
+      const list = document.getElementById('ruleList');
+      const empty = document.getElementById('emptyRules');
+      if (rules.length === 0) {
+        list.innerHTML = '<li class="empty-state" id="emptyRules">暂无自定义规则</li>';
+        return;
+      }
+      list.innerHTML = rules.map((r, i) => `
+        <li class="rule-item">
+          <div class="rule-content">
+            <div class="rule-name">${escapeHtml(r.规则名)}</div>
+            <div class="rule-desc">${escapeHtml(r.规则内容)}</div>
+          </div>
+          <button class="btn btn-danger btn-sm" onclick="removeRule(${i})">删除</button>
+        </li>
+      `).join('');
+    }
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+    function confirmWorldview() {
+      let ruleText = '';
+      if (rules.length > 0) {
+        ruleText = '\n\n【用户自定义规则】\n' + rules.map(r => `- ${r.规则名}: ${r.规则内容}`).join('\n');
+      }
+      const promptText = `/初始化世界观: 城市名=春风市, 年代=2005年` + ruleText + '\n\n请进入角色创建界面。';
+      sendToInput(promptText);
+    }
+    function sendToInput(text) {
+      const inputBox = document.querySelector('#send_textarea');
+      if (inputBox) {
+        inputBox.value = text;
+        inputBox.dispatchEvent(new Event('input', { bubbles: true }));
+      } else {
+        console.error('SillyTavern input box not found');
+      }
+    }
+  </script>
+</body>
+</html>
