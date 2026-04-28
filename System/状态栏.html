@@ -2,6 +2,7 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
@@ -9,7 +10,7 @@
     background: transparent;
     color: #ccd6f6;
     font-size: 12px;
-    line-height: 1.4;
+    line-height: 1.3;
     padding: 4px;
   }
   .status-bar {
@@ -20,22 +21,22 @@
   }
   .env-bar {
     background: rgba(15, 52, 96, 0.3);
-    padding: 6px 10px;
+    padding: 4px 8px;
     display: flex;
     justify-content: space-between;
     align-items: center;
     flex-wrap: wrap;
-    gap: 6px;
+    gap: 4px;
     border-bottom: 1px solid #233554;
   }
   .env-item { font-size: 12px; color: #8892b0; }
   .env-item strong { color: #64ffda; font-weight: normal; }
   .player-section {
-    padding: 10px;
+    padding: 7px;
     border-bottom: 1px solid #233554;
     display: flex;
     align-items: flex-start;
-    gap: 10px;
+    gap: 7px;
   }
   .avatar {
     width: 40px; height: 40px; border-radius: 50%;
@@ -44,34 +45,34 @@
     font-size: 16px; flex-shrink: 0;
   }
   .player-info { flex: 1; min-width: 0; }
-  .player-name { font-size: 14px; color: #e94560; font-weight: bold; margin-bottom: 3px; }
-  .player-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 4px; }
-  .tag { background: rgba(15,52,96,0.4); padding: 1px 6px; border-radius: 3px; font-size: 11px; color: #a8b2d1; }
-  .player-desc { font-size: 11px; color: #8892b0; line-height: 1.4; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
-  .player-actions { display: flex; gap: 4px; margin-top: 6px; }
-  .npc-section { padding: 10px; border-bottom: 1px solid #233554; }
-  .npc-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+  .player-name { font-size: 14px; color: #e94560; font-weight: bold; margin-bottom: 2px; }
+  .player-tags { display: flex; flex-wrap: wrap; gap: 3px; margin-bottom: 3px; }
+  .tag { background: rgba(15,52,96,0.4); padding: 1px 5px; border-radius: 3px; font-size: 11px; color: #a8b2d1; }
+  .player-desc { font-size: 11px; color: #8892b0; line-height: 1.3; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+  .player-actions { display: flex; gap: 3px; margin-top: 4px; }
+  .npc-section { padding: 7px; border-bottom: 1px solid #233554; }
+  .npc-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
   .npc-title { font-size: 12px; color: #64ffda; }
   .npc-card {
-    background: rgba(15,52,96,0.15); border-radius: 6px; padding: 10px;
-    margin-bottom: 8px; border: 1px solid rgba(35,53,84,0.4);
+    background: rgba(15,52,96,0.15); border-radius: 6px; padding: 7px;
+    margin-bottom: 6px; border: 1px solid rgba(35,53,84,0.4);
   }
-  .npc-top { display: flex; gap: 10px; margin-bottom: 8px; }
+  .npc-top { display: flex; gap: 7px; margin-bottom: 6px; }
   .npc-avatar { width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg,#64ffda,#0f3460); display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
   .npc-name { font-size: 13px; color: #e94560; font-weight: bold; }
   .npc-sub { font-size: 11px; color: #8892b0; }
-  .npc-details { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px,1fr)); gap: 4px; margin-bottom: 8px; }
+  .npc-details { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px,1fr)); gap: 3px; margin-bottom: 6px; }
   .npc-detail { font-size: 11px; color: #a8b2d1; }
   .npc-detail label { color: #64ffda; font-size: 10px; display: block; }
-  .affinity-bar { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 8px; background: rgba(10,25,47,0.4); padding: 6px; border-radius: 4px; }
+  .affinity-bar { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 6px; background: rgba(10,25,47,0.4); padding: 4px; border-radius: 4px; }
   .affinity-item { text-align: center; }
   .affinity-value { font-size: 14px; font-weight: bold; color: #e94560; }
   .affinity-label { font-size: 9px; color: #8892b0; }
-  .mood-badge { background: rgba(100,255,218,0.12); color: #64ffda; padding: 1px 6px; border-radius: 10px; font-size: 10px; }
-  .npc-actions { display: flex; gap: 4px; flex-wrap: wrap; }
+  .mood-badge { background: rgba(100,255,218,0.12); color: #64ffda; padding: 1px 5px; border-radius: 10px; font-size: 10px; }
+  .npc-actions { display: flex; gap: 3px; flex-wrap: wrap; }
   .btn {
     background: rgba(233,69,96,0.12); border: 1px solid rgba(233,69,96,0.25);
-    color: #e94560; padding: 4px 10px; border-radius: 3px; cursor: pointer;
+    color: #e94560; padding: 3px 8px; border-radius: 3px; cursor: pointer;
     font-size: 11px; font-family: inherit; transition: all 0.2s;
   }
   .btn:hover { background: rgba(233,69,96,0.25); }
@@ -80,41 +81,67 @@
   .btn-primary:hover { background: #c73e54; }
   .btn-secondary { background: rgba(15,52,96,0.3); border: 1px solid #0f3460; color: #64ffda; }
   .btn-secondary:hover { background: rgba(15,52,96,0.5); border-color: #64ffda; }
-  .global-actions { padding: 8px 10px; display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; background: rgba(10,25,47,0.3); }
-  .global-btn { background: rgba(15,52,96,0.3); border: 1px solid #0f3460; color: #64ffda; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; font-family: inherit; transition: all 0.2s; }
+  .btn-update-field { padding: 2px 8px; font-size: 10px; }
+  .global-actions { padding: 6px 8px; display: flex; justify-content: center; gap: 6px; flex-wrap: wrap; background: rgba(10,25,47,0.3); }
+  .global-btn { background: rgba(15,52,96,0.3); border: 1px solid #0f3460; color: #64ffda; padding: 4px 10px; border-radius: 4px; cursor: pointer; font-size: 12px; font-family: inherit; transition: all 0.2s; }
   .global-btn:hover { background: rgba(15,52,96,0.5); border-color: #64ffda; }
-  .empty-state { text-align: center; color: #8892b0; padding: 12px; font-size: 11px; font-style: italic; }
+  .empty-state { text-align: center; color: #8892b0; padding: 8px; font-size: 11px; font-style: italic; }
 
   /* Popup */
-  .popup-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 16px; }
-  .popup-panel { background: #112240; border: 1px solid #233554; border-radius: 8px; width: 100%; max-width: 720px; max-height: 92vh; overflow: auto; }
-  .popup-header { padding: 12px 16px; border-bottom: 1px solid #233554; display: flex; justify-content: space-between; align-items: center; }
+  .popup-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 8px; }
+  .popup-panel { background: #112240; border: 1px solid #233554; border-radius: 8px; width: 100%; max-width: 720px; max-height: 95vh; overflow: auto; display: flex; flex-direction: column; }
+  .popup-header { padding: 10px 14px; border-bottom: 1px solid #233554; display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; }
   .popup-title { color: #64ffda; font-size: 14px; font-weight: bold; }
   .popup-close { background: transparent; border: none; color: #e94560; font-size: 18px; cursor: pointer; }
-  .popup-content { padding: 16px; }
-  .form-row { margin-bottom: 8px; }
-  .form-row label { display: block; color: #64ffda; font-size: 11px; margin-bottom: 3px; }
-  .form-input, .form-textarea { width: 100%; padding: 6px 8px; background: rgba(10,25,47,0.6); border: 1px solid #0f3460; color: #ccd6f6; border-radius: 4px; font-family: inherit; font-size: 12px; }
-  .form-textarea { min-height: 60px; resize: vertical; }
+  .popup-content { padding: 10px; flex: 1; overflow: auto; }
+  .form-row { margin-bottom: 6px; }
+  .form-row label { display: block; color: #64ffda; font-size: 11px; margin-bottom: 2px; }
+  .form-input, .form-textarea { width: 100%; padding: 4px 6px; background: rgba(10,25,47,0.6); border: 1px solid #0f3460; color: #ccd6f6; border-radius: 4px; font-family: inherit; font-size: 12px; }
+  .form-textarea { min-height: 48px; resize: vertical; }
   .form-input:focus, .form-textarea:focus { outline: none; border-color: #64ffda; }
-  .item-row { display: grid; grid-template-columns: 1fr 2fr 60px auto auto; gap: 6px; align-items: center; margin-bottom: 6px; }
-  .item-card { background: rgba(15,52,96,0.3); border: 1px solid #233554; padding: 8px; margin-bottom: 6px; border-radius: 4px; }
+  .item-row { display: grid; grid-template-columns: 1fr 2fr 60px auto auto; gap: 4px; align-items: center; margin-bottom: 4px; }
+  .item-card { background: rgba(15,52,96,0.3); border: 1px solid #233554; padding: 6px; margin-bottom: 4px; border-radius: 4px; }
   .item-card-title { color: #64ffda; font-weight: bold; font-size: 12px; margin-bottom: 2px; }
   .item-card-desc { color: #a8b2d1; font-size: 11px; }
   .item-card-qty { color: #e94560; font-size: 11px; }
-  .list-item { background: rgba(15,52,96,0.25); border: 1px solid #233554; padding: 8px; margin-bottom: 6px; border-radius: 4px; }
+  .list-item { background: rgba(15,52,96,0.25); border: 1px solid #233554; padding: 6px; margin-bottom: 4px; border-radius: 4px; }
   .list-item-title { color: #64ffda; font-weight: bold; font-size: 12px; }
   .list-item-desc { color: #a8b2d1; font-size: 11px; margin-top: 2px; }
-  .inline-form { background: rgba(10,25,47,0.5); border: 1px solid #0f3460; padding: 10px; margin-bottom: 10px; border-radius: 4px; }
-  .tabs { display: flex; gap: 4px; margin-bottom: 12px; border-bottom: 1px solid #233554; padding-bottom: 8px; }
-  .tab { padding: 6px 12px; background: transparent; border: 1px solid #0f3460; color: #a8b2d1; cursor: pointer; border-radius: 4px; font-family: inherit; font-size: 12px; }
+  .inline-form { background: rgba(10,25,47,0.5); border: 1px solid #0f3460; padding: 7px; margin-bottom: 7px; border-radius: 4px; }
+  .tabs { display: flex; gap: 3px; margin-bottom: 8px; border-bottom: 1px solid #233554; padding-bottom: 6px; }
+  .tab { padding: 4px 10px; background: transparent; border: 1px solid #0f3460; color: #a8b2d1; cursor: pointer; border-radius: 4px; font-family: inherit; font-size: 12px; }
   .tab.active { background: rgba(15,52,96,0.5); border-color: #64ffda; color: #64ffda; }
-  .section-title { color: #e94560; font-size: 12px; font-weight: bold; margin: 12px 0 6px; padding-bottom: 4px; border-bottom: 1px solid rgba(233,69,96,0.2); }
-  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-  .char-card { background: rgba(15,52,96,0.3); border: 1px solid #233554; padding: 10px; margin-bottom: 8px; border-radius: 4px; }
-  .char-card-title { color: #64ffda; font-weight: bold; font-size: 13px; margin-bottom: 4px; }
-  .char-card-info { color: #a8b2d1; font-size: 11px; line-height: 1.5; }
-  .hint { color: #8892b0; font-size: 11px; margin-bottom: 8px; }
+  .section-title { color: #e94560; font-size: 12px; font-weight: bold; margin: 8px 0 4px; padding-bottom: 3px; border-bottom: 1px solid rgba(233,69,96,0.2); }
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+  .char-card { background: rgba(15,52,96,0.3); border: 1px solid #233554; padding: 7px; margin-bottom: 6px; border-radius: 4px; }
+  .char-card-title { color: #64ffda; font-weight: bold; font-size: 13px; margin-bottom: 3px; }
+  .char-card-info { color: #a8b2d1; font-size: 11px; line-height: 1.4; }
+  .hint { color: #8892b0; font-size: 11px; margin-bottom: 6px; }
+  .field-wrap { display: flex; align-items: center; gap: 4px; }
+  .field-wrap .form-input, .field-wrap .form-textarea { flex: 1; }
+
+  /* Scene Editor */
+  .scene-item { background: rgba(15,52,96,0.25); border: 1px solid #233554; padding: 5px 6px; margin-bottom: 4px; border-radius: 4px; display: flex; align-items: center; gap: 4px; }
+  .scene-num { color: #64ffda; font-size: 11px; font-weight: bold; min-width: 22px; flex-shrink: 0; }
+  .scene-type-label { color: #e94560; font-size: 11px; white-space: nowrap; }
+  .scene-who { width: 60px; flex-shrink: 0; }
+  .scene-content { flex: 1; min-width: 0; }
+  .scene-del { padding: 1px 5px; font-size: 10px; color: #e94560; background: transparent; border: 1px solid rgba(233,69,96,0.3); border-radius: 3px; cursor: pointer; }
+  .scene-del:hover { background: rgba(233,69,96,0.15); }
+  .scene-toolbar { display: flex; gap: 4px; padding: 8px 0 0; border-top: 1px solid #233554; margin-top: 8px; flex-wrap: wrap; align-items: center; }
+  .scene-confirm { margin-left: auto; }
+
+  @media (max-width: 600px) {
+    .popup-panel { max-width: 100%; max-height: 100vh; border-radius: 0; margin: 0; }
+    .two-col { grid-template-columns: 1fr; }
+    .status-bar { font-size: 11px; }
+    .player-section { padding: 6px; gap: 6px; }
+    .env-bar { padding: 4px 8px; font-size: 11px; }
+    .npc-card { padding: 6px; }
+    .global-actions { padding: 6px; }
+    .global-btn { padding: 4px 8px; font-size: 11px; }
+    .scene-who { width: 50px; }
+  }
 </style>
 </head>
 <body>
@@ -150,6 +177,7 @@
       <button class="global-btn" data-cmd="char-mgr">👥 角色</button>
       <button class="global-btn" data-cmd="world-mgr">🌍 世界</button>
       <button class="global-btn" data-cmd="plot">📖 剧情</button>
+      <button class="global-btn" data-cmd="scene-edit">🎬 情境</button>
     </div>
   </div>
 
@@ -160,13 +188,11 @@
     // ========== VARIABLE READING ==========
     function readVar() {
       try {
-        // Method 1: direct context (older ST)
         var ctx = window.SillyTavern.getContext();
         var raw = ctx.chatMetadata.variables['stat_data'];
         if (raw) return typeof raw === 'string' ? JSON.parse(raw) : raw;
       } catch(e) {}
       try {
-        // Method 2: getVariables API (newer ST)
         var msgId = getCurrentMessageId();
         var vars = getVariables({type:'message', message_id: msgId});
         var raw2 = vars['stat_data'];
@@ -214,7 +240,6 @@
         triggerSlash('/setinput ' + current + sep + text);
         if (typeof toastr !== 'undefined') toastr.success('已添加到输入框');
       } catch(e) {
-        // Fallback
         var el = document.createElement('div');
         el.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#112240;border:1px solid #233554;padding:16px;z-index:99999;max-width:90%;max-height:80%;overflow:auto;border-radius:8px;color:#ccd6f6;';
         el.innerHTML = '<div style="color:#e94560;font-weight:bold;margin-bottom:8px;">请复制以下命令并发送：</div>' +
@@ -309,8 +334,8 @@
       var input = isTextarea
         ? '<textarea class="form-textarea" id="'+id+'">' + esc(val) + '</textarea>'
         : '<input class="form-input" id="'+id+'" value="' + esc(val) + '">';
-      return '<div class="form-row"><label>' + label + '</label><div class="two-col">' + input +
-        '<button class="btn btn-primary btn-update-field" data-field="'+label+'" data-id="'+id+'" style="align-self:start;">更新 ' + label + '</button></div></div>';
+      return '<div class="form-row"><label>' + label + '</label><div class="field-wrap">' + input +
+        '<button class="btn btn-primary btn-update-field" data-field="'+label+'" data-id="'+id+'">更新</button></div></div>';
     }
     $(document).on('click', '.btn-update-field', function() {
       var field = $(this).data('field');
@@ -331,7 +356,7 @@
           '<div class="form-row"><label>物品名称</label><input class="form-input inv-name" value="'+esc(it.物品名||'')+'"></div>' +
           '<div class="form-row"><label>描述</label><input class="form-input inv-desc" value="'+esc(it.描述||'')+'"></div>' +
           '<div class="form-row"><label>数量</label><input class="form-input inv-qty" type="number" value="'+esc(it.数量||1)+'"></div>' +
-          '<div style="display:flex;gap:6px;margin-top:6px;">' +
+          '<div style="display:flex;gap:4px;margin-top:4px;">' +
           '<button class="btn btn-primary btn-sm btn-upd-item" data-idx="'+i+'">更新</button>' +
           '<button class="btn btn-sm btn-del-item" data-idx="'+i+'">删除</button></div></div>';
       });
@@ -369,7 +394,7 @@
       var html = '<div class="section-title">👤 玩家（主角）</div>' +
         '<div class="char-card"><div class="char-card-title">' + esc(p.名称||'未命名') + '</div>' +
         '<div class="char-card-info">' + (p.年龄||'--') + '岁 · ' + (p.当前地点||'--') + '<br>' + trunc(p.角色背景, 60) + '</div>' +
-        '<button class="btn btn-primary btn-sm" data-cmd="edit-player" style="margin-top:6px;">编辑玩家信息</button></div>';
+        '<button class="btn btn-primary btn-sm" data-cmd="edit-player" style="margin-top:4px;">编辑玩家信息</button></div>';
 
       html += '<div class="section-title">🎭 NPC 角色</div>';
       var hasNPC = false;
@@ -378,7 +403,7 @@
         hasNPC = true;
         html += '<div class="char-card"><div class="char-card-title">' + esc(n.名称) + ' <span style="color:#8892b0;font-size:11px;">(' + k + ')</span></div>' +
           '<div class="char-card-info">' + (n.年龄||'--') + '岁 · ' + (n.职业||'未知') + ' · 好感' + (n.好感度||0) + '</div>' +
-          '<div style="display:flex;gap:4px;margin-top:6px;">' +
+          '<div style="display:flex;gap:3px;margin-top:4px;">' +
           '<button class="btn btn-sm btn-edit-npc" data-npc="'+k+'">编辑</button>' +
           '<button class="btn btn-sm btn-secondary btn-npc-info" data-npc="'+k+'">信息</button>' +
           '<button class="btn btn-sm btn-secondary btn-npc-cloth" data-npc="'+k+'">服装</button>' +
@@ -391,7 +416,7 @@
         '<div class="two-col">' +
         '<button class="btn btn-primary" id="btnAddMain">添加主要角色</button>' +
         '<button class="btn btn-secondary" id="btnAddMinor">添加次要角色</button></div>' +
-        '<div id="addCharForm" style="display:none;margin-top:10px;"></div>';
+        '<div id="addCharForm" style="display:none;margin-top:8px;"></div>';
       openPopup('角色管理', html);
     }
 
@@ -410,7 +435,7 @@
         '<div class="form-row"><label>服装</label><input class="form-input" id="acCloth"></div>' +
         '<div class="form-row"><label>性格</label><input class="form-input" id="acPerson"></div>' +
         '<div class="form-row"><label>角色背景</label><textarea class="form-textarea" id="acBg"></textarea></div>' +
-        '<div style="display:flex;gap:6px;">' +
+        '<div style="display:flex;gap:4px;">' +
         '<button class="btn btn-primary btn-sm" id="btnDoAddMain">确认添加</button>' +
         '<button class="btn btn-sm" id="btnCancelAdd">取消</button></div></div>'
       );
@@ -440,7 +465,7 @@
         '<div class="form-row"><label>NPC ID</label><input class="form-input" id="acId2" placeholder="如 NPC7"></div>' +
         '<div class="form-row"><label>名称</label><input class="form-input" id="acName2"></div></div>' +
         '<div class="form-row"><label>简介</label><textarea class="form-textarea" id="acDesc2" placeholder="一句话描述该角色"></textarea></div>' +
-        '<div style="display:flex;gap:6px;">' +
+        '<div style="display:flex;gap:4px;">' +
         '<button class="btn btn-primary btn-sm" id="btnDoAddMinor">确认添加</button>' +
         '<button class="btn btn-sm" id="btnCancelAdd">取消</button></div></div>'
       );
@@ -585,7 +610,7 @@
         html += '<div class="inline-form"><div class="form-row"><label>地点名称</label><input class="form-input wm-loc-name" value="'+esc(l.名称||l.name||'')+'"></div>' +
           '<div class="form-row"><label>描述</label><input class="form-input wm-loc-desc" value="'+esc(l.描述||l.desc||'')+'"></div>' +
           '<div class="form-row"><label>距离</label><input class="form-input wm-loc-dist" value="'+esc(l.距离||l.distance||'')+'"></div>' +
-          '<div style="display:flex;gap:6px;">' +
+          '<div style="display:flex;gap:4px;">' +
           '<button class="btn btn-primary btn-sm btn-upd-loc" data-idx="'+i+'">更新</button>' +
           '<button class="btn btn-sm btn-del-loc" data-idx="'+i+'">删除</button></div></div>';
       });
@@ -603,7 +628,7 @@
       rules.forEach(function(r, i) {
         html += '<div class="inline-form"><div class="form-row"><label>规则名称</label><input class="form-input wm-rule-name" value="'+esc(r.规则名||r.name||'')+'"></div>' +
           '<div class="form-row"><label>规则内容</label><textarea class="form-textarea wm-rule-content">'+esc(r.规则内容||r.content||'')+'</textarea></div>' +
-          '<div style="display:flex;gap:6px;">' +
+          '<div style="display:flex;gap:4px;">' +
           '<button class="btn btn-primary btn-sm btn-upd-rule" data-idx="'+i+'">更新</button>' +
           '<button class="btn btn-sm btn-del-rule" data-idx="'+i+'">删除</button></div></div>';
       });
@@ -614,7 +639,6 @@
       $('#tabContent').html(html);
     }
     function showEventTab(w) {
-      // World events timeline
       var html = '<div class="hint">世界事件时间线（过往事件作为背景设定）</div>';
       html += '<div class="empty-state">暂无事件（请通过剧情编辑添加未来事件）</div>';
       $('#tabContent').html(html);
@@ -662,7 +686,7 @@
           '<div class="form-row"><label>地点</label><input class="form-input pe-loc" value="'+esc(e.地点||e.location||'')+'"></div></div>' +
           '<div class="form-row"><label>相关人物</label><input class="form-input pe-char" value="'+esc(e.相关人物||e.characters||'')+'"></div>' +
           '<div class="form-row"><label>剧情内容</label><textarea class="form-textarea pe-content">'+esc(e.剧情内容||e.content||'')+'</textarea></div>' +
-          '<div style="display:flex;gap:6px;">' +
+          '<div style="display:flex;gap:4px;">' +
           '<button class="btn btn-primary btn-sm btn-upd-event" data-idx="'+i+'">更新</button>' +
           '<button class="btn btn-sm btn-del-event" data-idx="'+i+'">删除</button></div></div>';
       });
@@ -687,12 +711,91 @@
       sendCmd('【剧情编辑】\n添加未来事件\n- 时间：' + $('#newEventTime').val() + '\n- 地点：' + $('#newEventLoc').val() + '\n- 人物：' + $('#newEventChar').val() + '\n- 内容：' + $('#newEventContent').val() + '\n请输出 JSON-Patch');
     });
 
+    // ========== SCENE EDITOR ==========
+    var sceneItems = [];
+    function popupSceneEdit() {
+      var html = '<div id="sceneList" style="margin-bottom:8px;"></div>' +
+        '<div class="scene-toolbar">' +
+        '<button class="btn btn-secondary btn-sm btn-add-scene" data-type="scene">+ 场景</button>' +
+        '<button class="btn btn-secondary btn-sm btn-add-scene" data-type="dialog">+ 对白</button>' +
+        '<button class="btn btn-secondary btn-sm btn-add-scene" data-type="action">+ 行动</button>' +
+        '<button class="btn btn-secondary btn-sm btn-add-scene" data-type="reaction">+ 反应</button>' +
+        '<button class="btn btn-primary scene-confirm" id="btnSceneConfirm">确认发送</button></div>';
+      openPopup('情境场景编辑', html);
+      renderSceneList();
+    }
+    function renderSceneList() {
+      var h = '';
+      if (sceneItems.length === 0) {
+        h = '<div class="empty-state">暂无场景条目，点击下方按钮添加</div>';
+      } else {
+        sceneItems.forEach(function(item, i) {
+          var typeLabel = '';
+          if (item.type === 'scene') typeLabel = '场景事件';
+          else if (item.type === 'dialog') typeLabel = '(对白)';
+          else if (item.type === 'action') typeLabel = '(行动)';
+          else if (item.type === 'reaction') typeLabel = '(反应)';
+          if (item.type === 'scene') {
+            h += '<div class="scene-item" data-idx="'+i+'">' +
+              '<span class="scene-num">'+(i+1)+'.</span>' +
+              '<span class="scene-type-label">'+typeLabel+'</span>' +
+              '<input class="form-input scene-content" placeholder="发生了什么" value="'+esc(item.content)+'">' +
+              '<button class="scene-del btn-del-scene" data-idx="'+i+'">x</button></div>';
+          } else {
+            h += '<div class="scene-item" data-idx="'+i+'">' +
+              '<span class="scene-num">'+(i+1)+'.</span>' +
+              '<input class="form-input scene-who" placeholder="角色" value="'+esc(item.who)+'">' +
+              '<span class="scene-type-label">'+typeLabel+'</span>' +
+              '<input class="form-input scene-content" placeholder="内容" value="'+esc(item.content)+'">' +
+              '<button class="scene-del btn-del-scene" data-idx="'+i+'">x</button></div>';
+          }
+        });
+      }
+      $('#sceneList').html(h);
+    }
+    $(document).on('click', '.btn-add-scene', function() {
+      var type = $(this).data('type');
+      sceneItems.push({type: type, who: '', content: ''});
+      renderSceneList();
+    });
+    $(document).on('click', '.btn-del-scene', function() {
+      var i = $(this).data('idx');
+      sceneItems.splice(i, 1);
+      renderSceneList();
+    });
+    $(document).on('input', '.scene-who', function() {
+      var idx = $(this).closest('.scene-item').data('idx');
+      sceneItems[idx].who = $(this).val();
+    });
+    $(document).on('input', '.scene-content', function() {
+      var idx = $(this).closest('.scene-item').data('idx');
+      sceneItems[idx].content = $(this).val();
+    });
+    $(document).on('click', '#btnSceneConfirm', function() {
+      if (sceneItems.length === 0) { alert('请先添加场景条目'); return; }
+      var lines = ['【情境场景编辑】', '请按以下顺序推进剧情：'];
+      sceneItems.forEach(function(item, i) {
+        if (item.type === 'scene') {
+          lines.push((i+1) + '. [场景事件] ' + (item.content || '发生了什么...'));
+        } else if (item.type === 'dialog') {
+          lines.push((i+1) + '. [' + (item.who || '角色名') + '-对白] ' + (item.content || ''));
+        } else if (item.type === 'action') {
+          lines.push((i+1) + '. [' + (item.who || '角色名') + '-行动] ' + (item.content || ''));
+        } else if (item.type === 'reaction') {
+          lines.push((i+1) + '. [' + (item.who || '角色名') + '-反应] ' + (item.content || ''));
+        }
+      });
+      sendCmd(lines.join('\n'));
+      closePopup();
+    });
+
     // ========== BUTTON BINDINGS ==========
     $(document).on('click', '[data-cmd="edit-player"]', popupEditPlayer);
     $(document).on('click', '[data-cmd="edit-inv"]', popupEditInv);
     $(document).on('click', '[data-cmd="char-mgr"]', popupCharMgr);
     $(document).on('click', '[data-cmd="world-mgr"]', popupWorldMgr);
     $(document).on('click', '[data-cmd="plot"]', popupPlot);
+    $(document).on('click', '[data-cmd="scene-edit"]', popupSceneEdit);
 
     // Init render
     render();
