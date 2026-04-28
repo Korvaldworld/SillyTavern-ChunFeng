@@ -1,35 +1,36 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
   <style>
-    * { box-sizing: border-box; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
-      margin: 0;
-      padding: 0;
+      background: transparent;
       color: #ccd6f6;
+      font-size: 12px;
+      line-height: 1.4;
+      padding: 4px;
     }
     .status-bar {
       background: linear-gradient(180deg, #0a192f 0%, #112240 100%);
       border: 1px solid #233554;
-      border-radius: 8px;
+      border-radius: 6px;
       overflow: hidden;
-      margin: 8px 0;
     }
     /* 环境栏 */
     .env-bar {
-      background: rgba(15, 52, 96, 0.4);
-      padding: 8px 16px;
+      background: rgba(15, 52, 96, 0.3);
+      padding: 6px 10px;
       display: flex;
       justify-content: space-between;
       align-items: center;
       flex-wrap: wrap;
-      gap: 8px;
+      gap: 6px;
       border-bottom: 1px solid #233554;
     }
     .env-item {
-      font-size: 13px;
+      font-size: 12px;
       color: #8892b0;
     }
     .env-item strong {
@@ -38,21 +39,21 @@
     }
     /* 玩家栏 */
     .player-section {
-      padding: 12px 16px;
+      padding: 10px;
       border-bottom: 1px solid #233554;
       display: flex;
       align-items: flex-start;
-      gap: 12px;
+      gap: 10px;
     }
     .avatar {
-      width: 48px;
-      height: 48px;
+      width: 40px;
+      height: 40px;
       border-radius: 50%;
       background: linear-gradient(135deg, #e94560, #0f3460);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 20px;
+      font-size: 16px;
       flex-shrink: 0;
     }
     .player-info {
@@ -60,32 +61,28 @@
       min-width: 0;
     }
     .player-name {
-      font-size: 16px;
+      font-size: 14px;
       color: #e94560;
       font-weight: bold;
-      margin-bottom: 4px;
+      margin-bottom: 3px;
     }
     .player-tags {
       display: flex;
       flex-wrap: wrap;
-      gap: 6px;
-      margin-bottom: 6px;
+      gap: 4px;
+      margin-bottom: 4px;
     }
     .tag {
-      background: rgba(15, 52, 96, 0.5);
-      padding: 2px 8px;
-      border-radius: 4px;
-      font-size: 12px;
+      background: rgba(15, 52, 96, 0.4);
+      padding: 1px 6px;
+      border-radius: 3px;
+      font-size: 11px;
       color: #a8b2d1;
     }
-    .tag.highlight {
-      background: rgba(233, 69, 96, 0.2);
-      color: #e94560;
-    }
     .player-desc {
-      font-size: 12px;
+      font-size: 11px;
       color: #8892b0;
-      line-height: 1.5;
+      line-height: 1.4;
       overflow: hidden;
       text-overflow: ellipsis;
       display: -webkit-box;
@@ -94,45 +91,45 @@
     }
     .player-actions {
       display: flex;
-      gap: 6px;
-      margin-top: 8px;
+      gap: 4px;
+      margin-top: 6px;
     }
     /* NPC 栏 */
     .npc-section {
-      padding: 12px 16px;
+      padding: 10px;
       border-bottom: 1px solid #233554;
     }
     .npc-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 10px;
+      margin-bottom: 8px;
     }
     .npc-title {
-      font-size: 14px;
+      font-size: 12px;
       color: #64ffda;
     }
     .npc-card {
-      background: rgba(15, 52, 96, 0.2);
-      border-radius: 8px;
-      padding: 12px;
-      margin-bottom: 10px;
-      border: 1px solid rgba(35, 53, 84, 0.5);
+      background: rgba(15, 52, 96, 0.15);
+      border-radius: 6px;
+      padding: 10px;
+      margin-bottom: 8px;
+      border: 1px solid rgba(35, 53, 84, 0.4);
     }
     .npc-top {
       display: flex;
-      gap: 12px;
-      margin-bottom: 10px;
+      gap: 10px;
+      margin-bottom: 8px;
     }
     .npc-avatar {
-      width: 40px;
-      height: 40px;
+      width: 36px;
+      height: 36px;
       border-radius: 50%;
       background: linear-gradient(135deg, #64ffda, #0f3460);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 16px;
+      font-size: 14px;
       flex-shrink: 0;
     }
     .npc-basic {
@@ -140,113 +137,120 @@
       min-width: 0;
     }
     .npc-name {
-      font-size: 15px;
+      font-size: 13px;
       color: #e94560;
       font-weight: bold;
-      margin-bottom: 2px;
     }
     .npc-sub {
-      font-size: 12px;
+      font-size: 11px;
       color: #8892b0;
     }
     .npc-details {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-      gap: 6px;
-      margin-bottom: 10px;
+      grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+      gap: 4px;
+      margin-bottom: 8px;
     }
     .npc-detail {
-      font-size: 12px;
+      font-size: 11px;
       color: #a8b2d1;
     }
     .npc-detail label {
       color: #64ffda;
-      font-size: 11px;
+      font-size: 10px;
       display: block;
     }
-    /* 好感度条 */
     .affinity-bar {
       display: flex;
-      gap: 12px;
+      gap: 10px;
       align-items: center;
       flex-wrap: wrap;
-      margin-bottom: 10px;
-      background: rgba(10, 25, 47, 0.5);
-      padding: 8px;
-      border-radius: 6px;
+      margin-bottom: 8px;
+      background: rgba(10, 25, 47, 0.4);
+      padding: 6px;
+      border-radius: 4px;
     }
     .affinity-item {
       text-align: center;
     }
     .affinity-value {
-      font-size: 16px;
+      font-size: 14px;
       font-weight: bold;
       color: #e94560;
     }
     .affinity-label {
-      font-size: 10px;
+      font-size: 9px;
       color: #8892b0;
     }
     .mood-badge {
-      background: rgba(100, 255, 218, 0.15);
+      background: rgba(100, 255, 218, 0.12);
       color: #64ffda;
-      padding: 2px 8px;
-      border-radius: 12px;
-      font-size: 11px;
+      padding: 1px 6px;
+      border-radius: 10px;
+      font-size: 10px;
     }
     .npc-actions {
       display: flex;
-      gap: 6px;
+      gap: 4px;
       flex-wrap: wrap;
     }
     /* 按钮 */
     .btn {
-      background: rgba(233, 69, 96, 0.15);
-      border: 1px solid rgba(233, 69, 96, 0.3);
+      background: rgba(233, 69, 96, 0.12);
+      border: 1px solid rgba(233, 69, 96, 0.25);
       color: #e94560;
-      padding: 5px 12px;
+      padding: 4px 10px;
+      border-radius: 3px;
+      cursor: pointer;
+      font-size: 11px;
+      font-family: inherit;
+      transition: all 0.2s;
+    }
+    .btn:hover {
+      background: rgba(233, 69, 96, 0.25);
+    }
+    .btn-sm {
+      padding: 2px 6px;
+      font-size: 10px;
+    }
+    .btn-secondary {
+      background: rgba(15, 52, 96, 0.3);
+      border: 1px solid #0f3460;
+      color: #64ffda;
+    }
+    .btn-secondary:hover {
+      background: rgba(15, 52, 96, 0.5);
+      border-color: #64ffda;
+    }
+    /* 底部全局按钮 */
+    .global-actions {
+      padding: 8px 10px;
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      background: rgba(10, 25, 47, 0.3);
+    }
+    .global-btn {
+      background: rgba(15, 52, 96, 0.3);
+      border: 1px solid #0f3460;
+      color: #64ffda;
+      padding: 6px 12px;
       border-radius: 4px;
       cursor: pointer;
       font-size: 12px;
       font-family: inherit;
       transition: all 0.2s;
     }
-    .btn:hover {
-      background: rgba(233, 69, 96, 0.3);
-    }
-    .btn-sm {
-      padding: 3px 8px;
-      font-size: 11px;
-    }
-    /* 底部全局按钮 */
-    .global-actions {
-      padding: 10px 16px;
-      display: flex;
-      justify-content: center;
-      gap: 10px;
-      flex-wrap: wrap;
-      background: rgba(10, 25, 47, 0.5);
-    }
-    .global-btn {
-      background: rgba(15, 52, 96, 0.5);
-      border: 1px solid #0f3460;
-      color: #64ffda;
-      padding: 8px 16px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 13px;
-      font-family: inherit;
-      transition: all 0.2s;
-    }
     .global-btn:hover {
-      background: rgba(15, 52, 96, 0.8);
+      background: rgba(15, 52, 96, 0.5);
       border-color: #64ffda;
     }
     .empty-state {
       text-align: center;
       color: #8892b0;
-      padding: 16px;
-      font-size: 13px;
+      padding: 12px;
+      font-size: 11px;
       font-style: italic;
     }
   </style>
@@ -254,197 +258,209 @@
 <body>
   <div class="status-bar">
     <!-- 环境栏 -->
-    <div class="env-bar" id="envBar">
-      <div class="env-item">📅 <strong id="envDate">--</strong></div>
-      <div class="env-item">🕐 <strong id="envTime">--</strong></div>
-      <div class="env-item">🌤 <strong id="envWeather">--</strong></div>
-      <div class="env-item">📍 <strong id="envLocation">--</strong></div>
-      <div class="env-item">👥 <strong id="envCharacter">--</strong></div>
+    <div class="env-bar">
+      <div class="env-item">📅 <strong id="eDate">2005年4月1日</strong></div>
+      <div class="env-item">🕐 <strong id="eTime">08:00</strong></div>
+      <div class="env-item">🌤 <strong id="eWeather">晴</strong></div>
+      <div class="env-item">📍 <strong id="eLoc">长乐公寓101室</strong></div>
+      <div class="env-item">👥 <strong id="eChar">无</strong></div>
     </div>
 
     <!-- 玩家栏 -->
-    <div class="player-section" id="playerSection">
+    <div class="player-section">
       <div class="avatar">👤</div>
       <div class="player-info">
-        <div class="player-name" id="playerName">加载中...</div>
+        <div class="player-name" id="pName">张浩</div>
         <div class="player-tags">
-          <span class="tag" id="playerAge">--岁</span>
-          <span class="tag highlight" id="playerMoney">💰 --</span>
-          <span class="tag" id="playerLocation">📍 --</span>
+          <span class="tag" id="pAge">19岁</span>
+          <span class="tag" id="pMoney">💰 0</span>
+          <span class="tag" id="pLoc">📍 长乐公寓101室</span>
         </div>
-        <div class="player-desc" id="playerDesc">加载中...</div>
+        <div class="player-desc" id="pDesc">天雄集团董事长张天雄的独子，被父亲安排管理长乐公寓。性格懒散但内心善良，对公寓中的租客们有着复杂的情感。</div>
         <div class="player-actions">
-          <button class="btn" onclick="openEditInfo()">✏️ 编辑信息</button>
-          <button class="btn" onclick="openInventory()">🎒 物品栏</button>
+          <button class="btn" data-cmd="edit-player">✏️ 编辑信息</button>
+          <button class="btn" data-cmd="edit-inv">🎒 物品</button>
         </div>
       </div>
     </div>
 
     <!-- NPC 栏 -->
-    <div class="npc-section" id="npcSection">
+    <div class="npc-section">
       <div class="npc-header">
         <span class="npc-title">🎭 交互角色</span>
       </div>
       <div id="npcContainer">
-        <div class="empty-state">暂无交互中的角色</div>
+        <div class="empty-state">暂无交互中的主要角色</div>
       </div>
     </div>
 
     <!-- 底部全局按钮 -->
     <div class="global-actions">
-      <button class="global-btn" onclick="openCharManage()">👥 角色管理</button>
-      <button class="global-btn" onclick="openWorldManage()">🌍 世界管理</button>
-      <button class="global-btn" onclick="openPlotEdit()">📖 剧情编辑</button>
+      <button class="global-btn" data-cmd="char-mgr">👥 角色</button>
+      <button class="global-btn" data-cmd="world-mgr">🌍 世界</button>
+      <button class="global-btn" data-cmd="plot">📖 剧情</button>
     </div>
   </div>
 
   <script>
-    const CDN_BASE = 'https://testingcf.jsdelivr.net/gh/korvaldworld/SillyTavern-ChunFeng@refs/heads/main/System/';
+    $(function() {
+      // 硬编码默认值（首次加载时使用）
+      var defaults = {
+        环境: { 当前日期: '2005年4月1日', 当前时间: '08:00', 天气: '晴', 地点: '长乐公寓101室', 当前交互角色ID: '' },
+        玩家: { 名称: '张浩', 年龄: 19, 持有金钱: 0, 当前地点: '长乐公寓101室',
+          角色背景: '天雄集团董事长张天雄的独子，被父亲安排管理长乐公寓。性格懒散但内心善良，对公寓中的租客们有着复杂的情感。' },
+        NPC: {}
+      };
 
-    function getStatData() {
-      try {
-        const ctx = window.SillyTavern.getContext();
-        const raw = ctx.chatMetadata.variables['stat_data'];
-        return typeof raw === 'string' ? JSON.parse(raw) : (raw || {});
-      } catch(e) { return {}; }
-    }
-
-    function renderStatusBar() {
-      const data = getStatData();
-      const env = data.环境 || {};
-      const player = data.玩家 || {};
-      const npcs = data.NPC || {};
-
-      // 环境栏
-      document.getElementById('envDate').textContent = env.当前日期 || '--';
-      document.getElementById('envTime').textContent = env.当前时间 || '--';
-      document.getElementById('envWeather').textContent = env.天气 || '--';
-      document.getElementById('envLocation').textContent = env.地点 || '--';
-
-      // 查找当前交互角色名称
-      let charName = '无';
-      const activeId = env.当前交互角色ID;
-      if (activeId && npcs[activeId] && npcs[activeId].名称) {
-        charName = npcs[activeId].名称;
+      // 读取变量
+      function readVar() {
+        try {
+          var ctx = window.SillyTavern.getContext();
+          var raw = ctx.chatMetadata.variables['stat_data'];
+          return typeof raw === 'string' ? JSON.parse(raw) : (raw || {});
+        } catch(e) { return {}; }
       }
-      document.getElementById('envCharacter').textContent = charName;
 
-      // 玩家栏
-      document.getElementById('playerName').textContent = player.名称 || '未命名';
-      document.getElementById('playerAge').textContent = (player.年龄 || '--') + '岁';
-      document.getElementById('playerMoney').textContent = '💰 ' + (player.持有金钱 || 0);
-      document.getElementById('playerLocation').textContent = '📍 ' + (player.当前地点 || '未知');
-      document.getElementById('playerDesc').textContent = player.角色背景 || '暂无背景描述';
+      // 渲染状态栏
+      function render() {
+        var d = readVar();
+        var env = $.extend({}, defaults.环境, d.环境 || {});
+        var plr = $.extend({}, defaults.玩家, d.玩家 || {});
+        var npcs = d.NPC || {};
 
-      // NPC 栏 - 只渲染当前交互且在场的主要角色
-      renderNPCs(npcs, activeId);
-    }
+        $('#eDate').text(env.当前日期);
+        $('#eTime').text(env.当前时间);
+        $('#eWeather').text(env.天气);
+        $('#eLoc').text(env.地点);
 
-    function renderNPCs(npcs, activeId) {
-      const container = document.getElementById('npcContainer');
-      let hasNPC = false;
-      let html = '';
+        var charName = '无';
+        var aid = env.当前交互角色ID;
+        if (aid && npcs[aid] && npcs[aid].名称) charName = npcs[aid].名称;
+        $('#eChar').text(charName);
 
-      // 主要角色对应的 NPC 槽位
-      const mainChars = { 'NPC1': '施美玉', 'NPC2': '梁惠', 'NPC3': '雪婉', 'NPC4': '雪柔', 'NPC5': '颜媚', 'NPC6': '茵曼' };
+        $('#pName').text(plr.名称 || defaults.玩家.名称);
+        $('#pAge').text((plr.年龄 || defaults.玩家.年龄) + '岁');
+        $('#pMoney').text('💰 ' + (plr.持有金钱 !== undefined ? plr.持有金钱 : defaults.玩家.持有金钱));
+        $('#pLoc').text('📍 ' + (plr.当前地点 || defaults.玩家.当前地点));
+        $('#pDesc').text(plr.角色背景 || defaults.玩家.角色背景);
 
-      Object.keys(mainChars).forEach(key => {
-        const npc = npcs[key];
-        if (!npc || !npc.名称) return;
-        // 只显示当前交互角色ID匹配且在场的
-        if (key !== activeId || !npc.是否在场) return;
-        hasNPC = true;
+        renderNPCs(npcs, aid);
+      }
 
-        html += `
-          <div class="npc-card">
-            <div class="npc-top">
-              <div class="npc-avatar">👩</div>
-              <div class="npc-basic">
-                <div class="npc-name">${escapeHtml(npc.名称)}</div>
-                <div class="npc-sub">${npc.年龄 || '--'}岁 · ${npc.职业 || '未知职业'}</div>
-              </div>
-            </div>
-            <div class="npc-details">
-              <div class="npc-detail"><label>外貌</label>${npc.外貌 ? escapeHtml(npc.外貌.substring(0, 20) + (npc.外貌.length > 20 ? '...' : '')) : '--'}</div>
-              <div class="npc-detail"><label>身材</label>${npc.身材 ? escapeHtml(npc.身材.substring(0, 20) + (npc.身材.length > 20 ? '...' : '')) : '--'}</div>
-              <div class="npc-detail"><label>服装</label>${npc.服装 ? escapeHtml(npc.服装.substring(0, 20) + (npc.服装.length > 20 ? '...' : '')) : '--'}</div>
-              <div class="npc-detail"><label>性格</label>${npc.性格 ? escapeHtml(npc.性格.substring(0, 20) + (npc.性格.length > 20 ? '...' : '')) : '--'}</div>
-            </div>
-            <div class="affinity-bar">
-              <div class="affinity-item">
-                <div class="affinity-value" style="color:#ff6b6b">${npc.好感度 || 0}</div>
-                <div class="affinity-label">好感</div>
-              </div>
-              <div class="affinity-item">
-                <div class="affinity-value" style="color:#ffd93d">${npc.厌恶度 || 0}</div>
-                <div class="affinity-label">厌恶</div>
-              </div>
-              <div class="affinity-item">
-                <div class="affinity-value" style="color:#c084fc">${npc.堕落度 || 0}</div>
-                <div class="affinity-label">堕落</div>
-              </div>
-              <div class="affinity-item">
-                <div class="affinity-value" style="color:#ff9f43">${npc.快感 || 0}</div>
-                <div class="affinity-label">快感</div>
-              </div>
-              <div style="margin-left:auto;">
-                <span class="mood-badge">${npc.情绪状态 || '平静'}</span>
-              </div>
-              <button class="btn btn-sm" onclick="editAffinity('${key}')">编辑</button>
-            </div>
-            <div class="npc-actions">
-              <button class="btn" onclick="openCharInfo('${key}')">📋 角色信息</button>
-              <button class="btn" onclick="openClothing('${key}')">👗 当前服装</button>
-              <button class="btn" onclick="openEvents('${key}')">📜 事件记录</button>
-            </div>
-          </div>
-        `;
+      function renderNPCs(npcs, activeId) {
+        var container = $('#npcContainer');
+        var hasNPC = false;
+        var html = '';
+        var mains = { 'NPC1': '施美玉', 'NPC2': '梁惠', 'NPC3': '雪婉', 'NPC4': '雪柔', 'NPC5': '颜媚', 'NPC6': '茵曼' };
+
+        $.each(mains, function(key, defaultName) {
+          var npc = npcs[key];
+          if (!npc || !npc.名称) return;
+          if (key !== activeId || !npc.是否在场) return;
+          hasNPC = true;
+
+          html += '<div class="npc-card">' +
+            '<div class="npc-top"><div class="npc-avatar">👩</div>' +
+            '<div class="npc-basic"><div class="npc-name">' + esc(npc.名称) + '</div>' +
+            '<div class="npc-sub">' + (npc.年龄 || '--') + '岁 · ' + (npc.职业 || '未知职业') + '</div></div></div>' +
+            '<div class="npc-details">' +
+            '<div class="npc-detail"><label>外貌</label>' + trunc(npc.外貌) + '</div>' +
+            '<div class="npc-detail"><label>身材</label>' + trunc(npc.身材) + '</div>' +
+            '<div class="npc-detail"><label>服装</label>' + trunc(npc.服装) + '</div>' +
+            '<div class="npc-detail"><label>性格</label>' + trunc(npc.性格) + '</div></div>' +
+            '<div class="affinity-bar">' +
+            '<div class="affinity-item"><div class="affinity-value" style="color:#ff6b6b">' + (npc.好感度 || 0) + '</div><div class="affinity-label">好感</div></div>' +
+            '<div class="affinity-item"><div class="affinity-value" style="color:#ffd93d">' + (npc.厌恶度 || 0) + '</div><div class="affinity-label">厌恶</div></div>' +
+            '<div class="affinity-item"><div class="affinity-value" style="color:#c084fc">' + (npc.堕落度 || 0) + '</div><div class="affinity-label">堕落</div></div>' +
+            '<div class="affinity-item"><div class="affinity-value" style="color:#ff9f43">' + (npc.快感 || 0) + '</div><div class="affinity-label">快感</div></div>' +
+            '<div style="margin-left:auto;"><span class="mood-badge">' + (npc.情绪状态 || '平静') + '</span></div>' +
+            '<button class="btn btn-sm btn-edit-npc" data-npc="' + key + '" data-cmd="edit-aff">编辑</button></div>' +
+            '<div class="npc-actions">' +
+            '<button class="btn btn-secondary btn-sm btn-edit-npc" data-npc="' + key + '" data-cmd="npc-info">📋 角色信息</button>' +
+            '<button class="btn btn-secondary btn-sm btn-edit-npc" data-npc="' + key + '" data-cmd="npc-cloth">👗 当前服装</button>' +
+            '<button class="btn btn-secondary btn-sm btn-edit-npc" data-npc="' + key + '" data-cmd="npc-event">📜 事件记录</button></div></div>';
+        });
+
+        container.html(hasNPC ? html : '<div class="empty-state">暂无交互中的主要角色</div>');
+      }
+
+      function esc(t) { return $('<div>').text(t || '--').html(); }
+      function trunc(t) {
+        if (!t) return '--';
+        return t.length > 20 ? t.substring(0, 20) + '...' : t;
+      }
+
+      // 按钮命令处理
+      function sendCmd(text) {
+        try {
+          triggerSlash('/setinput ' + text);
+          if (typeof toastr !== 'undefined') toastr.success('已写入输入框，请发送');
+        } catch(e) {
+          // Fallback
+          var el = document.createElement('div');
+          el.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#112240;border:1px solid #233554;padding:16px;z-index:99999;max-width:90%;max-height:80%;overflow:auto;border-radius:8px;color:#ccd6f6;';
+          el.innerHTML = '<div style="color:#e94560;font-weight:bold;margin-bottom:8px;">请复制以下命令并发送：</div>' +
+            '<textarea readonly style="width:100%;min-height:100px;background:#0a192f;border:1px solid #233554;color:#ccd6f6;padding:8px;font-family:inherit;font-size:12px;" onclick="this.select()">' + esc(text) + '</textarea>' +
+            '<button class="btn btn-primary btn-sm" style="margin-top:8px;" onclick="this.parentElement.remove()">关闭</button>';
+          document.body.appendChild(el);
+        }
+      }
+
+      // 命令模板
+      var cmds = {
+        'edit-player': function() {
+          var d = readVar();
+          var p = $.extend({}, defaults.玩家, d.玩家 || {});
+          sendCmd('【编辑玩家信息】\n当前信息：\n- 名称：' + (p.名称 || '') + '\n- 年龄：' + (p.年龄 || '') + '\n- 持有金钱：' + (p.持有金钱 || 0) + '\n- 当前地点：' + (p.当前地点 || '') + '\n- 外观：' + (p.外观 || '') + '\n- 角色背景：' + (p.角色背景 || '') + '\n- 性能力：' + (p.性能力 || '') + '\n- 性癖：' + (p.性癖 || '') + '\n\n请输出更新后的 JSON-Patch');
+        },
+        'edit-inv': function() {
+          sendCmd('【查看/编辑物品栏】\n请列出当前所有物品，并允许我添加/删除物品。输出 JSON-Patch 更新物品栏。');
+        },
+        'char-mgr': function() {
+          sendCmd('【角色管理】\n请列出所有NPC角色的当前状态，并允许我编辑各角色的信息。输出 JSON-Patch。');
+        },
+        'world-mgr': function() {
+          var d = readVar();
+          var env = $.extend({}, defaults.环境, d.环境 || {});
+          sendCmd('【世界管理】\n当前环境：\n- 日期：' + (env.当前日期 || '') + '\n- 时间：' + (env.当前时间 || '') + '\n- 天气：' + (env.天气 || '') + '\n- 地点：' + (env.地点 || '') + '\n\n请输出 JSON-Patch 更新环境变量。');
+        },
+        'plot': function() {
+          sendCmd('【剧情编辑】\n请总结当前剧情进度，并允许我推进或修改剧情走向。输出 JSON-Patch 更新剧情变量。');
+        },
+        'npc-info': function(npcId) {
+          var d = readVar();
+          var npc = (d.NPC || {})[npcId] || {};
+          sendCmd('【编辑NPC信息：' + (npc.名称 || npcId) + '】\n当前信息：\n- 名称：' + (npc.名称 || '') + '\n- 年龄：' + (npc.年龄 || '') + '\n- 职业：' + (npc.职业 || '') + '\n- 外貌：' + (npc.外貌 || '') + '\n- 身材：' + (npc.身材 || '') + '\n- 性格：' + (npc.性格 || '') + '\n- 角色背景：' + (npc.角色背景 || '') + '\n\n请输出 JSON-Patch 更新该NPC信息。');
+        },
+        'npc-cloth': function(npcId) {
+          var d = readVar();
+          var npc = (d.NPC || {})[npcId] || {};
+          sendCmd('【编辑NPC服装：' + (npc.名称 || npcId) + '】\n当前服装：' + (npc.服装 || '未设定') + '\n请输出 JSON-Patch 更新服装。');
+        },
+        'npc-event': function(npcId) {
+          var d = readVar();
+          var npc = (d.NPC || {})[npcId] || {};
+          sendCmd('【查看NPC事件：' + (npc.名称 || npcId) + '】\n请列出该角色的重要事件记录，并允许我添加新事件。输出 JSON-Patch 更新事件记录。');
+        },
+        'edit-aff': function(npcId) {
+          var d = readVar();
+          var npc = (d.NPC || {})[npcId] || {};
+          sendCmd('【编辑好感度：' + (npc.名称 || npcId) + '】\n当前好感度：' + (npc.好感度 || 0) + '\n当前厌恶度：' + (npc.厌恶度 || 0) + '\n当前堕落度：' + (npc.堕落度 || 0) + '\n当前快感：' + (npc.快感 || 0) + '\n情绪状态：' + (npc.情绪状态 || '平静') + '\n\n请输出 JSON-Patch 更新数值。');
+        }
+      };
+
+      // 全局按钮事件
+      $(document).on('click', '[data-cmd]', function() {
+        var cmd = $(this).data('cmd');
+        var npc = $(this).data('npc');
+        if (cmds[cmd]) {
+          cmds[cmd](npc);
+        }
       });
 
-      container.innerHTML = hasNPC ? html : '<div class="empty-state">暂无交互中的主要角色</div>';
-    }
-
-    function escapeHtml(text) {
-      const div = document.createElement('div');
-      div.textContent = text;
-      return div.innerHTML;
-    }
-
-    // 按钮操作
-    function openEditInfo() { loadSubPage('编辑信息.html'); }
-    function openInventory() { loadSubPage('物品栏.html'); }
-    function openCharManage() { loadSubPage('角色管理.html'); }
-    function openWorldManage() { loadSubPage('世界管理.html'); }
-    function openPlotEdit() { loadSubPage('剧情编辑.html'); }
-    function openCharInfo(npcId) { loadSubPage('角色信息.html?npc=' + npcId); }
-    function openClothing(npcId) { loadSubPage('当前服装.html?npc=' + npcId); }
-    function openEvents(npcId) { loadSubPage('事件记录.html?npc=' + npcId); }
-    function editAffinity(npcId) { loadSubPage('好感度编辑.html?npc=' + npcId); }
-
-    function loadSubPage(filename) {
-      const url = CDN_BASE + filename;
-      const container = document.createElement('div');
-      container.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(10,25,47,0.95);z-index:9999;overflow:auto;';
-      document.body.appendChild(container);
-
-      fetch(url)
-        .then(r => r.text())
-        .then(html => {
-          container.innerHTML = html;
-          // 注入关闭按钮
-          const closeBtn = document.createElement('button');
-          closeBtn.textContent = '✕ 关闭';
-          closeBtn.style.cssText = 'position:fixed;top:10px;right:10px;background:#e94560;color:white;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;z-index:10000;font-family:inherit;';
-          closeBtn.onclick = () => container.remove();
-          container.appendChild(closeBtn);
-        })
-        .catch(() => {
-          container.innerHTML = '<div style="text-align:center;padding:40px;color:#e94560;">加载失败，请检查网络连接</div>';
-        });
-    }
-
-    // 初始化渲染
-    renderStatusBar();
+      // 初始化渲染
+      render();
+    });
   </script>
 </body>
 </html>
