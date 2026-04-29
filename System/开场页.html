@@ -1,8 +1,4 @@
-<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-  <meta charset="UTF-8">
-  <style>
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
@@ -224,9 +220,18 @@
       justify-content: space-between;
       margin-top: 12px;
     }
-  </style>
-</head>
-<body>
+    @media (max-width: 600px) {
+      .char-form { grid-template-columns: 1fr; }
+      .char-form .form-group.full { grid-column: span 1; }
+      .locations-grid { grid-template-columns: 1fr; }
+      .nav-btns { flex-direction: column; gap: 8px; }
+      .nav-btns .btn { width: 100%; text-align: center; }
+      .mode-switch { flex-direction: column; }
+      body { padding: 6px; font-size: 12px; }
+      .card { padding: 10px 12px; }
+      .header-title { font-size: 16px; }
+    }
+  </style></head><body>
   <div class="shell">
     <div class="header">
       <div class="header-title">🌆 春风市</div>
@@ -248,7 +253,7 @@
         <div class="desc-text">
           在经济高速发展的年代，春风市的表面繁华下隐藏着无数普通人的生活百态。
         </div>
-        <div class="locations-grid">
+        <div class="locations-grid" id="locGrid">
           <div class="location-tag"><strong>长乐公寓</strong><br>三层出租公寓，月租600元，无电梯</div>
           <div class="location-tag"><strong>春风市中心医院</strong><br>顶尖三甲医院，距长乐公寓700米</div>
           <div class="location-tag"><strong>春风美容院</strong><br>平民美容院，距长乐公寓400米</div>
@@ -376,6 +381,7 @@
     $(function() {
       var rules = [];
       var mode = 'def';
+      var parsedLocations = [];
       var defChar = {
         名称: '张浩', 年龄: 19, 身高: '193cm',
         当前地点: '长乐公寓101室',
@@ -389,6 +395,57 @@
         $('.section').removeClass('active');
         $('#step' + n).addClass('active');
       }
+
+      // Parse locations from world description
+      function parseLocations() {
+        var text = $('#worldDesc').val() || '';
+        var lines = text.split(/\n/);
+        var locations = [];
+        lines.forEach(function(line) {
+          var trimmed = line.trim();
+          if (trimmed.indexOf('- ') === 0) {
+            var content = trimmed.substring(2).trim();
+            var sepIndex = -1;
+            var colonIndex = content.indexOf('：');
+            var asciiColonIndex = content.indexOf(':');
+            if (colonIndex !== -1 && asciiColonIndex !== -1) {
+              sepIndex = Math.min(colonIndex, asciiColonIndex);
+            } else {
+              sepIndex = Math.max(colonIndex, asciiColonIndex);
+            }
+            if (sepIndex > 0) {
+              var name = content.substring(0, sepIndex).trim();
+              var desc = content.substring(sepIndex + 1).trim();
+              var dist = '';
+              var distMatch = desc.match(/(\d+(?:\.\d+)?)\s*(米|公里|km)/i);
+              if (distMatch) {
+                dist = distMatch[0];
+              }
+              locations.push({ 名称: name, 描述: desc, 距离: dist });
+            }
+          }
+        });
+        parsedLocations = locations;
+        renderLocationTags();
+        return locations;
+      }
+
+      function renderLocationTags() {
+        var grid = $('#locGrid');
+        if (parsedLocations.length === 0) {
+          grid.html('<div class="empty-state">未检测到地点，请在描述中使用 "- 地点名：描述" 格式</div>');
+          return;
+        }
+        grid.html(parsedLocations.map(function(loc) {
+          return '<div class="location-tag"><strong>' + esc(loc.名称) + '</strong><br>' + esc(loc.描述) + '</div>';
+        }).join(''));
+      }
+
+      // Bind worldDesc input to parse locations
+      $('#worldDesc').on('input', parseLocations);
+
+      // Initial parse
+      parseLocations();
 
       // Rule management
       $('#btnToggleRule, #btnCancelRule').on('click', function() {
@@ -479,7 +536,6 @@
 
       function renderConfirm() {
         var wd = $('#worldDesc').val().trim();
-        // Always read from form - default mode pre-fills the form with defChar values
         var c = {
           名称: $('#cusName').val().trim() || '未命名',
           年龄: $('#cusAge').val() || '--',
@@ -491,8 +547,14 @@
           性癖: $('#cusFet').val().trim() || '--'
         };
         var isDef = mode === 'def';
+        var locs = parseLocations();
 
         var txt = '【世界观设定】\n\n【世界描述】\n' + wd + '\n\n';
+        if (locs.length > 0) {
+          txt += '【重要地点】\n' + locs.map(function(loc) {
+            return '- ' + loc.名称 + '：' + loc.描述 + (loc.距离 ? '（' + loc.距离 + '）' : '');
+          }).join('\n') + '\n\n';
+        }
         if (rules.length > 0) {
           txt += '【用户自定义规则】\n' + rules.map(function(r) {
             return '- ' + r.规则名 + ': ' + r.规则内容;
@@ -516,10 +578,13 @@
           '请根据以上设定开始游戏，同时必须执行以下操作：\n' +
           '1. 使用 JSON-Patch 初始化以下变量：\n' +
           '   - /玩家：主角信息（名称、年龄、身高、外观、角色背景、当前地点、性能力、性癖、持有金钱、物品栏）\n' +
-          '   - /环境：当前日期=2005年4月1日，当前时间=08:00，天气=晴，地点=长乐公寓101室\n' +
-          '   - /世界观/重要地点：从【世界描述】中提取的所有地点列表\n' +
+          '   - /环境：当前日期=2005年4月1日，当前时间=08:00，天气=晴，地点=' + (c.当前地点 || '长乐公寓101室') + '\n' +
+          '   - /世界观/基础设定：城市名=春风市，年代=2005年，默认规则=见【世界描述】\n' +
           '   - /世界观/用户自定义规则：从【用户自定义规则】中提取的所有规则\n' +
-          '   - /NPC：初始化主要角色（施美玉、梁惠、雪婉、雪柔、颜媚、茵曼）的基本信息\n' +
+          '   - /世界观/重要地点：从【世界描述】中提取的所有地点列表\n' +
+          '   - /世界观/过往事件：空数组\n' +
+          '   - /剧情/未来事件：空数组\n' +
+          '   - /NPC：空对象 {}（不预填任何NPC，由AI在剧情中自然引入）\n' +
           '2. 输出 <StatusPlaceHolder/> 触发状态栏渲染\n' +
           '3. 在 <UpdateVariable> 中输出所有初始化用的 JSON-Patch\n' +
           '示例格式：<UpdateVariable><Analysis>Initialize all game variables</Analysis><JSONPatch>[{"op":"insert","path":"/玩家","value":{...}},{"op":"insert","path":"/环境","value":{...}},{"op":"insert","path":"/世界观","value":{...}}]</JSONPatch></UpdateVariable>';
@@ -537,7 +602,6 @@
           triggerSlash('/setinput ' + newText);
           if (typeof toastr !== 'undefined') toastr.success('已添加到输入框');
         } catch(e) {
-          // Fallback
           var el = document.createElement('div');
           el.className = 'cmd-box';
           el.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#112240;border:1px solid #233554;padding:16px;z-index:99999;max-width:90%;max-height:80%;overflow:auto;border-radius:8px;color:#ccd6f6;';
@@ -573,6 +637,7 @@
         };
         var wd = $('#worldDesc').val().trim();
         var plot = $('#openingPlot').val().trim();
+        var locs = parseLocations();
 
         // Build initial data structure
         var initData = {
@@ -591,24 +656,10 @@
               默认规则: wd.substring(0, 100) + '...'
             },
             用户自定义规则: rules,
-            重要地点: [
-              {名称: '长乐公寓', 描述: '三层出租公寓，月租600元，无电梯', 距离: '0米'},
-              {名称: '春风市中心医院', 描述: '顶尖三甲医院', 距离: '700米'},
-              {名称: '春风美容院', 描述: '平民美容院', 距离: '400米'},
-              {名称: '长乐便利店', 描述: '24小时营业', 距离: '50米'},
-              {名称: '天雄集团总部', 描述: 'CBD地标', 距离: '6公里'},
-              {名称: '宏发商贸公司', 描述: '天雄旗下子公司', 距离: '5公里'}
-            ],
+            重要地点: locs,
             过往事件: []
           },
-          NPC: {
-            NPC1: {名称: '施美玉', 年龄: 28, 职业: '美容院老板娘', 外貌: '成熟优雅', 身材: '丰满', 服装: '旗袍', 性格: '温柔体贴', 角色背景: '春风美容院老板娘，在春风市打拼多年。', 好感度: 0, 厌恶度: 0, 堕落度: 0, 快感: 0, 情绪状态: '平静', 事件记录: [], 是否在场: true},
-            NPC2: {名称: '梁惠', 年龄: 35, 职业: '护士长', 外貌: '干练', 身材: '匀称', 服装: '护士服', 性格: '严肃认真', 角色背景: '春风市中心医院护士长。', 好感度: 0, 厌恶度: 0, 堕落度: 0, 快感: 0, 情绪状态: '平静', 事件记录: [], 是否在场: true},
-            NPC3: {名称: '雪婉', 年龄: 22, 职业: '大学生', 外貌: '清纯', 身材: '苗条', 服装: '连衣裙', 性格: '活泼开朗', 角色背景: '就读于春风市大学，在公寓兼职。', 好感度: 0, 厌恶度: 0, 堕落度: 0, 快感: 0, 情绪状态: '平静', 事件记录: [], 是否在场: true},
-            NPC4: {名称: '雪柔', 年龄: 22, 职业: '大学生', 外貌: '冷艳', 身材: '苗条', 服装: '牛仔裤', 性格: '内向害羞', 角色背景: '雪婉的双胞胎妹妹，性格内向。', 好感度: 0, 厌恶度: 0, 堕落度: 0, 快感: 0, 情绪状态: '平静', 事件记录: [], 是否在场: true},
-            NPC5: {名称: '颜媚', 年龄: 30, 职业: '自由职业', 外貌: '妩媚', 身材: '火辣', 服装: '紧身衣', 性格: '风骚热情', 角色背景: '自由职业者，经常在公寓出入。', 好感度: 0, 厌恶度: 0, 堕落度: 0, 快感: 0, 情绪状态: '平静', 事件记录: [], 是否在场: true},
-            NPC6: {名称: '茵曼', 年龄: 26, 职业: '教师', 外貌: '知性', 身材: '标准', 服装: '职业装', 性格: '理性温和', 角色背景: '春风市中学教师。', 好感度: 0, 厌恶度: 0, 堕落度: 0, 快感: 0, 情绪状态: '平静', 事件记录: [], 是否在场: true}
-          },
+          NPC: {},
           剧情: {
             未来事件: []
           }
@@ -619,6 +670,11 @@
 
         // Build command text for AI
         var cmdText = '【世界观设定】\n\n【世界描述】\n' + wd + '\n\n';
+        if (locs.length > 0) {
+          cmdText += '【重要地点】\n' + locs.map(function(loc) {
+            return '- ' + loc.名称 + '：' + loc.描述 + (loc.距离 ? '（' + loc.距离 + '）' : '');
+          }).join('\n') + '\n\n';
+        }
         if (rules.length > 0) {
           cmdText += '【用户自定义规则】\n' + rules.map(function(r) { return '- ' + r.规则名 + ': ' + r.规则内容; }).join('\n') + '\n\n';
         }
@@ -636,10 +692,10 @@
         }
         cmdText += '请基于以上设定开始游戏，输出一段开场剧情。在回复末尾输出 <StatusPlaceHolder/>';
 
+        // ALWAYS send command text to input so AI knows the setup
         sendStackedCmd(cmdText);
         if (typeof toastr !== 'undefined') toastr.success('游戏已初始化，变量已保存');
       });
     });
   </script>
-</body>
-</html>
+</body></html>
