@@ -122,259 +122,489 @@ body{font-family:"Microsoft YaHei","PingFang SC",sans-serif;background:transpare
 
 <script>
 $(function(){
-function readVar(){try{var c=window.SillyTavern.getContext(),r=c.chatMetadata.variables['stat_data'];if(r)return typeof r==='string'?JSON.parse(r):r}catch(e){}try{var m=getCurrentMessageId(),v=getVariables({type:'message',message_id:m}),r2=v['stat_data'];if(r2)return typeof r2==='string'?JSON.parse(r2):r2}catch(e){}return{}}
-function getPlayer(){var d=readVar();return $.extend({名称:'',年龄:'',身高:'',外观:'',角色背景:'',性能力:'',性癖:'',持有金钱:0,当前地点:'',物品栏:[]},d.玩家||{})}
-function getEnv(){var d=readVar();return $.extend({当前日期:'',当前时间:'',天气:'',地点:'',当前交互角色ID:''},d.环境||{})}
-function getNPCs(){var d=readVar();return d.NPC||{}}
-function getWorld(){var d=readVar();return $.extend({基础设定:{城市名:'',年代:'',默认规则:''},用户自定义规则:[],重要地点:[],过往事件:[]},d.世界观||{})}
-function getPlot(){var d=readVar();return $.extend({未来事件:[]},d.剧情||{})}
-function sendCmd(t){try{var c='';try{c=window.parent.$('#send_textarea').val()||''}catch(e){}var s=c.trim()?'\n\n---\n\n':'';triggerSlash('/setinput '+c+s+t);if(typeof toastr!=='undefined')toastr.success('已添加到输入框')}catch(e){var el=document.createElement('div');el.style.cssText='position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#112240;border:1px solid #233554;padding:16px;z-index:99999;max-width:90%;max-height:80%;overflow:auto;border-radius:8px;color:#ccd6f6;';el.innerHTML='<div style="color:#e94560;font-weight:bold;margin-bottom:8px">请复制以下命令并发送：</div><textarea readonly style="width:100%;min-height:100px;background:#0a192f;border:1px solid #233554;color:#ccd6f6;padding:8px;font-family:inherit;font-size:12px" onclick="this.select()">'+esc(t)+'</textarea><button class="btn btn-primary btn-sm" style="margin-top:8px" id="fbClose">关闭</button>';document.body.appendChild(el);$(document).one('click','#fbClose',function(){$(el).remove()})}}
-function esc(t){return $('<div>').text(t||'').html()}
-function trunc(t,l){l=l||20;return t?(t.length>l?t.substring(0,l)+'...':t):'--'}
-function openPopup(tt,html){$('#popupOverlay').html('<div class="popup-overlay"><div class="popup-panel"><div class="popup-header"><span class="popup-title">'+esc(tt)+'</span><button class="popup-close" data-act="close">&times;</button></div><div class="popup-content">'+html+'</div></div></div>').show()}
-function closePopup(){$('#popupOverlay').hide().empty()}
-$(document).on('click','[data-act="close"]',closePopup)
+// === CRITICAL: Variable Read/Write API ===
+function readVar(){
+  try{
+    var ctx=window.SillyTavern.getContext();
+    var raw=ctx.chatMetadata.variables['stat_data'];
+    if(raw) return typeof raw==='string'?JSON.parse(raw):raw;
+  }catch(e){}
+  return {};
+}
+function writeVar(data){
+  try{
+    var ctx=window.SillyTavern.getContext();
+    ctx.chatMetadata.variables['stat_data']=JSON.stringify(data);
+    if(typeof toastr!=='undefined') toastr.success('已保存');
+    return true;
+  }catch(e){ console.error('writeVar:',e); return false; }
+}
+function updateVar(path,value){
+  var data=readVar();
+  var keys=path.split('.');
+  var obj=data;
+  for(var i=0;i<keys.length-1;i++){
+    if(!obj[keys[i]]) obj[keys[i]]={};
+    obj=obj[keys[i]];
+  }
+  obj[keys[keys.length-1]]=value;
+  return writeVar(data);
+}
+function getVal(path,defaultVal){
+  var data=readVar();
+  var keys=path.split('.');
+  var obj=data;
+  for(var i=0;i<keys.length;i++){
+    if(obj==null) return defaultVal;
+    obj=obj[keys[i]];
+  }
+  return obj!==undefined?obj:defaultVal;
+}
 
+// === Helpers ===
+function esc(t){return $('<div>').text(t||'').html();}
+function trunc(t,l){l=l||20;return t?(t.length>l?t.substring(0,l)+'...':t):'--';}
+function openPopup(tt,html){
+  $('#popupOverlay').html('<div class="popup-overlay"><div class="popup-panel"><div class="popup-header"><span class="popup-title">'+esc(tt)+'</span><button class="popup-close" data-act="close">&times;</button></div><div class="popup-content">'+html+'</div></div></div>').show();
+}
+function closePopup(){$('#popupOverlay').hide().empty();}
+$(document).on('click','[data-act="close"]',closePopup);
+
+function sendCmd(t){
+  try{
+    var c='';
+    try{c=window.parent.$('#send_textarea').val()||''}catch(e){}
+    var s=c.trim()?'\n\n---\n\n':'';
+    var cmd=c+s+t;
+    window.parent.$('#send_textarea').val(cmd).trigger('input');
+    if(typeof toastr!=='undefined') toastr.success('已添加到输入框');
+  }catch(e){
+    var el=document.createElement('div');
+    el.style.cssText='position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#112240;border:1px solid #233554;padding:16px;z-index:99999;max-width:90%;max-height:80%;overflow:auto;border-radius:8px;color:#ccd6f6;';
+    el.innerHTML='<div style="color:#e94560;font-weight:bold;margin-bottom:8px">请复制以下命令并发送：</div><textarea readonly style="width:100%;min-height:100px;background:#0a192f;border:1px solid #233554;color:#ccd6f6;padding:8px;font-family:inherit;font-size:12px" onclick="this.select()">'+esc(t)+'</textarea><button class="btn btn-primary btn-sm" style="margin-top:8px" id="fbClose">关闭</button>';
+    document.body.appendChild(el);
+    $(document).one('click','#fbClose',function(){$(el).remove();});
+  }
+}
+
+// === 1. Status bar rendering ===
 function render(){
-var p=getPlayer(),env=getEnv(),npcs=getNPCs();
-$('#eDate').text(env.当前日期||'--');$('#eTime').text(env.当前时间||'--');$('#eWeather').text(env.天气||'--');$('#eLoc').text(env.地点||'--');
-var cname='无',aid=env.当前交互角色ID;
-if(aid&&npcs[aid]&&npcs[aid].名称)cname=npcs[aid].名称;
-$('#eChar').text(cname);
-$('#pName').text(p.名称||'未命名');$('#pAge').text((p.年龄||'--')+'岁');$('#pMoney').text('💰'+(p.持有金钱!==undefined?p.持有金钱:0));$('#pLoc').text('📍'+(p.当前地点||'--'));$('#pDesc').text(p.角色背景||'暂无描述');
-renderNPCs(npcs,aid)
-}
-function renderNPCs(npcs,activeId){
-var c=$('#npcContainer'),h='',has=false;
-var mains={NPC1:'施美玉',NPC2:'梁惠',NPC3:'雪婉',NPC4:'雪柔',NPC5:'颜媚',NPC6:'茵曼'};
-$.each(mains,function(k,dn){
-var n=npcs[k];if(!n||!n.名称)return;if(k!==activeId||!n.是否在场)return;has=true;
-h+='<div class="npc-card"><div class="npc-top"><div class="npc-avatar">👩</div><div class="player-info"><div class="npc-name">'+esc(n.名称)+'</div><div class="npc-sub">'+(n.年龄||'--')+'岁·'+(n.职业||'未知')+'</div></div></div>'+
-'<div class="npc-details"><div class="npc-detail"><label>外貌</label>'+trunc(n.外貌)+'</div><div class="npc-detail"><label>身材</label>'+trunc(n.身材)+'</div><div class="npc-detail"><label>服装</label>'+trunc(n.服装)+'</div><div class="npc-detail"><label>性格</label>'+trunc(n.性格)+'</div></div>'+
-'<div class="affinity-bar"><div class="affinity-item"><div class="affinity-value" style="color:#ff6b6b">'+(n.好感度||0)+'</div><div class="affinity-label">好感</div></div><div class="affinity-item"><div class="affinity-value" style="color:#ffd93d">'+(n.厌恶度||0)+'</div><div class="affinity-label">厌恶</div></div><div class="affinity-item"><div class="affinity-value" style="color:#c084fc">'+(n.堕落度||0)+'</div><div class="affinity-label">堕落</div></div><div class="affinity-item"><div class="affinity-value" style="color:#ff9f43">'+(n.快感||0)+'</div><div class="affinity-label">快感</div></div><div style="margin-left:auto"><span class="mood-badge">'+(n.情绪状态||'平静')+'</span></div><button class="btn btn-sm btn-edit-aff" data-npc="'+k+'">编辑</button></div>'+
-'<div class="npc-actions"><button class="btn btn-secondary btn-sm btn-npc-info" data-npc="'+k+'">📋信息</button><button class="btn btn-secondary btn-sm btn-npc-cloth" data-npc="'+k+'">👗服装</button><button class="btn btn-secondary btn-sm btn-npc-event" data-npc="'+k+'">📜事件</button></div></div>'
-});
-c.html(has?h:'<div class="empty-state">暂无交互中的主要角色</div>')
+  var env=getVal('环境',{});
+  var p=getVal('玩家',{});
+  var npcs=getVal('NPC',{});
+
+  $('#eDate').text(env.当前日期||'--');
+  $('#eTime').text(env.当前时间||'--');
+  $('#eWeather').text(env.天气||'--');
+  $('#eLoc').text(env.地点||'--');
+
+  var cname='无',aid=env.当前交互角色ID;
+  if(aid&&npcs[aid]&&npcs[aid].名称) cname=npcs[aid].名称;
+  $('#eChar').text(cname);
+
+  $('#pName').text(p.名称||'未命名');
+  $('#pAge').text((p.年龄||'--')+'岁');
+  $('#pMoney').text('💰'+(p.持有金钱!==undefined?p.持有金钱:0));
+  $('#pLoc').text('📍'+(p.当前地点||'--'));
+  $('#pDesc').text(p.角色背景||'暂无描述');
+
+  renderNPCs(npcs);
+
+  // 12. Show only latest status bar
+  try{
+    var allBars=window.parent.document.querySelectorAll('.status-bar');
+    if(allBars.length>1){
+      var thisBar=document.querySelector('.status-bar');
+      var myIndex=-1;
+      for(var i=0;i<allBars.length;i++){if(allBars[i]===thisBar){myIndex=i;break;}}
+      if(myIndex>=0&&myIndex<allBars.length-1){
+        var container=$(thisBar).closest('.mes');
+        if(container.length) container.hide();
+      }
+    }
+  }catch(e){}
 }
 
-// player edit - compact inline update buttons
-function popupEditPlayer(){
-var p=getPlayer();
-var html='<div class="hint">修改后点击右侧「更新」</div>'+
-'<div class="two-col">'+fRow2('名称','epName',p.名称)+fRow2('年龄','epAge',p.年龄)+'</div>'+
-'<div class="two-col">'+fRow2('身高','epHeight',p.身高)+fRow2('持有金钱','epMoney',p.持有金钱)+'</div>'+
-'<div class="two-col">'+fRow2('当前地点','epLoc',p.当前地点)+fRow2('外观','epApp',p.外观)+'</div>'+
-fRow2('角色背景','epBg',p.角色背景,true)+
-'<div class="two-col">'+fRow2('性能力','epAbi',p.性能力)+fRow2('性癖','epFet',p.性癖)+'</div>';
-openPopup('编辑玩家信息',html)
+function renderNPCs(npcs){
+  var c=$('#npcContainer'),h='',has=false;
+  $.each(npcs,function(k,n){
+    if(!n||!n.名称) return;
+    has=true;
+    h+='<div class="npc-card"><div class="npc-top"><div class="npc-avatar">👩</div><div class="player-info"><div class="npc-name">'+esc(n.名称)+'</div><div class="npc-sub">'+(n.年龄||'--')+'岁·'+(n.职业||'未知')+'</div></div></div>'+
+    '<div class="npc-details"><div class="npc-detail"><label>外貌</label>'+trunc(n.外貌)+'</div><div class="npc-detail"><label>身材</label>'+trunc(n.身材)+'</div><div class="npc-detail"><label>服装</label>'+trunc(n.服装)+'</div><div class="npc-detail"><label>性格</label>'+trunc(n.性格)+'</div></div>'+
+    '<div class="affinity-bar"><div class="affinity-item"><div class="affinity-value" style="color:#ff6b6b">'+(n.好感度||0)+'</div><div class="affinity-label">好感</div></div><div class="affinity-item"><div class="affinity-value" style="color:#ffd93d">'+(n.厌恶度||0)+'</div><div class="affinity-label">厌恶</div></div><div class="affinity-item"><div class="affinity-value" style="color:#c084fc">'+(n.堕落度||0)+'</div><div class="affinity-label">堕落</div></div><div class="affinity-item"><div class="affinity-value" style="color:#ff9f43">'+(n.快感||0)+'</div><div class="affinity-label">快感</div></div><div style="margin-left:auto"><span class="mood-badge">'+(n.情绪状态||'平静')+'</span></div><button class="btn btn-sm btn-edit-aff" data-npc="'+esc(k)+'">编辑</button></div>'+
+    '<div class="npc-actions"><button class="btn btn-secondary btn-sm btn-npc-info" data-npc="'+esc(k)+'">📋信息</button><button class="btn btn-secondary btn-sm btn-npc-cloth" data-npc="'+esc(k)+'">👗服装</button><button class="btn btn-secondary btn-sm btn-npc-event" data-npc="'+esc(k)+'">📜事件</button></div></div>';
+  });
+  c.html(has?h:'<div class="empty-state">暂无交互中的主要角色</div>');
 }
-function fRow2(lbl,id,val,ta){
-var inp=ta?'<textarea class="form-textarea" id="'+id+'">'+esc(val)+'</textarea>':'<input class="form-input" id="'+id+'" value="'+esc(val)+'">';
-return'<div class="form-row"><label>'+lbl+'</label><div class="field-wrap">'+inp+'<button class="btn btn-primary btn-update-field" data-field="'+lbl+'" data-id="'+id+'">更新</button></div></div>'
+
+// === 2. Edit Player Info ===
+function popupEditPlayer(){
+  var p=getVal('玩家',{});
+  var html='<div class="hint">修改后点击右侧「更新」直接保存</div>'+
+  '<div class="two-col">'+fRow('名称','epName',p.名称,'玩家.名称')+fRow('年龄','epAge',p.年龄,'玩家.年龄')+'</div>'+
+  '<div class="two-col">'+fRow('身高','epHeight',p.身高,'玩家.身高')+fRow('持有金钱','epMoney',p.持有金钱,'玩家.持有金钱')+'</div>'+
+  '<div class="two-col">'+fRow('当前地点','epLoc',p.当前地点,'玩家.当前地点')+fRow('外观','epApp',p.外观,'玩家.外观')+'</div>'+
+  fRow('角色背景','epBg',p.角色背景,'玩家.角色背景',true)+
+  '<div class="two-col">'+fRow('性能力','epAbi',p.性能力,'玩家.性能力')+fRow('性癖','epFet',p.性癖,'玩家.性癖')+'</div>';
+  openPopup('编辑玩家信息',html);
+}
+function fRow(lbl,id,val,path,ta){
+  var inp=ta?'<textarea class="form-textarea" id="'+id+'">'+esc(val)+'</textarea>':'<input class="form-input" id="'+id+'" value="'+esc(val)+'">';
+  return '<div class="form-row"><label>'+lbl+'</label><div class="field-wrap">'+inp+'<button class="btn btn-primary btn-update-field" data-path="'+path+'" data-id="'+id+'">更新</button></div></div>';
 }
 $(document).on('click','.btn-update-field',function(){
-var f=$(this).data('field'),id=$(this).data('id'),v=$('#'+id).val();
-sendCmd('【编辑玩家信息】\n修改玩家「'+f+'」为：'+v+'\n请输出更新该字段的JSON-Patch')
+  var path=$(this).data('path');
+  var val=$('#'+$(this).data('id')).val();
+  updateVar(path,val);
+  render();
 });
 
-// inventory
+// === 3. Inventory ===
 function popupEditInv(){
-var p=getPlayer(),items=p.物品栏||[];
-var html='<div class="hint">点击「更新」或「删除」</div>';
-if(items.length===0)html+='<div class="empty-state">物品栏为空</div>';
-items.forEach(function(it,i){
-html+='<div class="inline-form" data-idx="'+i+'"><div class="two-col"><div class="form-row"><label>名称</label><input class="form-input inv-name" value="'+esc(it.物品名||'')+'"></div><div class="form-row"><label>数量</label><input class="form-input inv-qty" type="number" value="'+esc(it.数量||1)+'"></div></div><div class="form-row"><label>描述</label><input class="form-input inv-desc" value="'+esc(it.描述||'')+'"></div><div style="display:flex;gap:4px;margin-top:4px"><button class="btn btn-primary btn-sm btn-upd-item" data-idx="'+i+'">更新</button><button class="btn btn-sm btn-del-item" data-idx="'+i+'">删除</button></div></div>'
-});
-html+='<div class="section-title">+添加新物品</div><div class="inline-form"><div class="two-col"><div class="form-row"><label>名称</label><input class="form-input" id="newItemName"></div><div class="form-row"><label>数量</label><input class="form-input" id="newItemQty" type="number" value="1"></div></div><div class="form-row"><label>描述</label><input class="form-input" id="newItemDesc"></div><button class="btn btn-primary btn-sm" id="btnAddItem">添加</button></div>';
-openPopup('物品栏',html)
+  var items=getVal('玩家.物品栏',[]);
+  var html='<div class="hint">修改后点击「更新」或「删除」直接保存</div>';
+  if(items.length===0) html+='<div class="empty-state">物品栏为空</div>';
+  items.forEach(function(it,i){
+    html+='<div class="inline-form" data-idx="'+i+'"><div class="two-col"><div class="form-row"><label>名称</label><input class="form-input inv-name" value="'+esc(it.物品名||'')+'"></div><div class="form-row"><label>数量</label><input class="form-input inv-qty" type="number" value="'+(it.数量!==undefined?it.数量:1)+'"></div></div><div class="form-row"><label>描述</label><input class="form-input inv-desc" value="'+esc(it.描述||'')+'"></div><div style="display:flex;gap:4px;margin-top:4px"><button class="btn btn-primary btn-sm btn-upd-item" data-idx="'+i+'">更新</button><button class="btn btn-sm btn-del-item" data-idx="'+i+'">删除</button></div></div>';
+  });
+  html+='<div class="section-title">+添加新物品</div><div class="inline-form"><div class="two-col"><div class="form-row"><label>名称</label><input class="form-input" id="newItemName"></div><div class="form-row"><label>数量</label><input class="form-input" id="newItemQty" type="number" value="1"></div></div><div class="form-row"><label>描述</label><input class="form-input" id="newItemDesc"></div><button class="btn btn-primary btn-sm" id="btnAddItem">添加</button></div>';
+  openPopup('物品栏',html);
 }
 $(document).on('click','.btn-upd-item',function(){
-var i=$(this).data('idx'),el=$(this).closest('.inline-form');
-sendCmd('【编辑物品栏】\n修改物品#'+(i+1)+'\n-名称：'+el.find('.inv-name').val()+'\n-描述：'+el.find('.inv-desc').val()+'\n-数量：'+el.find('.inv-qty').val()+'\n请输出JSON-Patch')
+  var idx=$(this).data('idx');
+  var el=$(this).closest('.inline-form');
+  var items=getVal('玩家.物品栏',[]);
+  items[idx]={
+    物品名:el.find('.inv-name').val(),
+    描述:el.find('.inv-desc').val(),
+    数量:parseInt(el.find('.inv-qty').val())||1
+  };
+  updateVar('玩家.物品栏',items);
+  render(); popupEditInv();
 });
-$(document).on('click','.btn-del-item',function(){sendCmd('【编辑物品栏】\n删除物品#'+($(this).data('idx')+1)+'\n请输出JSON-Patch')});
+$(document).on('click','.btn-del-item',function(){
+  var idx=$(this).data('idx');
+  var items=getVal('玩家.物品栏',[]);
+  items.splice(idx,1);
+  updateVar('玩家.物品栏',items);
+  render(); popupEditInv();
+});
 $(document).on('click','#btnAddItem',function(){
-var n=$('#newItemName').val().trim();if(!n){alert('请输入名称');return}
-sendCmd('【编辑物品栏】\n添加新物品\n-名称：'+n+'\n-描述：'+$('#newItemDesc').val()+'\n-数量：'+$('#newItemQty').val()+'\n请输出JSON-Patch')
+  var n=$('#newItemName').val().trim();
+  if(!n){alert('请输入名称');return;}
+  var items=getVal('玩家.物品栏',[]);
+  items.push({
+    物品名:n,
+    描述:$('#newItemDesc').val(),
+    数量:parseInt($('#newItemQty').val())||1
+  });
+  updateVar('玩家.物品栏',items);
+  render(); popupEditInv();
 });
 
-// character manager
+// === 4. Character Manager ===
 function popupCharMgr(){
-var p=getPlayer(),npcs=getNPCs();
-var html='<div class="section-title">👤玩家</div><div class="char-card"><div class="char-card-title">'+esc(p.名称||'未命名')+'</div><div class="char-card-info">'+(p.年龄||'--')+'岁·'+(p.当前地点||'--')+'<br>'+trunc(p.角色背景,50)+'</div><button class="btn btn-primary btn-sm" data-cmd="edit-player" style="margin-top:4px">编辑</button></div>';
-html+='<div class="section-title">🎭NPC角色</div>';
-var hasNPC=false;
-$.each(npcs,function(k,n){if(!n||!n.名称)return;hasNPC=true;
-html+='<div class="char-card"><div class="char-card-title">'+esc(n.名称)+'<span style="color:#8892b0;font-size:10px">('+k+')</span></div><div class="char-card-info">'+(n.年龄||'--')+'岁·'+(n.职业||'未知')+'·好感'+(n.好感度||0)+'</div><div style="display:flex;gap:3px;margin-top:4px;flex-wrap:wrap"><button class="btn btn-sm btn-edit-npc" data-npc="'+k+'">编辑</button><button class="btn btn-sm btn-secondary btn-npc-info" data-npc="'+k+'">信息</button><button class="btn btn-sm btn-secondary btn-npc-cloth" data-npc="'+k+'">服装</button><button class="btn btn-sm btn-secondary btn-npc-event" data-npc="'+k+'">事件</button><button class="btn btn-sm btn-secondary btn-edit-aff" data-npc="'+k+'">好感</button></div></div>'
-});
-if(!hasNPC)html+='<div class="empty-state">暂无NPC</div>';
-html+='<div class="section-title">+添加角色</div><div class="two-col"><button class="btn btn-primary btn-sm" id="btnAddMain">+主要角色</button><button class="btn btn-secondary btn-sm" id="btnAddMinor">+次要角色</button></div><div id="addCharForm" style="display:none;margin-top:6px"></div>';
-openPopup('角色管理',html)
+  var p=getVal('玩家',{});
+  var npcs=getVal('NPC',{});
+  var html='<div class="section-title">👤玩家</div><div class="char-card"><div class="char-card-title">'+esc(p.名称||'未命名')+'</div><div class="char-card-info">'+(p.年龄||'--')+'岁·'+(p.当前地点||'--')+'<br>'+trunc(p.角色背景,50)+'</div><button class="btn btn-primary btn-sm" data-cmd="edit-player" style="margin-top:4px">编辑</button></div>';
+  html+='<div class="section-title">🎭NPC角色</div>';
+  var hasNPC=false;
+  $.each(npcs,function(k,n){
+    if(!n||!n.名称) return;
+    hasNPC=true;
+    html+='<div class="char-card"><div class="char-card-title">'+esc(n.名称)+'<span style="color:#8892b0;font-size:10px">('+esc(k)+')</span></div><div class="char-card-info">'+(n.年龄||'--')+'岁·'+(n.职业||'未知')+'·好感'+(n.好感度||0)+'</div><div style="display:flex;gap:3px;margin-top:4px;flex-wrap:wrap"><button class="btn btn-sm btn-edit-npc" data-npc="'+esc(k)+'">编辑</button><button class="btn btn-sm btn-secondary btn-npc-info" data-npc="'+esc(k)+'">信息</button><button class="btn btn-sm btn-secondary btn-npc-cloth" data-npc="'+esc(k)+'">服装</button><button class="btn btn-sm btn-secondary btn-npc-event" data-npc="'+esc(k)+'">事件</button><button class="btn btn-sm btn-secondary btn-edit-aff" data-npc="'+esc(k)+'">好感</button></div></div>';
+  });
+  if(!hasNPC) html+='<div class="empty-state">暂无NPC</div>';
+  html+='<div class="section-title">+添加角色</div><div class="two-col"><button class="btn btn-primary btn-sm" id="btnAddMain">+主要角色</button><button class="btn btn-secondary btn-sm" id="btnAddMinor">+次要角色</button></div><div id="addCharForm" style="display:none;margin-top:6px"></div>';
+  openPopup('角色管理',html);
 }
+
 $(document).on('click','#btnAddMain',function(){
-$('#addCharForm').show().html('<div class="inline-form"><div class="hint">主要角色（完整信息）</div><div class="two-col"><div class="form-row"><label>NPC ID</label><input class="form-input" id="acId" placeholder="如NPC1"></div><div class="form-row"><label>名称</label><input class="form-input" id="acName"></div></div><div class="two-col"><div class="form-row"><label>年龄</label><input class="form-input" id="acAge" type="number"></div><div class="form-row"><label>职业</label><input class="form-input" id="acJob"></div></div><div class="two-col"><div class="form-row"><label>外貌</label><input class="form-input" id="acLook"></div><div class="form-row"><label>身材</label><input class="form-input" id="acBody"></div></div><div class="two-col"><div class="form-row"><label>服装</label><input class="form-input" id="acCloth"></div><div class="form-row"><label>性格</label><input class="form-input" id="acPerson"></div></div><div class="form-row"><label>角色背景</label><textarea class="form-textarea" id="acBg"></textarea></div><div style="display:flex;gap:4px"><button class="btn btn-primary btn-sm" id="btnDoAddMain">确认</button><button class="btn btn-sm" id="btnCancelAdd">取消</button></div></div>')
+  $('#addCharForm').show().html('<div class="inline-form"><div class="hint">主要角色（完整信息）</div><div class="two-col"><div class="form-row"><label>NPC ID</label><input class="form-input" id="acId" placeholder="如NPC1"></div><div class="form-row"><label>名称</label><input class="form-input" id="acName"></div></div><div class="two-col"><div class="form-row"><label>年龄</label><input class="form-input" id="acAge" type="number"></div><div class="form-row"><label>职业</label><input class="form-input" id="acJob"></div></div><div class="two-col"><div class="form-row"><label>外貌</label><input class="form-input" id="acLook"></div><div class="form-row"><label>身材</label><input class="form-input" id="acBody"></div></div><div class="two-col"><div class="form-row"><label>服装</label><input class="form-input" id="acCloth"></div><div class="form-row"><label>性格</label><input class="form-input" id="acPerson"></div></div><div class="form-row"><label>角色背景</label><textarea class="form-textarea" id="acBg"></textarea></div><div style="display:flex;gap:4px"><button class="btn btn-primary btn-sm" id="btnDoAddMain">确认</button><button class="btn btn-sm" id="btnCancelAdd">取消</button></div></div>');
 });
 $(document).on('click','#btnDoAddMain',function(){
-var id=$('#acId').val().trim()||'NPC1';
-sendCmd('【添加主要角色】\nNPC ID：'+id+'\n-名称：'+$('#acName').val()+'\n-年龄：'+$('#acAge').val()+'\n-职业：'+$('#acJob').val()+'\n-外貌：'+$('#acLook').val()+'\n-身材：'+$('#acBody').val()+'\n-服装：'+$('#acCloth').val()+'\n-性格：'+$('#acPerson').val()+'\n-角色背景：'+$('#acBg').val()+'\n请输出JSON-Patch添加该角色到NPC.'+id);
-$('#addCharForm').hide()
+  var id=$('#acId').val().trim()||'NPC1';
+  var data=readVar();
+  if(!data.NPC) data.NPC={};
+  data.NPC[id]={
+    名称:$('#acName').val(),
+    年龄:$('#acAge').val(),
+    职业:$('#acJob').val(),
+    外貌:$('#acLook').val(),
+    身材:$('#acBody').val(),
+    服装:$('#acCloth').val(),
+    性格:$('#acPerson').val(),
+    角色背景:$('#acBg').val(),
+    好感度:0,厌恶度:0,堕落度:0,快感:0,情绪状态:'平静'
+  };
+  writeVar(data); render(); popupCharMgr();
 });
 $(document).on('click','#btnAddMinor',function(){
-$('#addCharForm').show().html('<div class="inline-form"><div class="hint">次要角色（仅名称+简介）</div><div class="two-col"><div class="form-row"><label>NPC ID</label><input class="form-input" id="acId2" placeholder="如NPC7"></div><div class="form-row"><label>名称</label><input class="form-input" id="acName2"></div></div><div class="form-row"><label>简介</label><textarea class="form-textarea" id="acDesc2" placeholder="一句话描述"></textarea></div><div style="display:flex;gap:4px"><button class="btn btn-primary btn-sm" id="btnDoAddMinor">确认</button><button class="btn btn-sm" id="btnCancelAdd">取消</button></div></div>')
+  $('#addCharForm').show().html('<div class="inline-form"><div class="hint">次要角色（仅名称+简介）</div><div class="two-col"><div class="form-row"><label>NPC ID</label><input class="form-input" id="acId2" placeholder="如NPC7"></div><div class="form-row"><label>名称</label><input class="form-input" id="acName2"></div></div><div class="form-row"><label>简介</label><textarea class="form-textarea" id="acDesc2" placeholder="一句话描述"></textarea></div><div style="display:flex;gap:4px"><button class="btn btn-primary btn-sm" id="btnDoAddMinor">确认</button><button class="btn btn-sm" id="btnCancelAdd">取消</button></div></div>');
 });
 $(document).on('click','#btnDoAddMinor',function(){
-var id=$('#acId2').val().trim()||'NPC7';
-sendCmd('【添加次要角色】\nNPC ID：'+id+'\n-名称：'+$('#acName2').val()+'\n-简介：'+$('#acDesc2').val()+'\n请输出JSON-Patch添加该角色到NPC.'+id);
-$('#addCharForm').hide()
+  var id=$('#acId2').val().trim()||'NPC7';
+  var data=readVar();
+  if(!data.NPC) data.NPC={};
+  data.NPC[id]={
+    名称:$('#acName2').val(),
+    角色背景:$('#acDesc2').val()
+  };
+  writeVar(data); render(); popupCharMgr();
 });
-$(document).on('click','#btnCancelAdd',function(){$('#addCharForm').hide()});
+$(document).on('click','#btnCancelAdd',function(){$('#addCharForm').hide();});
 
+// === 5. NPC Editor ===
 $(document).on('click','.btn-edit-npc',function(){
-var id=$(this).data('npc'),npcs=getNPCs(),n=npcs[id]||{};
-var html='<div class="hint">修改字段后点击「更新」</div>'+
-'<div class="two-col">'+nRow('名称','nen',n.名称)+nRow('年龄','nea',n.年龄)+'</div>'+
-'<div class="two-col">'+nRow('职业','nej',n.职业)+nRow('外貌','nel',n.外貌)+'</div>'+
-'<div class="two-col">'+nRow('身材','neb',n.身材)+nRow('服装','nec',n.服装)+'</div>'+
-'<div class="two-col">'+nRow('性格','nep',n.性格)+nRow('角色背景','nebg',n.角色背景,true)+'</div>'+
-'<button class="btn btn-primary btn-sm" id="btnSaveNpc" data-npc="'+id+'">更新 '+esc(n.名称||id)+'</button>';
-openPopup('编辑角色',html)
+  var id=$(this).data('npc');
+  popupNpcEdit(id);
 });
-function nRow(lbl,id,val,ta){var inp=ta?'<textarea class="form-textarea" id="'+id+'">'+esc(val)+'</textarea>':'<input class="form-input" id="'+id+'" value="'+esc(val)+'">';return'<div class="form-row"><label>'+lbl+'</label>'+inp+'</div>'}
+function popupNpcEdit(id){
+  var n=getVal('NPC.'+id,{});
+  var html='<div class="hint">修改后点击「更新」保存所有字段</div>'+
+  '<div class="two-col">'+nRow('名称','nen',n.名称)+nRow('年龄','nea',n.年龄)+'</div>'+
+  '<div class="two-col">'+nRow('职业','nej',n.职业)+nRow('外貌','nel',n.外貌)+'</div>'+
+  '<div class="two-col">'+nRow('身材','neb',n.身材)+nRow('服装','nec',n.服装)+'</div>'+
+  '<div class="two-col">'+nRow('性格','nep',n.性格)+nRow('角色背景','nebg',n.角色背景,true)+'</div>'+
+  '<button class="btn btn-primary btn-sm" id="btnSaveNpc" data-npc="'+esc(id)+'">更新 '+esc(n.名称||id)+'</button>';
+  openPopup('编辑角色',html);
+}
+function nRow(lbl,id,val,ta){
+  var inp=ta?'<textarea class="form-textarea" id="'+id+'">'+esc(val)+'</textarea>':'<input class="form-input" id="'+id+'" value="'+esc(val)+'">';
+  return '<div class="form-row"><label>'+lbl+'</label>'+inp+'</div>';
+}
 $(document).on('click','#btnSaveNpc',function(){
-var id=$(this).data('npc');
-sendCmd('【编辑角色信息：'+id+'】\n-名称：'+$('#nen').val()+'\n-年龄：'+$('#nea').val()+'\n-职业：'+$('#nej').val()+'\n-外貌：'+$('#nel').val()+'\n-身材：'+$('#neb').val()+'\n-服装：'+$('#nec').val()+'\n-性格：'+$('#nep').val()+'\n-角色背景：'+$('#nebg').val()+'\n请输出JSON-Patch更新NPC.'+id)
+  var id=$(this).data('npc');
+  updateVar('NPC.'+id+'.名称',$('#nen').val());
+  updateVar('NPC.'+id+'.年龄',$('#nea').val());
+  updateVar('NPC.'+id+'.职业',$('#nej').val());
+  updateVar('NPC.'+id+'.外貌',$('#nel').val());
+  updateVar('NPC.'+id+'.身材',$('#neb').val());
+  updateVar('NPC.'+id+'.服装',$('#nec').val());
+  updateVar('NPC.'+id+'.性格',$('#nep').val());
+  updateVar('NPC.'+id+'.角色背景',$('#nebg').val());
+  render(); closePopup();
 });
 
+// === 6. NPC Affinity ===
 $(document).on('click','.btn-edit-aff',function(){
-var id=$(this).data('npc'),npcs=getNPCs(),n=npcs[id]||{};
-var html='<div class="hint">修改后点击「更新」</div><div class="two-col">'+nRow('好感度','naFav',n.好感度)+nRow('厌恶度','naHate',n.厌恶度)+'</div><div class="two-col">'+nRow('堕落度','naCor',n.堕落度)+nRow('快感','naPle',n.快感)+'</div>'+nRow('情绪状态','naMood',n.情绪状态)+'<button class="btn btn-primary btn-sm" id="btnSaveAff" data-npc="'+id+'">更新好感度</button>';
-openPopup('编辑好感度：'+esc(n.名称||id),html)
+  var id=$(this).data('npc');
+  popupEditAff(id);
 });
+function popupEditAff(id){
+  var n=getVal('NPC.'+id,{});
+  var html='<div class="hint">修改后点击「更新」直接保存</div><div class="two-col">'+affRow('好感度','naFav',n.好感度)+affRow('厌恶度','naHate',n.厌恶度)+'</div><div class="two-col">'+affRow('堕落度','naCor',n.堕落度)+affRow('快感','naPle',n.快感)+'</div>'+affRow('情绪状态','naMood',n.情绪状态)+'<button class="btn btn-primary btn-sm" id="btnSaveAff" data-npc="'+esc(id)+'">更新好感度</button>';
+  openPopup('编辑好感度：'+esc(n.名称||id),html);
+}
+function affRow(lbl,id,val){
+  return '<div class="form-row"><label>'+lbl+'</label><input class="form-input" id="'+id+'" value="'+esc(val)+'"></div>';
+}
 $(document).on('click','#btnSaveAff',function(){
-var id=$(this).data('npc');
-sendCmd('【编辑好感度：'+id+'】\n-好感度：'+$('#naFav').val()+'\n-厌恶度：'+$('#naHate').val()+'\n-堕落度：'+$('#naCor').val()+'\n-快感：'+$('#naPle').val()+'\n-情绪状态：'+$('#naMood').val()+'\n请输出JSON-Patch更新NPC.'+id)
+  var id=$(this).data('npc');
+  updateVar('NPC.'+id+'.好感度',$('#naFav').val());
+  updateVar('NPC.'+id+'.厌恶度',$('#naHate').val());
+  updateVar('NPC.'+id+'.堕落度',$('#naCor').val());
+  updateVar('NPC.'+id+'.快感',$('#naPle').val());
+  updateVar('NPC.'+id+'.情绪状态',$('#naMood').val());
+  render(); closePopup();
 });
 
+// === 7. NPC Clothing ===
 $(document).on('click','.btn-npc-cloth',function(){
-var id=$(this).data('npc'),npcs=getNPCs(),n=npcs[id]||{};
-var html=nRow('当前服装','ncCloth',n.服装,true)+'<button class="btn btn-primary btn-sm" id="btnSaveCloth" data-npc="'+id+'">更新服装</button>';
-openPopup('编辑服装：'+esc(n.名称||id),html)
+  var id=$(this).data('npc');
+  popupNpcCloth(id);
 });
-$(document).on('click','#btnSaveCloth',function(){var id=$(this).data('npc');sendCmd('【编辑服装：'+id+'】\n当前服装：'+$('#ncCloth').val()+'\n请输出JSON-Patch更新NPC.'+id+'.服装')});
+function popupNpcCloth(id){
+  var n=getVal('NPC.'+id,{});
+  var html='<div class="form-row"><label>当前服装</label><textarea class="form-textarea" id="ncCloth">'+esc(n.服装)+'</textarea></div><button class="btn btn-primary btn-sm" id="btnSaveCloth" data-npc="'+esc(id)+'">更新服装</button>';
+  openPopup('编辑服装：'+esc(n.名称||id),html);
+}
+$(document).on('click','#btnSaveCloth',function(){
+  var id=$(this).data('npc');
+  updateVar('NPC.'+id+'.服装',$('#ncCloth').val());
+  render(); closePopup();
+});
 
+// === 8. NPC Events ===
 $(document).on('click','.btn-npc-event',function(){
-var id=$(this).data('npc'),npcs=getNPCs(),n=npcs[id]||{};
-var evs=n.事件记录||[];
-var html='<div class="hint">事件记录（每行一条）</div><textarea class="form-textarea" id="neEvents" rows="4">'+esc(Array.isArray(evs)?evs.join('\n'):evs)+'</textarea><button class="btn btn-primary btn-sm" id="btnSaveEvents" data-npc="'+id+'">更新事件记录</button>';
-openPopup('事件记录：'+esc(n.名称||id),html)
+  var id=$(this).data('npc');
+  popupNpcEvent(id);
 });
-$(document).on('click','#btnSaveEvents',function(){var id=$(this).data('npc');sendCmd('【编辑事件记录：'+id+'】\n新的事件记录：\n'+$('#neEvents').val()+'\n请输出JSON-Patch更新NPC.'+id+'.事件记录')});
-
-$(document).on('click','.btn-npc-info',function(){
-var id=$(this).data('npc'),npcs=getNPCs(),n=npcs[id]||{};
-var html='<div class="char-card"><div class="char-card-title">'+esc(n.名称||id)+'</div><div class="char-card-info">年龄：'+(n.年龄||'--')+'<br>职业：'+(n.职业||'--')+'<br>外貌：'+(n.外貌||'--')+'<br>身材：'+(n.身材||'--')+'<br>服装：'+(n.服装||'--')+'<br>性格：'+(n.性格||'--')+'<br>背景：'+(n.角色背景||'--')+'<br>好感：'+(n.好感度||0)+'·厌恶：'+(n.厌恶度||0)+'·堕落：'+(n.堕落度||0)+'·快感：'+(n.快感||0)+'<br>情绪：'+(n.情绪状态||'平静')+'</div></div>';
-openPopup('角色信息：'+esc(n.名称||id),html)
+function popupNpcEvent(id){
+  var n=getVal('NPC.'+id,{});
+  var evs=n.事件记录||[];
+  var html='<div class="hint">事件记录（每行一条）</div><textarea class="form-textarea" id="neEvents" rows="4">'+esc(Array.isArray(evs)?evs.join('\n'):evs)+'</textarea><button class="btn btn-primary btn-sm" id="btnSaveEvents" data-npc="'+esc(id)+'">更新事件记录</button>';
+  openPopup('事件记录：'+esc(n.名称||id),html);
+}
+$(document).on('click','#btnSaveEvents',function(){
+  var id=$(this).data('npc');
+  var lines=$('#neEvents').val().split('\n').map(function(s){return s.trim();}).filter(function(s){return s.length>0;});
+  updateVar('NPC.'+id+'.事件记录',lines);
+  render(); closePopup();
 });
 
-// world manager
+// === 9. World Manager ===
 function popupWorldMgr(){
-var w=getWorld();
-var html='<div class="tabs"><button class="tab active" data-tab="loc">地点</button><button class="tab" data-tab="rule">规则</button><button class="tab" data-tab="event">历史</button></div><div id="tabContent"></div>';
-openPopup('世界管理',html);showLocTab(w)
+  var html='<div class="tabs"><button class="tab active" data-tab="loc">地点</button><button class="tab" data-tab="rule">规则</button><button class="tab" data-tab="event">历史</button></div><div id="tabContent"></div>';
+  openPopup('世界管理',html); showLocTab();
 }
-function showLocTab(w){
-var ls=w.重要地点||[];
-var html='<div class="hint">地点列表</div>';
-if(ls.length===0)html+='<div class="empty-state">无地点</div>';
-ls.forEach(function(l,i){
-html+='<div class="inline-form"><div class="two-col"><div class="form-row"><label>名称</label><input class="form-input wm-loc-name" value="'+esc(l.名称||l.name||'')+'"></div><div class="form-row"><label>距离</label><input class="form-input wm-loc-dist" value="'+esc(l.距离||l.distance||'')+'"></div></div><div class="form-row"><label>描述</label><input class="form-input wm-loc-desc" value="'+esc(l.描述||l.desc||'')+'"></div><div style="display:flex;gap:4px;margin-top:4px"><button class="btn btn-primary btn-sm btn-upd-loc" data-idx="'+i+'">更新</button><button class="btn btn-sm btn-del-loc" data-idx="'+i+'">删除</button></div></div>'
+function showLocTab(){
+  var ls=getVal('世界观.重要地点',[]);
+  var html='<div class="hint">地点列表</div>';
+  if(ls.length===0) html+='<div class="empty-state">无地点</div>';
+  ls.forEach(function(l,i){
+    html+='<div class="inline-form" data-idx="'+i+'"><div class="two-col"><div class="form-row"><label>名称</label><input class="form-input wm-loc-name" value="'+esc(l.名称||l.name||'')+'"></div><div class="form-row"><label>距离</label><input class="form-input wm-loc-dist" value="'+esc(l.距离||l.distance||'')+'"></div></div><div class="form-row"><label>描述</label><input class="form-input wm-loc-desc" value="'+esc(l.描述||l.desc||'')+'"></div><div style="display:flex;gap:4px;margin-top:4px"><button class="btn btn-primary btn-sm btn-upd-loc" data-idx="'+i+'">更新</button><button class="btn btn-sm btn-del-loc" data-idx="'+i+'">删除</button></div></div>';
+  });
+  html+='<div class="section-title">+添加地点</div><div class="inline-form"><div class="two-col"><div class="form-row"><label>名称</label><input class="form-input" id="newLocName"></div><div class="form-row"><label>距离</label><input class="form-input" id="newLocDist"></div></div><div class="form-row"><label>描述</label><input class="form-input" id="newLocDesc"></div><button class="btn btn-primary btn-sm" id="btnAddLoc">添加</button></div>';
+  $('#tabContent').html(html);
+}
+function showRuleTab(){
+  var rs=getVal('世界观.用户自定义规则',[]);
+  var html='<div class="hint">规则列表</div>';
+  if(rs.length===0) html+='<div class="empty-state">无规则</div>';
+  rs.forEach(function(r,i){
+    html+='<div class="inline-form" data-idx="'+i+'"><div class="form-row"><label>规则名</label><input class="form-input wm-rule-name" value="'+esc(r.规则名||r.name||'')+'"></div><div class="form-row"><label>内容</label><textarea class="form-textarea wm-rule-content">'+esc(r.规则内容||r.content||'')+'</textarea></div><div style="display:flex;gap:4px;margin-top:4px"><button class="btn btn-primary btn-sm btn-upd-rule" data-idx="'+i+'">更新</button><button class="btn btn-sm btn-del-rule" data-idx="'+i+'">删除</button></div></div>';
+  });
+  html+='<div class="section-title">+添加规则</div><div class="inline-form"><div class="form-row"><label>规则名</label><input class="form-input" id="newRuleName"></div><div class="form-row"><label>内容</label><textarea class="form-textarea" id="newRuleContent"></textarea></div><button class="btn btn-primary btn-sm" id="btnAddRule">添加</button></div>';
+  $('#tabContent').html(html);
+}
+function showEventTab(){
+  var es=getVal('世界观.过往事件',[]);
+  var html='<div class="hint">世界历史事件（过往背景）</div>';
+  if(es.length===0) html+='<div class="empty-state">无历史事件</div>';
+  es.forEach(function(e,i){
+    html+='<div class="inline-form" data-idx="'+i+'"><div class="two-col"><div class="form-row"><label>时间</label><input class="form-input wm-ev-time" value="'+esc(e.时间||e.time||'')+'"></div><div class="form-row"><label>地点</label><input class="form-input wm-ev-loc" value="'+esc(e.地点||e.location||'')+'"></div></div><div class="form-row"><label>内容</label><textarea class="form-textarea wm-ev-content">'+esc(e.内容||e.content||'')+'</textarea></div><div style="display:flex;gap:4px;margin-top:4px"><button class="btn btn-primary btn-sm btn-upd-ev" data-idx="'+i+'">更新</button><button class="btn btn-sm btn-del-ev" data-idx="'+i+'">删除</button></div></div>';
+  });
+  html+='<div class="section-title">+添加历史事件</div><div class="inline-form"><div class="two-col"><div class="form-row"><label>时间</label><input class="form-input" id="newEvTime"></div><div class="form-row"><label>地点</label><input class="form-input" id="newEvLoc"></div></div><div class="form-row"><label>内容</label><textarea class="form-textarea" id="newEvContent"></textarea></div><button class="btn btn-primary btn-sm" id="btnAddEv">添加</button></div>';
+  $('#tabContent').html(html);
+}
+$(document).on('click','.tab',function(){
+  $('.tab').removeClass('active');
+  $(this).addClass('active');
+  var tab=$(this).data('tab');
+  if(tab==='loc') showLocTab();
+  else if(tab==='rule') showRuleTab();
+  else showEventTab();
 });
-html+='<div class="section-title">+添加地点</div><div class="inline-form"><div class="two-col"><div class="form-row"><label>名称</label><input class="form-input" id="newLocName"></div><div class="form-row"><label>距离</label><input class="form-input" id="newLocDist"></div></div><div class="form-row"><label>描述</label><input class="form-input" id="newLocDesc"></div><button class="btn btn-primary btn-sm" id="btnAddLoc">添加</button></div>';
-$('#tabContent').html(html)
-}
-function showRuleTab(w){
-var rs=w.用户自定义规则||[];
-var html='<div class="hint">规则列表</div>';
-if(rs.length===0)html+='<div class="empty-state">无规则</div>';
-rs.forEach(function(r,i){
-html+='<div class="inline-form"><div class="form-row"><label>规则名</label><input class="form-input wm-rule-name" value="'+esc(r.规则名||r.name||'')+'"></div><div class="form-row"><label>内容</label><textarea class="form-textarea wm-rule-content">'+esc(r.规则内容||r.content||'')+'</textarea></div><div style="display:flex;gap:4px;margin-top:4px"><button class="btn btn-primary btn-sm btn-upd-rule" data-idx="'+i+'">更新</button><button class="btn btn-sm btn-del-rule" data-idx="'+i+'">删除</button></div></div>'
-});
-html+='<div class="section-title">+添加规则</div><div class="inline-form"><div class="form-row"><label>规则名</label><input class="form-input" id="newRuleName"></div><div class="form-row"><label>内容</label><textarea class="form-textarea" id="newRuleContent"></textarea></div><button class="btn btn-primary btn-sm" id="btnAddRule">添加</button></div>';
-$('#tabContent').html(html)
-}
-function showEventTab(w){
-var es=w.过往事件||[];
-var html='<div class="hint">世界历史事件（过往背景）</div>';
-if(es.length===0)html+='<div class="empty-state">无历史事件</div>';
-es.forEach(function(e,i){
-html+='<div class="inline-form"><div class="two-col"><div class="form-row"><label>时间</label><input class="form-input wm-ev-time" value="'+esc(e.时间||e.time||'')+'"></div><div class="form-row"><label>地点</label><input class="form-input wm-ev-loc" value="'+esc(e.地点||e.location||'')+'"></div></div><div class="form-row"><label>内容</label><textarea class="form-textarea wm-ev-content">'+esc(e.内容||e.content||'')+'</textarea></div><div style="display:flex;gap:4px;margin-top:4px"><button class="btn btn-primary btn-sm btn-upd-ev" data-idx="'+i+'">更新</button><button class="btn btn-sm btn-del-ev" data-idx="'+i+'">删除</button></div></div>'
-});
-html+='<div class="section-title">+添加历史事件</div><div class="inline-form"><div class="two-col"><div class="form-row"><label>时间</label><input class="form-input" id="newEvTime"></div><div class="form-row"><label>地点</label><input class="form-input" id="newEvLoc"></div></div><div class="form-row"><label>内容</label><textarea class="form-textarea" id="newEvContent"></textarea></div><button class="btn btn-primary btn-sm" id="btnAddEv">添加</button></div>';
-$('#tabContent').html(html)
-}
-$(document).on('click','.tab',function(){$('.tab').removeClass('active');$(this).addClass('active');var w=getWorld();if($(this).data('tab')==='loc')showLocTab(w);else if($(this).data('tab')==='rule')showRuleTab(w);else showEventTab(w)});
-$(document).on('click','.btn-upd-loc',function(){var i=$(this).data('idx'),el=$(this).closest('.inline-form');sendCmd('【世界管理-地点】\n修改地点#'+(i+1)+'\n-名称：'+el.find('.wm-loc-name').val()+'\n-描述：'+el.find('.wm-loc-desc').val()+'\n-距离：'+el.find('.wm-loc-dist').val()+'\n请输出JSON-Patch')});
-$(document).on('click','.btn-del-loc',function(){sendCmd('【世界管理-地点】\n删除地点#'+($(this).data('idx')+1)+'\n请输出JSON-Patch')});
-$(document).on('click','#btnAddLoc',function(){sendCmd('【世界管理-地点】\n添加新地点\n-名称：'+$('#newLocName').val()+'\n-描述：'+$('#newLocDesc').val()+'\n-距离：'+$('#newLocDist').val()+'\n请输出JSON-Patch')});
-$(document).on('click','.btn-upd-rule',function(){var i=$(this).data('idx'),el=$(this).closest('.inline-form');sendCmd('【世界管理-规则】\n修改规则#'+(i+1)+'\n-名称：'+el.find('.wm-rule-name').val()+'\n-内容：'+el.find('.wm-rule-content').val()+'\n请输出JSON-Patch')});
-$(document).on('click','.btn-del-rule',function(){sendCmd('【世界管理-规则】\n删除规则#'+($(this).data('idx')+1)+'\n请输出JSON-Patch')});
-$(document).on('click','#btnAddRule',function(){sendCmd('【世界管理-规则】\n添加新规则\n-名称：'+$('#newRuleName').val()+'\n-内容：'+$('#newRuleContent').val()+'\n请输出JSON-Patch')});
-$(document).on('click','.btn-upd-ev',function(){var i=$(this).data('idx'),el=$(this).closest('.inline-form');sendCmd('【世界管理-历史】\n修改历史事件#'+(i+1)+'\n-时间：'+el.find('.wm-ev-time').val()+'\n-地点：'+el.find('.wm-ev-loc').val()+'\n-内容：'+el.find('.wm-ev-content').val()+'\n请输出JSON-Patch')});
-$(document).on('click','.btn-del-ev',function(){sendCmd('【世界管理-历史】\n删除历史事件#'+($(this).data('idx')+1)+'\n请输出JSON-Patch')});
-$(document).on('click','#btnAddEv',function(){sendCmd('【世界管理-历史】\n添加历史事件\n-时间：'+$('#newEvTime').val()+'\n-地点：'+$('#newEvLoc').val()+'\n-内容：'+$('#newEvContent').val()+'\n请输出JSON-Patch')});
 
-// plot editor - future events
+$(document).on('click','.btn-upd-loc',function(){
+  var idx=$(this).data('idx'),el=$(this).closest('.inline-form');
+  var ls=getVal('世界观.重要地点',[]);
+  ls[idx]={名称:el.find('.wm-loc-name').val(),描述:el.find('.wm-loc-desc').val(),距离:el.find('.wm-loc-dist').val()};
+  updateVar('世界观.重要地点',ls); render();
+});
+$(document).on('click','.btn-del-loc',function(){
+  var idx=$(this).data('idx');
+  var ls=getVal('世界观.重要地点',[]);
+  ls.splice(idx,1);
+  updateVar('世界观.重要地点',ls); render(); showLocTab();
+});
+$(document).on('click','#btnAddLoc',function(){
+  var ls=getVal('世界观.重要地点',[]);
+  ls.push({名称:$('#newLocName').val(),描述:$('#newLocDesc').val(),距离:$('#newLocDist').val()});
+  updateVar('世界观.重要地点',ls); render(); showLocTab();
+});
+$(document).on('click','.btn-upd-rule',function(){
+  var idx=$(this).data('idx'),el=$(this).closest('.inline-form');
+  var rs=getVal('世界观.用户自定义规则',[]);
+  rs[idx]={规则名:el.find('.wm-rule-name').val(),规则内容:el.find('.wm-rule-content').val()};
+  updateVar('世界观.用户自定义规则',rs); render();
+});
+$(document).on('click','.btn-del-rule',function(){
+  var idx=$(this).data('idx');
+  var rs=getVal('世界观.用户自定义规则',[]);
+  rs.splice(idx,1);
+  updateVar('世界观.用户自定义规则',rs); render(); showRuleTab();
+});
+$(document).on('click','#btnAddRule',function(){
+  var rs=getVal('世界观.用户自定义规则',[]);
+  rs.push({规则名:$('#newRuleName').val(),规则内容:$('#newRuleContent').val()});
+  updateVar('世界观.用户自定义规则',rs); render(); showRuleTab();
+});
+$(document).on('click','.btn-upd-ev',function(){
+  var idx=$(this).data('idx'),el=$(this).closest('.inline-form');
+  var es=getVal('世界观.过往事件',[]);
+  es[idx]={时间:el.find('.wm-ev-time').val(),地点:el.find('.wm-ev-loc').val(),内容:el.find('.wm-ev-content').val()};
+  updateVar('世界观.过往事件',es); render();
+});
+$(document).on('click','.btn-del-ev',function(){
+  var idx=$(this).data('idx');
+  var es=getVal('世界观.过往事件',[]);
+  es.splice(idx,1);
+  updateVar('世界观.过往事件',es); render(); showEventTab();
+});
+$(document).on('click','#btnAddEv',function(){
+  var es=getVal('世界观.过往事件',[]);
+  es.push({时间:$('#newEvTime').val(),地点:$('#newEvLoc').val(),内容:$('#newEvContent').val()});
+  updateVar('世界观.过往事件',es); render(); showEventTab();
+});
+
+// === 10. Plot Editor ===
 function popupPlot(){
-var plot=getPlot();
-var evs=plot.未来事件||[];
-var html='<div class="hint">未来剧情事件（未发生）</div>';
-if(evs.length===0)html+='<div class="empty-state">暂无未来事件</div>';
-evs.forEach(function(e,i){
-html+='<div class="inline-form"><div class="two-col"><div class="form-row"><label>时间</label><input class="form-input pe-time" value="'+esc(e.时间||e.time||'')+'"></div><div class="form-row"><label>地点</label><input class="form-input pe-loc" value="'+esc(e.地点||e.location||'')+'"></div></div><div class="form-row"><label>人物</label><input class="form-input pe-char" value="'+esc(e.相关人物||e.characters||'')+'"></div><div class="form-row"><label>内容</label><textarea class="form-textarea pe-content">'+esc(e.剧情内容||e.content||'')+'</textarea></div><div style="display:flex;gap:4px;margin-top:4px"><button class="btn btn-primary btn-sm btn-upd-event" data-idx="'+i+'">更新</button><button class="btn btn-sm btn-del-event" data-idx="'+i+'">删除</button></div></div>'
-});
-html+='<div class="section-title">+添加未来事件</div><div class="inline-form"><div class="two-col"><div class="form-row"><label>时间</label><input class="form-input" id="newEventTime"></div><div class="form-row"><label>地点</label><input class="form-input" id="newEventLoc"></div></div><div class="form-row"><label>人物</label><input class="form-input" id="newEventChar"></div><div class="form-row"><label>内容</label><textarea class="form-textarea" id="newEventContent"></textarea></div><button class="btn btn-primary btn-sm" id="btnAddEvent">添加</button></div>';
-openPopup('剧情编辑',html)
+  var evs=getVal('剧情.未来事件',[]);
+  var html='<div class="hint">未来剧情事件（未发生）</div>';
+  if(evs.length===0) html+='<div class="empty-state">暂无未来事件</div>';
+  evs.forEach(function(e,i){
+    html+='<div class="inline-form" data-idx="'+i+'"><div class="two-col"><div class="form-row"><label>时间</label><input class="form-input pe-time" value="'+esc(e.时间||e.time||'')+'"></div><div class="form-row"><label>地点</label><input class="form-input pe-loc" value="'+esc(e.地点||e.location||'')+'"></div></div><div class="form-row"><label>人物</label><input class="form-input pe-char" value="'+esc(e.相关人物||e.characters||'')+'"></div><div class="form-row"><label>内容</label><textarea class="form-textarea pe-content">'+esc(e.剧情内容||e.content||'')+'</textarea></div><div style="display:flex;gap:4px;margin-top:4px"><button class="btn btn-primary btn-sm btn-upd-event" data-idx="'+i+'">更新</button><button class="btn btn-sm btn-del-event" data-idx="'+i+'">删除</button></div></div>';
+  });
+  html+='<div class="section-title">+添加未来事件</div><div class="inline-form"><div class="two-col"><div class="form-row"><label>时间</label><input class="form-input" id="newEventTime"></div><div class="form-row"><label>地点</label><input class="form-input" id="newEventLoc"></div></div><div class="form-row"><label>人物</label><input class="form-input" id="newEventChar"></div><div class="form-row"><label>内容</label><textarea class="form-textarea" id="newEventContent"></textarea></div><button class="btn btn-primary btn-sm" id="btnAddEvent">添加</button></div>';
+  openPopup('剧情编辑',html);
 }
-$(document).on('click','.btn-upd-event',function(){var i=$(this).data('idx'),el=$(this).closest('.inline-form');sendCmd('【剧情编辑】\n修改未来事件#'+(i+1)+'\n-时间：'+el.find('.pe-time').val()+'\n-地点：'+el.find('.pe-loc').val()+'\n-人物：'+el.find('.pe-char').val()+'\n-内容：'+el.find('.pe-content').val()+'\n请输出JSON-Patch')});
-$(document).on('click','.btn-del-event',function(){sendCmd('【剧情编辑】\n删除未来事件#'+($(this).data('idx')+1)+'\n请输出JSON-Patch')});
-$(document).on('click','#btnAddEvent',function(){sendCmd('【剧情编辑】\n添加未来事件\n-时间：'+$('#newEventTime').val()+'\n-地点：'+$('#newEventLoc').val()+'\n-人物：'+$('#newEventChar').val()+'\n-内容：'+$('#newEventContent').val()+'\n请输出JSON-Patch')});
+$(document).on('click','.btn-upd-event',function(){
+  var idx=$(this).data('idx'),el=$(this).closest('.inline-form');
+  var evs=getVal('剧情.未来事件',[]);
+  evs[idx]={时间:el.find('.pe-time').val(),地点:el.find('.pe-loc').val(),相关人物:el.find('.pe-char').val(),剧情内容:el.find('.pe-content').val()};
+  updateVar('剧情.未来事件',evs); render();
+});
+$(document).on('click','.btn-del-event',function(){
+  var idx=$(this).data('idx');
+  var evs=getVal('剧情.未来事件',[]);
+  evs.splice(idx,1);
+  updateVar('剧情.未来事件',evs); render(); popupPlot();
+});
+$(document).on('click','#btnAddEvent',function(){
+  var evs=getVal('剧情.未来事件',[]);
+  evs.push({时间:$('#newEventTime').val(),地点:$('#newEventLoc').val(),相关人物:$('#newEventChar').val(),剧情内容:$('#newEventContent').val()});
+  updateVar('剧情.未来事件',evs); render(); popupPlot();
+});
 
-// scene editor
+// === 11. Scene Editor ===
 var sceneItems=[];
 function popupSceneEdit(){
-var html='<div class="scene-list" id="sceneList"></div><div class="scene-toolbar"><button class="btn btn-secondary btn-sm" data-scene="scene">+场景</button><button class="btn btn-secondary btn-sm" data-scene="dialog">+对白</button><button class="btn btn-secondary btn-sm" data-scene="action">+行动</button><button class="btn btn-secondary btn-sm" data-scene="reaction">+反应</button><div style="flex:1"></div><button class="btn btn-primary btn-sm" id="btnSendScene">确认发送</button></div>';
-openPopup('情境场景编辑',html);renderSceneList()
+  var html='<div class="scene-list" id="sceneList"></div><div class="scene-toolbar"><button class="btn btn-secondary btn-sm" data-scene="scene">+场景</button><button class="btn btn-secondary btn-sm" data-scene="dialog">+对白</button><button class="btn btn-secondary btn-sm" data-scene="action">+行动</button><button class="btn btn-secondary btn-sm" data-scene="reaction">+反应</button><div style="flex:1"></div><button class="btn btn-primary btn-sm" id="btnSendScene">确认发送</button></div>';
+  openPopup('情境场景编辑',html); renderSceneList();
 }
 function renderSceneList(){
-var h='';
-if(sceneItems.length===0){h='<div class="empty-state">点击上方按钮添加场景条目</div>'}
-sceneItems.forEach(function(item,i){
-var tag=item.type==='scene'?'场景事件':item.type==='dialog'?'对白':item.type==='action'?'行动':'反应';
-var whoInput=item.type==='scene'?'':'<input class="scene-who" data-idx="'+i+'" placeholder="谁" value="'+esc(item.who)+'">';
-h+='<div class="scene-item"><span class="scene-num">'+(i+1)+'</span><span class="scene-tag">'+tag+'</span>'+whoInput+(item.type==='scene'?'':'<span style="color:#8892b0">-</span>')+'<span style="color:#8892b0">('+tag+')</span><input class="scene-content" data-idx="'+i+'" placeholder="内容" value="'+esc(item.content)+'"><button class="scene-del" data-idx="'+i+'">&times;</button></div>'
-});
-$('#sceneList').html(h)
+  var h='';
+  if(sceneItems.length===0){h='<div class="empty-state">点击上方按钮添加场景条目</div>';}
+  sceneItems.forEach(function(item,i){
+    var tag=item.type==='scene'?'场景事件':item.type==='dialog'?'对白':item.type==='action'?'行动':'反应';
+    var whoInput=item.type==='scene'?'':'<input class="scene-who" data-idx="'+i+'" placeholder="谁" value="'+esc(item.who)+'">';
+    h+='<div class="scene-item"><span class="scene-num">'+(i+1)+'</span><span class="scene-tag">'+tag+'</span>'+whoInput+(item.type==='scene'?'':'<span style="color:#8892b0">-</span>')+'<span style="color:#8892b0">('+tag+')</span><input class="scene-content" data-idx="'+i+'" placeholder="内容" value="'+esc(item.content)+'"><button class="scene-del" data-idx="'+i+'">&times;</button></div>';
+  });
+  $('#sceneList').html(h);
 }
 $(document).on('click','[data-scene]',function(){
-var t=$(this).data('scene');sceneItems.push({type:t,who:'',content:''});renderSceneList()
+  var t=$(this).data('scene'); sceneItems.push({type:t,who:'',content:''}); renderSceneList();
 });
 $(document).on('click','.scene-del',function(){
-var i=$(this).data('idx');sceneItems.splice(i,1);renderSceneList()
+  var i=$(this).data('idx'); sceneItems.splice(i,1); renderSceneList();
 });
-$(document).on('input','.scene-who',function(){sceneItems[$(this).data('idx')].who=$(this).val()});
-$(document).on('input','.scene-content',function(){sceneItems[$(this).data('idx')].content=$(this).val()});
+$(document).on('input','.scene-who',function(){sceneItems[$(this).data('idx')].who=$(this).val();});
+$(document).on('input','.scene-content',function(){sceneItems[$(this).data('idx')].content=$(this).val();});
 $(document).on('click','#btnSendScene',function(){
-if(sceneItems.length===0){alert('请先添加场景条目');return}
-var cmd='【情境场景编辑】\n请按以下顺序推进剧情：\n';
-sceneItems.forEach(function(item,i){
-var tag=item.type==='scene'?'场景事件':item.type==='dialog'?'对白':item.type==='action'?'行动':'反应';
-if(item.type==='scene'){cmd+=(i+1)+'.['+tag+']'+item.content+'\n'}
-else{cmd+=(i+1)+'.['+item.who+']-('+tag+')-'+item.content+'\n'}
-});
-sendCmd(cmd);closePopup()
+  if(sceneItems.length===0){alert('请先添加场景条目');return;}
+  var cmd='【情境场景编辑】\n请按以下顺序推进剧情：\n';
+  sceneItems.forEach(function(item,i){
+    var tag=item.type==='scene'?'场景事件':item.type==='dialog'?'对白':item.type==='action'?'行动':'反应';
+    if(item.type==='scene'){cmd+=(i+1)+'.['+tag+']'+item.content+'\n';}
+    else{cmd+=(i+1)+'.['+item.who+']-('+tag+')-'+item.content+'\n';}
+  });
+  sendCmd(cmd); closePopup();
 });
 
-// bindings
+// === Global bindings ===
 $(document).on('click','[data-cmd="edit-player"]',popupEditPlayer);
 $(document).on('click','[data-cmd="edit-inv"]',popupEditInv);
 $(document).on('click','[data-cmd="char-mgr"]',popupCharMgr);
@@ -382,26 +612,16 @@ $(document).on('click','[data-cmd="world-mgr"]',popupWorldMgr);
 $(document).on('click','[data-cmd="plot"]',popupPlot);
 $(document).on('click','[data-cmd="scene-edit"]',popupSceneEdit);
 
+// === NPC info popup ===
+$(document).on('click','.btn-npc-info',function(){
+  var id=$(this).data('npc');
+  var n=getVal('NPC.'+id,{});
+  var html='<div class="char-card"><div class="char-card-title">'+esc(n.名称||id)+'</div><div class="char-card-info">年龄：'+(n.年龄||'--')+'<br>职业：'+(n.职业||'--')+'<br>外貌：'+(n.外貌||'--')+'<br>身材：'+(n.身材||'--')+'<br>服装：'+(n.服装||'--')+'<br>性格：'+(n.性格||'--')+'<br>背景：'+(n.角色背景||'--')+'<br>好感：'+(n.好感度||0)+'·厌恶：'+(n.厌恶度||0)+'·堕落：'+(n.堕落度||0)+'·快感：'+(n.快感||0)+'<br>情绪：'+(n.情绪状态||'平静')+'</div></div>';
+  openPopup('角色信息：'+esc(n.名称||id),html);
+});
+
 render();
-// Only show status bar on the latest AI message
-(function showOnlyLatest(){
-try{
-// Access parent window to find all status bars in chat
-var parentDoc=window.parent.document;
-var allBars=parentDoc.querySelectorAll('.status-bar');
-if(allBars.length<=1)return;
-// Find which index this bar is
-var thisBar=document.querySelector('.status-bar');
-var myIndex=-1;
-for(var i=0;i<allBars.length;i++){if(allBars[i]===thisBar){myIndex=i;break}}
-// If this is not the last bar, hide it
-if(myIndex>=0&&myIndex<allBars.length-1){
-var container=thisBar.closest('.mes,.mes_text,.chat-row,.message-row,div[class*="mes"]');
-if(container)container.style.display='none';
-}
-}catch(e){}
-})();
-})
+});
 </script>
 </body>
 </html>

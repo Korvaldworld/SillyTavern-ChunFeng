@@ -549,14 +549,95 @@
         }
       }
 
+      // Direct variable write API
+      function writeVar(data) {
+        try {
+          var ctx = window.SillyTavern.getContext();
+          ctx.chatMetadata.variables['stat_data'] = JSON.stringify(data);
+          return true;
+        } catch(e) { console.error('writeVar:', e); return false; }
+      }
+
       $('#btnConfirm').on('click', function() {
-        // Re-generate text to include any changes to openingPlot
-        var text = $('#confirmContent').text();
+        var c = {
+          名称: $('#cusName').val().trim() || '未命名',
+          年龄: parseInt($('#cusAge').val()) || 0,
+          身高: $('#cusHeight').val().trim() || '',
+          当前地点: $('#cusLoc').val().trim() || '长乐公寓101室',
+          外观: $('#cusApp').val().trim() || '',
+          角色背景: $('#cusBg').val().trim() || '',
+          性能力: $('#cusAbi').val().trim() || '',
+          性癖: $('#cusFet').val().trim() || '',
+          持有金钱: 0,
+          物品栏: []
+        };
+        var wd = $('#worldDesc').val().trim();
         var plot = $('#openingPlot').val().trim();
-        if (plot && text.indexOf('【开场剧情要求】') === -1) {
-          text += '\n\n【开场剧情要求】\n' + plot;
+
+        // Build initial data structure
+        var initData = {
+          玩家: c,
+          环境: {
+            当前日期: '2005年4月1日',
+            当前时间: '08:00',
+            天气: '晴',
+            地点: c.当前地点 || '长乐公寓101室',
+            当前交互角色ID: ''
+          },
+          世界观: {
+            基础设定: {
+              城市名: '春风市',
+              年代: '2005年',
+              默认规则: wd.substring(0, 100) + '...'
+            },
+            用户自定义规则: rules,
+            重要地点: [
+              {名称: '长乐公寓', 描述: '三层出租公寓，月租600元，无电梯', 距离: '0米'},
+              {名称: '春风市中心医院', 描述: '顶尖三甲医院', 距离: '700米'},
+              {名称: '春风美容院', 描述: '平民美容院', 距离: '400米'},
+              {名称: '长乐便利店', 描述: '24小时营业', 距离: '50米'},
+              {名称: '天雄集团总部', 描述: 'CBD地标', 距离: '6公里'},
+              {名称: '宏发商贸公司', 描述: '天雄旗下子公司', 距离: '5公里'}
+            ],
+            过往事件: []
+          },
+          NPC: {
+            NPC1: {名称: '施美玉', 年龄: 28, 职业: '美容院老板娘', 外貌: '成熟优雅', 身材: '丰满', 服装: '旗袍', 性格: '温柔体贴', 角色背景: '春风美容院老板娘，在春风市打拼多年。', 好感度: 0, 厌恶度: 0, 堕落度: 0, 快感: 0, 情绪状态: '平静', 事件记录: [], 是否在场: true},
+            NPC2: {名称: '梁惠', 年龄: 35, 职业: '护士长', 外貌: '干练', 身材: '匀称', 服装: '护士服', 性格: '严肃认真', 角色背景: '春风市中心医院护士长。', 好感度: 0, 厌恶度: 0, 堕落度: 0, 快感: 0, 情绪状态: '平静', 事件记录: [], 是否在场: true},
+            NPC3: {名称: '雪婉', 年龄: 22, 职业: '大学生', 外貌: '清纯', 身材: '苗条', 服装: '连衣裙', 性格: '活泼开朗', 角色背景: '就读于春风市大学，在公寓兼职。', 好感度: 0, 厌恶度: 0, 堕落度: 0, 快感: 0, 情绪状态: '平静', 事件记录: [], 是否在场: true},
+            NPC4: {名称: '雪柔', 年龄: 22, 职业: '大学生', 外貌: '冷艳', 身材: '苗条', 服装: '牛仔裤', 性格: '内向害羞', 角色背景: '雪婉的双胞胎妹妹，性格内向。', 好感度: 0, 厌恶度: 0, 堕落度: 0, 快感: 0, 情绪状态: '平静', 事件记录: [], 是否在场: true},
+            NPC5: {名称: '颜媚', 年龄: 30, 职业: '自由职业', 外貌: '妩媚', 身材: '火辣', 服装: '紧身衣', 性格: '风骚热情', 角色背景: '自由职业者，经常在公寓出入。', 好感度: 0, 厌恶度: 0, 堕落度: 0, 快感: 0, 情绪状态: '平静', 事件记录: [], 是否在场: true},
+            NPC6: {名称: '茵曼', 年龄: 26, 职业: '教师', 外貌: '知性', 身材: '标准', 服装: '职业装', 性格: '理性温和', 角色背景: '春风市中学教师。', 好感度: 0, 厌恶度: 0, 堕落度: 0, 快感: 0, 情绪状态: '平静', 事件记录: [], 是否在场: true}
+          },
+          剧情: {
+            未来事件: []
+          }
+        };
+
+        // Write variables directly
+        writeVar(initData);
+
+        // Build command text for AI
+        var cmdText = '【世界观设定】\n\n【世界描述】\n' + wd + '\n\n';
+        if (rules.length > 0) {
+          cmdText += '【用户自定义规则】\n' + rules.map(function(r) { return '- ' + r.规则名 + ': ' + r.规则内容; }).join('\n') + '\n\n';
         }
-        sendStackedCmd(text);
+        cmdText += '【主角信息】\n' +
+          '- 名称：' + c.名称 + '\n' +
+          '- 年龄：' + c.年龄 + '\n' +
+          '- 身高：' + c.身高 + '\n' +
+          '- 外观：' + c.外观 + '\n' +
+          '- 角色背景：' + c.角色背景 + '\n' +
+          '- 当前地点：' + c.当前地点 + '\n' +
+          '- 性能力：' + c.性能力 + '\n' +
+          '- 性癖：' + c.性癖 + '\n\n';
+        if (plot) {
+          cmdText += '【开场剧情要求】\n' + plot + '\n\n';
+        }
+        cmdText += '请基于以上设定开始游戏，输出一段开场剧情。在回复末尾输出 <StatusPlaceHolder/>';
+
+        sendStackedCmd(cmdText);
+        if (typeof toastr !== 'undefined') toastr.success('游戏已初始化，变量已保存');
       });
     });
   </script>
