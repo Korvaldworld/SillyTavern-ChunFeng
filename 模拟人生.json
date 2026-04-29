@@ -42,7 +42,7 @@
                     "id": "863c3d42-d1f4-439e-8bb8-5eb78478cc55",
                     "scriptName": "[选择器]界面",
                     "findRegex": "【选择器】",
-                    "replaceString": "```html\n<body>\n  <script>\n    $('body').load('https://testingcf.jsdelivr.net/gh/emo-lsp/SillyTavern@refs/heads/main/System/选择器1.2.html')\n  </script>\n  </body>\n```",
+                    "replaceString": "```html\n<body>\n  <script>\n    $('body').load('https://testingcf.jsdelivr.net/gh/Korvaldworld/SillyTavern-ChunFeng@refs/heads/main/System/选择器1.2.html')\n  </script>\n  </body>\n```",
                     "trimStrings": [],
                     "placement": [
                         1,
