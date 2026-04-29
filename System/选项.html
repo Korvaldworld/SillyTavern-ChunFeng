@@ -1,52 +1,134 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8">
-  <style>
-    * { box-sizing: border-box; }
-    body {
-      font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
-      background: linear-gradient(135deg, #0a192f 0%, #112240 100%);
-      color: #ccd6f6;
-      margin: 0;
-      padding: 16px;
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+  background: transparent;
+  color: #eee;
+  font-size: 13px;
+  line-height: 1.5;
+  padding: 8px;
+}
+.options-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: center;
+}
+.option-btn {
+  background: rgba(233, 69, 96, 0.15);
+  border: 1px solid rgba(233, 69, 96, 0.3);
+  color: #e94560;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px;
+  font-family: inherit;
+  transition: all 0.2s;
+  text-align: center;
+  max-width: 100%;
+  word-break: break-all;
+}
+.option-btn:hover {
+  background: rgba(233, 69, 96, 0.3);
+  transform: translateY(-1px);
+}
+.empty-msg {
+  color: #8892b0;
+  font-size: 12px;
+  text-align: center;
+  padding: 8px;
+}
+</style></head><body>
+<div class="options-container" id="optionsContainer">
+  <span class="empty-msg">选项加载中...</span>
+</div>
+
+<script>
+(function() {
+  var container = document.getElementById('optionsContainer');
+  var options = [];
+
+  // Try to find options from URL hash
+  if (window.location.hash) {
+    try {
+      var hash = decodeURIComponent(window.location.hash.substring(1));
+      if (hash.indexOf('|') > -1) {
+        options = hash.split('|').map(function(s) { return s.trim(); }).filter(function(s) { return s; });
+      }
+    } catch(e) {}
+  }
+
+  // Try to find options from parent window chat content
+  if (options.length === 0) {
+    try {
+      var parentDoc = window.parent.document;
+      var chatContent = parentDoc.body.innerText || parentDoc.body.textContent || '';
+      var match = chatContent.match(/<options>([\s\S]*?)<\/options>/i);
+      if (match && match[1]) {
+        var raw = match[1].replace(/\n/g, '').trim();
+        options = raw.split('|').map(function(s) { return s.trim(); }).filter(function(s) { return s; });
+      }
+    } catch(e) {}
+  }
+
+  // Try to scan current document text nodes
+  if (options.length === 0) {
+    var walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null, false);
+    var node;
+    while (node = walker.nextNode()) {
+      var text = node.nodeValue;
+      var m = text.match(/<options>([\s\S]*?)<\/options>/i);
+      if (m && m[1]) {
+        var raw2 = m[1].replace(/\n/g, '').trim();
+        options = raw2.split('|').map(function(s) { return s.trim(); }).filter(function(s) { return s; });
+        break;
+      }
     }
-    .options-container {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      justify-content: center;
+  }
+
+  // If still no options, show a fallback
+  if (options.length === 0) {
+    container.innerHTML = '<span class="empty-msg">未检测到选项。AI输出格式应为：&lt;options&gt;选项1|选项2|...&lt;/options&gt;</span>';
+    return;
+  }
+
+  // Render buttons
+  container.innerHTML = options.map(function(opt, idx) {
+    return '<button class="option-btn" data-idx="' + idx + '" title="' + opt.replace(/"/g, '&quot;') + '">' + escapeHtml(trunc(opt, 40)) + '</button>';
+  }).join('');
+
+  // Bind click
+  container.addEventListener('click', function(e) {
+    if (e.target.classList.contains('option-btn')) {
+      var idx = parseInt(e.target.getAttribute('data-idx'));
+      var text = options[idx];
+      if (!text) return;
+      try {
+        var inputBox = document.querySelector('#send_textarea');
+        if (!inputBox) inputBox = window.parent.document.querySelector('#send_textarea');
+        if (inputBox) {
+          inputBox.value = text;
+          inputBox.dispatchEvent(new Event('input', { bubbles: true }));
+        } else {
+          // Try triggerSlash
+          if (typeof triggerSlash === 'function') {
+            triggerSlash('/setinput ' + text);
+          }
+        }
+      } catch(err) {
+        console.error('Option send failed:', err);
+      }
     }
-    .option-btn {
-      background: rgba(233, 69, 96, 0.15);
-      border: 1px solid rgba(233, 69, 96, 0.3);
-      color: #e94560;
-      padding: 8px 16px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 13px;
-      font-family: inherit;
-      transition: all 0.2s;
-    }
-    .option-btn:hover {
-      background: rgba(233, 69, 96, 0.3);
-      transform: translateY(-1px);
-    }
-  </style>
-</head>
-<body>
-  <div class="options-container" id="optionsContainer">
-    <span style="color:#8892b0;font-size:12px;">选项加载中...</span>
-  </div>
-  <script>
-    // 解析 options 标签内容并渲染为按钮
-    (function() {
-      const scripts = document.querySelectorAll('script');
-      // 从 SillyTavern 上下文中获取原始 options 文本
-      // 由于正则已经替换，这里仅作为备用样式容器
-      const container = document.getElementById('optionsContainer');
-      container.innerHTML = '<span style="color:#8892b0;font-size:12px;">请在对话中输入选项内容</span>';
-    })();
-  </script>
-</body>
-</html>
+  });
+
+  function escapeHtml(t) {
+    var d = document.createElement('div');
+    d.textContent = t;
+    return d.innerHTML;
+  }
+  function trunc(t, l) {
+    return t && t.length > l ? t.substring(0, l) + '...' : t;
+  }
+})();
+</script>
+</body></html>

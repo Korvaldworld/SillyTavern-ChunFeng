@@ -1,701 +1,496 @@
 <!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
-      background: transparent;
-      color: #eee;
-      font-size: 13px;
-      line-height: 1.5;
-      padding: 10px;
-    }
-    .shell {
-      border: 1px solid #233554;
-      background: linear-gradient(180deg, #0a192f 0%, #112240 100%);
-      border-radius: 8px;
-      overflow: hidden;
-      max-width: 900px;
-      margin: 0 auto;
-    }
-    .header {
-      background: rgba(15, 52, 96, 0.4);
-      padding: 12px 16px;
-      border-bottom: 1px solid #233554;
-      text-align: center;
-    }
-    .header-title {
-      font-size: 18px;
-      color: #e94560;
-      font-weight: bold;
-      margin-bottom: 4px;
-    }
-    .header-sub {
-      font-size: 12px;
-      color: #8892b0;
-    }
-    .card {
-      padding: 14px 16px;
-      border-bottom: 1px solid #233554;
-    }
-    .card-title {
-      font-size: 14px;
-      color: #64ffda;
-      font-weight: bold;
-      margin-bottom: 10px;
-      padding-bottom: 6px;
-      border-bottom: 1px solid rgba(15, 52, 96, 0.5);
-    }
-    .info-row {
-      display: flex;
-      margin-bottom: 6px;
-      align-items: baseline;
-    }
-    .info-label {
-      color: #64ffda;
-      font-weight: bold;
-      min-width: 60px;
-      flex-shrink: 0;
-      font-size: 12px;
-    }
-    .info-value {
-      color: #ccd6f6;
-      flex: 1;
-      font-size: 13px;
-    }
-    .desc-text {
-      color: #a8b2d1;
-      font-size: 12px;
-      line-height: 1.6;
-    }
-    .locations-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-      gap: 8px;
-      margin-top: 10px;
-    }
-    .location-tag {
-      background: rgba(15, 52, 96, 0.4);
-      padding: 6px 10px;
-      border-radius: 4px;
-      font-size: 12px;
-      color: #a8b2d1;
-      border: 1px solid rgba(35, 53, 84, 0.5);
-    }
-    .location-tag strong {
-      color: #64ffda;
-    }
-    textarea, input[type="text"], input[type="number"] {
-      width: 100%;
-      padding: 8px;
-      border-radius: 4px;
-      border: 1px solid #0f3460;
-      background: rgba(10, 25, 47, 0.6);
-      color: #ccd6f6;
-      font-family: inherit;
-      font-size: 13px;
-      resize: vertical;
-    }
-    textarea:focus, input:focus {
-      outline: none;
-      border-color: #64ffda;
-    }
-    .btn {
-      background: rgba(233, 69, 96, 0.15);
-      border: 1px solid rgba(233, 69, 96, 0.3);
-      color: #e94560;
-      padding: 6px 14px;
-      border-radius: 4px;
-      cursor: pointer;
-      font-size: 12px;
-      font-family: inherit;
-      transition: all 0.2s;
-      display: inline-block;
-    }
-    .btn:hover {
-      background: rgba(233, 69, 96, 0.3);
-    }
-    .btn-primary {
-      background: #e94560;
-      color: white;
-      border-color: #e94560;
-    }
-    .btn-primary:hover {
-      background: #c73e54;
-    }
-    .btn-sm {
-      padding: 4px 10px;
-      font-size: 11px;
-    }
-    .btn-secondary {
-      background: transparent;
-      border: 1px solid #0f3460;
-      color: #64ffda;
-    }
-    .btn-secondary:hover {
-      background: rgba(15, 52, 96, 0.3);
-      border-color: #64ffda;
-    }
-    .rule-list {
-      list-style: none;
-      margin-top: 8px;
-    }
-    .rule-item {
-      background: rgba(15, 52, 96, 0.3);
-      padding: 8px 10px;
-      margin-bottom: 6px;
-      border-radius: 4px;
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      border-left: 2px solid #64ffda;
-      font-size: 12px;
-    }
-    .rule-content { flex: 1; margin-right: 8px; }
-    .rule-name { color: #64ffda; font-weight: bold; margin-bottom: 2px; }
-    .rule-desc { color: #a8b2d1; font-size: 11px; }
-    .empty-state {
-      text-align: center;
-      color: #8892b0;
-      padding: 12px;
-      font-style: italic;
-      font-size: 12px;
-    }
-    .form-group { margin-bottom: 10px; }
-    .form-group label {
-      display: block;
-      margin-bottom: 4px;
-      color: #64ffda;
-      font-size: 12px;
-    }
-    .mode-switch {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 12px;
-    }
-    .mode-btn {
-      flex: 1;
-      padding: 8px;
-      text-align: center;
-      border: 1px solid #0f3460;
-      background: rgba(10, 25, 47, 0.4);
-      color: #a8b2d1;
-      cursor: pointer;
-      border-radius: 4px;
-      font-family: inherit;
-      font-size: 12px;
-    }
-    .mode-btn.active {
-      background: rgba(15, 52, 96, 0.6);
-      border-color: #64ffda;
-      color: #64ffda;
-    }
-    .char-form {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 10px;
-    }
-    .char-form .form-group.full { grid-column: span 2; }
-    .bottom-bar {
-      padding: 14px 16px;
-      text-align: center;
-      background: rgba(10, 25, 47, 0.4);
-    }
-    .step-nav {
-      display: flex;
-      justify-content: center;
-      gap: 6px;
-      margin-bottom: 12px;
-    }
-    .step-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: #0f3460;
-      cursor: pointer;
-    }
-    .step-dot.active { background: #64ffda; }
-    .section { display: none; }
-    .section.active { display: block; }
-    .nav-btns {
-      display: flex;
-      justify-content: space-between;
-      margin-top: 12px;
-    }
-    @media (max-width: 600px) {
-      .char-form { grid-template-columns: 1fr; }
-      .char-form .form-group.full { grid-column: span 1; }
-      .locations-grid { grid-template-columns: 1fr; }
-      .nav-btns { flex-direction: column; gap: 8px; }
-      .nav-btns .btn { width: 100%; text-align: center; }
-      .mode-switch { flex-direction: column; }
-      body { padding: 6px; font-size: 12px; }
-      .card { padding: 10px 12px; }
-      .header-title { font-size: 16px; }
-    }
-  </style></head><body>
-  <div class="shell">
-    <div class="header">
-      <div class="header-title">🌆 春风市</div>
-      <div class="header-sub">2005年 · 现代都市角色扮演系统</div>
-    </div>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+  background: transparent;
+  color: #eee;
+  font-size: 13px;
+  line-height: 1.5;
+  padding: 10px;
+}
+.shell {
+  border: 1px solid #233554;
+  background: linear-gradient(180deg, #0a192f 0%, #112240 100%);
+  border-radius: 8px;
+  overflow: hidden;
+  max-width: 900px;
+  margin: 0 auto;
+}
+.header {
+  background: rgba(15, 52, 96, 0.4);
+  padding: 12px 16px;
+  border-bottom: 1px solid #233554;
+  text-align: center;
+}
+.header-title {
+  font-size: 18px;
+  color: #e94560;
+  font-weight: bold;
+  margin-bottom: 4px;
+}
+.header-sub {
+  font-size: 12px;
+  color: #8892b0;
+}
+.card {
+  padding: 14px 16px;
+  border-bottom: 1px solid #233554;
+}
+.card-title {
+  font-size: 14px;
+  color: #64ffda;
+  font-weight: bold;
+  margin-bottom: 10px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid rgba(15, 52, 96, 0.5);
+}
+.info-row {
+  display: flex;
+  margin-bottom: 6px;
+  align-items: baseline;
+}
+.info-label {
+  color: #64ffda;
+  font-weight: bold;
+  min-width: 80px;
+  flex-shrink: 0;
+  font-size: 12px;
+}
+.info-value {
+  color: #ccd6f6;
+  flex: 1;
+  font-size: 13px;
+}
+.desc-text {
+  color: #a8b2d1;
+  font-size: 12px;
+  line-height: 1.6;
+}
+textarea, input[type="text"], input[type="number"], select {
+  width: 100%;
+  padding: 8px;
+  border-radius: 4px;
+  border: 1px solid #0f3460;
+  background: rgba(10, 25, 47, 0.6);
+  color: #ccd6f6;
+  font-family: inherit;
+  font-size: 13px;
+  resize: vertical;
+}
+textarea:focus, input:focus, select:focus {
+  outline: none;
+  border-color: #64ffda;
+}
+.btn {
+  background: rgba(233, 69, 96, 0.15);
+  border: 1px solid rgba(233, 69, 96, 0.3);
+  color: #e94560;
+  padding: 6px 14px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  font-family: inherit;
+  transition: all 0.2s;
+  display: inline-block;
+}
+.btn:hover {
+  background: rgba(233, 69, 96, 0.3);
+}
+.btn-primary {
+  background: #e94560;
+  color: white;
+  border-color: #e94560;
+}
+.btn-primary:hover {
+  background: #c73e54;
+}
+.btn-secondary {
+  background: transparent;
+  border: 1px solid #0f3460;
+  color: #64ffda;
+}
+.btn-secondary:hover {
+  background: rgba(15, 52, 96, 0.3);
+  border-color: #64ffda;
+}
+.bottom-bar {
+  padding: 14px 16px;
+  text-align: center;
+  background: rgba(10, 25, 47, 0.4);
+}
+.section { display: none; }
+.section.active { display: block; }
+.nav-btns {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 12px;
+}
+.form-group { margin-bottom: 10px; }
+.form-group label {
+  display: block;
+  margin-bottom: 4px;
+  color: #64ffda;
+  font-size: 12px;
+}
+.char-form {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+.char-form .form-group.full { grid-column: span 2; }
+.mode-switch {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.mode-btn {
+  flex: 1;
+  padding: 8px;
+  text-align: center;
+  border: 1px solid #0f3460;
+  background: rgba(10, 25, 47, 0.4);
+  color: #a8b2d1;
+  cursor: pointer;
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 12px;
+}
+.mode-btn.active {
+  background: rgba(15, 52, 96, 0.6);
+  border-color: #64ffda;
+  color: #64ffda;
+}
+@media (max-width: 600px) {
+  .char-form { grid-template-columns: 1fr; }
+  .char-form .form-group.full { grid-column: span 1; }
+  .mode-switch { flex-direction: column; }
+}
+</style></head><body>
+<div class="shell">
+  <div class="header">
+    <div class="header-title">🎮 模拟人生</div>
+    <div class="header-sub">自定义世界观 · 创建主角 · 开启人生</div>
+  </div>
 
-    <!-- Step 1: 世界观 -->
-    <div class="section active" id="step1">
-      <div class="card">
-        <div class="card-title">📍 世界观设定</div>
-        <div class="info-row">
-          <span class="info-label">时代</span>
-          <span class="info-value">2005年</span>
-        </div>
-        <div class="info-row">
-          <span class="info-label">城市</span>
-          <span class="info-value">春风市（一线城市）</span>
-        </div>
-        <div class="desc-text">
-          在经济高速发展的年代，春风市的表面繁华下隐藏着无数普通人的生活百态。
-        </div>
-        <div class="locations-grid" id="locGrid">
-          <div class="location-tag"><strong>长乐公寓</strong><br>三层出租公寓，月租600元，无电梯</div>
-          <div class="location-tag"><strong>春风市中心医院</strong><br>顶尖三甲医院，距长乐公寓700米</div>
-          <div class="location-tag"><strong>春风美容院</strong><br>平民美容院，距长乐公寓400米</div>
-          <div class="location-tag"><strong>长乐便利店</strong><br>24小时营业，距长乐公寓50米</div>
-          <div class="location-tag"><strong>天雄集团总部</strong><br>CBD地标，距长乐公寓6公里</div>
-          <div class="location-tag"><strong>宏发商贸公司</strong><br>天雄旗下子公司，距长乐公寓5公里</div>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="card-title">✏️ 编辑世界观信息</div>
-        <div class="desc-text" style="margin-bottom:8px">修改下方世界观描述，AI 将基于此构建故事：</div>
-        <textarea id="worldDesc" rows="5">2005年春风市，一线城市。科技水平：功能机与早期翻盖手机普及，家用电脑与拨号/早期宽带网络进入家庭，现金支付为主流。
-
-核心地点：
-- 长乐公寓：三层出租公寓，位于老城区，月租600元，无电梯
-- 春风市中心医院：顶尖三甲医院，距长乐公寓700米
-- 春风美容院：平民美容院，距长乐公寓400米
-- 长乐便利店：24小时营业，距长乐公寓50米
-- 天雄集团总部：CBD地标，距长乐公寓6公里
-- 宏发商贸公司：天雄旗下子公司，距长乐公寓5公里</textarea>
-      </div>
-
-      <div class="card">
-        <div class="card-title">⚙️ 自定义规则（可选）</div>
-        <button class="btn btn-secondary btn-sm" id="btnToggleRule">+ 添加规则</button>
-        <div id="ruleForm" style="display:none; margin-top:10px;">
-          <div class="form-group">
-            <label>规则名称</label>
-            <input type="text" id="ruleName" placeholder="规则名称">
-          </div>
-          <div class="form-group">
-            <label>规则内容</label>
-            <textarea id="ruleContent" rows="2" placeholder="规则内容"></textarea>
-          </div>
-          <div style="text-align:right;">
-            <button class="btn btn-sm" id="btnCancelRule">取消</button>
-            <button class="btn btn-primary btn-sm" id="btnAddRule" style="margin-left:6px;">添加</button>
-          </div>
-        </div>
-        <ul class="rule-list" id="ruleList">
-          <li class="empty-state">暂无自定义规则</li>
-        </ul>
-      </div>
-
-      <div class="bottom-bar">
-        <button class="btn btn-primary" id="btnGoS2">确认并继续 →</button>
+  <!-- Step 1: 世界观 -->
+  <div class="section active" id="step1">
+    <div class="card">
+      <div class="card-title">🌍 世界观设定</div>
+      <div class="form-group full">
+        <label>世界描述 <span style="color:#8892b0;font-weight:normal">（AI将基于此构建故事）</span></label>
+        <textarea id="worldDesc" rows="6" placeholder="描述你的世界：时代背景、城市/地区、核心地点、社会规则等。例如：现代都市，繁华的天海市，主角住在老城区的一栋公寓里...">现代都市，繁华的天海市。主角住在老城区一栋名为"长乐公寓"的三层出租楼里，周边有便利店、医院、美容院等配套设施。社会节奏快，人情冷暖交织，平凡的生活中隐藏着无数相遇的可能。</textarea>
       </div>
     </div>
 
-    <!-- Step 2: 角色创建 -->
-    <div class="section" id="step2">
-      <div class="card">
-        <div class="card-title">🎭 角色模式</div>
-        <div class="mode-switch">
-          <button class="mode-btn active" data-mode="def">默认角色（张浩）</button>
-          <button class="mode-btn" data-mode="cus">自定义角色</button>
+    <div class="card">
+      <div class="card-title">⚙️ 自定义规则（可选）</div>
+      <button class="btn btn-secondary btn-sm" id="btnToggleRule">+ 添加规则</button>
+      <div id="ruleForm" style="display:none; margin-top:10px;">
+        <div class="form-group">
+          <label>规则名称</label>
+          <input type="text" id="ruleName" placeholder="规则名称">
         </div>
-        <div id="defDesc" class="desc-text">
-          <strong>张浩</strong>：19岁，身高193cm，天雄集团董事长张天雄的独子。性格懒散但内心善良，对公寓中的租客们有着复杂的情感。
+        <div class="form-group">
+          <label>规则内容</label>
+          <textarea id="ruleContent" rows="2" placeholder="规则内容"></textarea>
         </div>
-        <div id="charForm">
-          <div class="char-form">
-            <div class="form-group">
-              <label>名称</label>
-              <input type="text" id="cusName" placeholder="角色名称">
-            </div>
-            <div class="form-group">
-              <label>年龄</label>
-              <input type="number" id="cusAge" placeholder="年龄">
-            </div>
-            <div class="form-group">
-              <label>身高</label>
-              <input type="text" id="cusHeight" placeholder="例如：175cm">
-            </div>
-            <div class="form-group">
-              <label>当前地点</label>
-              <input type="text" id="cusLoc" placeholder="例如：长乐公寓101室">
-            </div>
-            <div class="form-group full">
-              <label>外观</label>
-              <input type="text" id="cusApp" placeholder="外观描述">
-            </div>
-            <div class="form-group full">
-              <label>角色背景</label>
-              <textarea id="cusBg" rows="2" placeholder="背景故事"></textarea>
-            </div>
-            <div class="form-group">
-              <label>性能力</label>
-              <input type="text" id="cusAbi" placeholder="例如：正常">
-            </div>
-            <div class="form-group">
-              <label>性癖</label>
-              <input type="text" id="cusFet" placeholder="例如：巨乳熟女">
-            </div>
-          </div>
+        <div style="text-align:right;">
+          <button class="btn btn-sm" id="btnCancelRule">取消</button>
+          <button class="btn btn-primary btn-sm" id="btnAddRule" style="margin-left:6px;">添加</button>
         </div>
       </div>
-
-      <div class="nav-btns" style="padding:0 16px 14px;">
-        <button class="btn btn-secondary" id="btnBackS1">← 返回修改</button>
-        <button class="btn btn-primary" id="btnGoS3">确定开局 →</button>
-      </div>
+      <div id="ruleList" style="margin-top:8px;"></div>
     </div>
 
-    <!-- Step 3: 确认 -->
-    <div class="section" id="step3">
-      <div class="card">
-        <div class="card-title">📋 开局确认</div>
-        <div id="confirmContent" class="desc-text" style="white-space:pre-wrap;"></div>
-      </div>
-      <div class="card">
-        <div class="card-title">🎬 开场剧情设定（可选）</div>
-        <div class="hint" style="color:#8892b0;font-size:12px;margin-bottom:8px;">你可以在这里描述希望以什么样的剧情开场，例如：收租、偶遇、突发事件等。留空则由AI自由发挥。</div>
-        <textarea class="form-textarea" id="openingPlot" rows="3" placeholder="例如：User在长乐公寓楼下遇到了正在搬家的雪婉，主动帮忙..."></textarea>
-      </div>
-      <div class="nav-btns" style="padding:0 16px 14px;">
-        <button class="btn btn-secondary" id="btnBackS2">← 返回修改</button>
-        <button class="btn btn-primary" id="btnConfirm">🚀 开始游戏</button>
-      </div>
+    <div class="bottom-bar">
+      <button class="btn btn-primary" id="btnGoS2">确认并继续 →</button>
     </div>
   </div>
 
-  <script>
-    $(function() {
-      var rules = [];
-      var mode = 'def';
-      var parsedLocations = [];
-      var defChar = {
-        名称: '张浩', 年龄: 19, 身高: '193cm',
-        当前地点: '长乐公寓101室',
-        外观: '肥胖但壮硕的体型，因长期健身而肌肉发达，但体脂率较高',
-        角色背景: '天雄集团董事长张天雄的独子，被父亲安排管理长乐公寓。性格懒散但内心善良，对公寓中的租客们有着复杂的情感。',
-        性能力: '正常', 性癖: '巨乳熟女'
-      };
+  <!-- Step 2: 角色创建 -->
+  <div class="section" id="step2">
+    <div class="card">
+      <div class="card-title">🎭 主角设定</div>
+      <div class="char-form">
+        <div class="form-group">
+          <label>姓名 <span style="color:#e94560">*</span></label>
+          <input type="text" id="cName" placeholder="主角姓名" value="张浩">
+        </div>
+        <div class="form-group">
+          <label>性别 <span style="color:#e94560">*</span></label>
+          <select id="cGender">
+            <option value="男" selected>男</option>
+            <option value="女">女</option>
+            <option value="男娘">男娘</option>
+            <option value="扶她">扶她</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>年龄 <span style="color:#e94560">*</span></label>
+          <input type="number" id="cAge" placeholder="年龄" value="19">
+        </div>
+        <div class="form-group">
+          <label>当前地点</label>
+          <input type="text" id="cLoc" placeholder="当前所在地点" value="长乐公寓101室">
+        </div>
+        <div class="form-group full">
+          <label>外观描述</label>
+          <input type="text" id="cApp" placeholder="外貌特征描述" value="肥胖但壮硕的体型，因长期健身而肌肉发达，但体脂率较高">
+        </div>
+        <div class="form-group full">
+          <label>角色背景</label>
+          <textarea id="cBg" rows="2" placeholder="身份、来历、社会关系...">天雄集团董事长张天雄的独子，被父亲安排管理长乐公寓。性格懒散但内心善良，对公寓中的租客们有着复杂的情感。</textarea>
+        </div>
+        <div class="form-group">
+          <label>主导功能 <small style="color:#8892b0">(荣格八维)</small></label>
+          <select id="cMbti1">
+            <option value="" selected>--</option>
+            <option value="Ti">Ti</option><option value="Te">Te</option><option value="Fi">Fi</option><option value="Fe">Fe</option>
+            <option value="Ni">Ni</option><option value="Ne">Ne</option><option value="Si">Si</option><option value="Se">Se</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>辅助功能</label>
+          <select id="cMbti2">
+            <option value="" selected>--</option>
+            <option value="Ti">Ti</option><option value="Te">Te</option><option value="Fi">Fi</option><option value="Fe">Fe</option>
+            <option value="Ni">Ni</option><option value="Ne">Ne</option><option value="Si">Si</option><option value="Se">Se</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>第三功能</label>
+          <select id="cMbti3">
+            <option value="" selected>--</option>
+            <option value="Ti">Ti</option><option value="Te">Te</option><option value="Fi">Fi</option><option value="Fe">Fe</option>
+            <option value="Ni">Ni</option><option value="Ne">Ne</option><option value="Si">Si</option><option value="Se">Se</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>劣势功能</label>
+          <select id="cMbti4">
+            <option value="" selected>--</option>
+            <option value="Ti">Ti</option><option value="Te">Te</option><option value="Fi">Fi</option><option value="Fe">Fe</option>
+            <option value="Ni">Ni</option><option value="Ne">Ne</option><option value="Si">Si</option><option value="Se">Se</option>
+          </select>
+        </div>
+        <div class="form-group full">
+          <label>性格核心特征</label>
+          <input type="text" id="cTrait" placeholder="用一句话概括性格" value="理性、内敛、务实、自嘲式幽默">
+        </div>
+        <div class="form-group full">
+          <label>隐藏秘密 <small style="color:#8892b0">（仅AI知晓，主角不自知或不愿提及）</small></label>
+          <textarea id="cSecret" rows="2" placeholder="一个深藏心底的秘密..."></textarea>
+        </div>
+      </div>
+    </div>
 
-      // Step navigation
-      function showStep(n) {
-        $('.section').removeClass('active');
-        $('#step' + n).addClass('active');
-      }
+    <div class="nav-btns" style="padding:0 16px 14px;">
+      <button class="btn btn-secondary" id="btnBackS1">← 返回修改</button>
+      <button class="btn btn-primary" id="btnGoS3">确定开局 →</button>
+    </div>
+  </div>
 
-      // Parse locations from world description
-      function parseLocations() {
-        var text = $('#worldDesc').val() || '';
-        var lines = text.split(/\n/);
-        var locations = [];
-        lines.forEach(function(line) {
-          var trimmed = line.trim();
-          if (trimmed.indexOf('- ') === 0) {
-            var content = trimmed.substring(2).trim();
-            var sepIndex = -1;
-            var colonIndex = content.indexOf('：');
-            var asciiColonIndex = content.indexOf(':');
-            if (colonIndex !== -1 && asciiColonIndex !== -1) {
-              sepIndex = Math.min(colonIndex, asciiColonIndex);
-            } else {
-              sepIndex = Math.max(colonIndex, asciiColonIndex);
-            }
-            if (sepIndex > 0) {
-              var name = content.substring(0, sepIndex).trim();
-              var desc = content.substring(sepIndex + 1).trim();
-              var dist = '';
-              var distMatch = desc.match(/(\d+(?:\.\d+)?)\s*(米|公里|km)/i);
-              if (distMatch) {
-                dist = distMatch[0];
-              }
-              locations.push({ 名称: name, 描述: desc, 距离: dist });
-            }
-          }
-        });
-        parsedLocations = locations;
-        renderLocationTags();
-        return locations;
-      }
+  <!-- Step 3: 确认 -->
+  <div class="section" id="step3">
+    <div class="card">
+      <div class="card-title">📋 开局确认</div>
+      <div id="confirmContent" class="desc-text" style="white-space:pre-wrap;"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">🎬 开场剧情设定（可选）</div>
+      <div class="desc-text" style="margin-bottom:8px">描述希望以什么样的剧情开场，留空则由AI自由发挥。</div>
+      <textarea id="openingPlot" rows="3" placeholder="例如：主角在公寓楼下遇到了正在搬家的女性，主动帮忙..."></textarea>
+    </div>
+    <div class="nav-btns" style="padding:0 16px 14px;">
+      <button class="btn btn-secondary" id="btnBackS2">← 返回修改</button>
+      <button class="btn btn-primary" id="btnConfirm">🚀 开始游戏</button>
+    </div>
+  </div>
+</div>
 
-      function renderLocationTags() {
-        var grid = $('#locGrid');
-        if (parsedLocations.length === 0) {
-          grid.html('<div class="empty-state">未检测到地点，请在描述中使用 "- 地点名：描述" 格式</div>');
-          return;
-        }
-        grid.html(parsedLocations.map(function(loc) {
-          return '<div class="location-tag"><strong>' + esc(loc.名称) + '</strong><br>' + esc(loc.描述) + '</div>';
-        }).join(''));
-      }
+<script>
+$(function() {
+  var rules = [];
 
-      // Bind worldDesc input to parse locations
-      $('#worldDesc').on('input', parseLocations);
+  function showStep(n) {
+    $('.section').removeClass('active');
+    $('#step' + n).addClass('active');
+  }
 
-      // Initial parse
-      parseLocations();
+  // Rules
+  $('#btnToggleRule, #btnCancelRule').on('click', function() {
+    var form = $('#ruleForm');
+    var isHidden = !form.is(':visible');
+    form.toggle(isHidden);
+    $('#btnToggleRule').toggle(!isHidden);
+    if (isHidden) $('#ruleName').focus();
+  });
 
-      // Rule management
-      $('#btnToggleRule, #btnCancelRule').on('click', function() {
-        var form = $('#ruleForm');
-        var isHidden = !form.is(':visible');
-        form.toggle(isHidden);
-        $('#btnToggleRule').toggle(!isHidden);
-        if (isHidden) $('#ruleName').focus();
-      });
+  $('#btnAddRule').on('click', function() {
+    var name = $('#ruleName').val().trim();
+    var content = $('#ruleContent').val().trim();
+    if (!name || !content) { alert('请填写完整'); return; }
+    rules.push({ 规则名: name, 规则内容: content });
+    renderRules();
+    $('#ruleName').val('');
+    $('#ruleContent').val('');
+    $('#ruleForm').hide();
+    $('#btnToggleRule').show();
+  });
 
-      $('#btnAddRule').on('click', function() {
-        var name = $('#ruleName').val().trim();
-        var content = $('#ruleContent').val().trim();
-        if (!name || !content) { alert('请填写完整'); return; }
-        rules.push({ 规则名: name, 规则内容: content });
-        renderRules();
-        $('#ruleName').val('');
-        $('#ruleContent').val('');
-        $('#ruleForm').hide();
-        $('#btnToggleRule').show();
-      });
+  function renderRules() {
+    var list = $('#ruleList');
+    if (rules.length === 0) { list.html(''); return; }
+    list.html(rules.map(function(r, i) {
+      return '<div style="background:rgba(15,52,96,0.3);padding:8px 10px;margin-bottom:6px;border-radius:4px;border-left:2px solid #64ffda;font-size:12px;">' +
+        '<div style="color:#64ffda;font-weight:bold;">' + esc(r.规则名) + '</div>' +
+        '<div style="color:#a8b2d1;font-size:11px;">' + esc(r.规则内容) + '</div>' +
+        '<button class="btn btn-sm" style="margin-top:4px;" onclick="delRule(' + i + ')">删除</button></div>';
+    }).join(''));
+  }
+  window.delRule = function(idx) { rules.splice(idx, 1); renderRules(); };
 
-      function renderRules() {
-        var list = $('#ruleList');
-        if (rules.length === 0) {
-          list.html('<li class="empty-state">暂无自定义规则</li>');
-          return;
-        }
-        list.html(rules.map(function(r, i) {
-          return '<li class="rule-item">' +
-            '<div class="rule-content"><div class="rule-name">' + esc(r.规则名) + '</div>' +
-            '<div class="rule-desc">' + esc(r.规则内容) + '</div></div>' +
-            '<button class="btn btn-sm btn-del-rule" data-idx="' + i + '">删除</button></li>';
-        }).join(''));
-      }
+  function esc(t) { return $('<div>').text(t).html(); }
 
-      $(document).on('click', '.btn-del-rule', function() {
-        var idx = $(this).data('idx');
-        rules.splice(idx, 1);
-        renderRules();
-      });
+  // Navigation
+  $('#btnGoS2').on('click', function() { showStep(2); });
+  $('#btnBackS1').on('click', function() { showStep(1); });
+  $('#btnGoS3').on('click', function() { showStep(3); renderConfirm(); });
+  $('#btnBackS2').on('click', function() { showStep(2); });
 
-      function esc(t) {
-        return $('<div>').text(t).html();
-      }
+  function renderConfirm() {
+    var wd = $('#worldDesc').val().trim();
+    var c = {
+      姓名: $('#cName').val().trim() || '未命名',
+      性别: $('#cGender').val(),
+      年龄: $('#cAge').val() || '--',
+      当前地点: $('#cLoc').val().trim() || '--',
+      外观: $('#cApp').val().trim() || '--',
+      角色背景: $('#cBg').val().trim() || '--',
+      主导: $('#cMbti1').val() || '--',
+      辅助: $('#cMbti2').val() || '--',
+      第三: $('#cMbti3').val() || '--',
+      劣势: $('#cMbti4').val() || '--',
+      核心特征: $('#cTrait').val().trim() || '--',
+      隐藏秘密: $('#cSecret').val().trim() || '无'
+    };
 
-      // Mode switch
-      $('.mode-btn').on('click', function() {
-        mode = $(this).data('mode');
-        $('.mode-btn').removeClass('active');
-        $(this).addClass('active');
-        if (mode === 'def') {
-          $('#cusName').val(defChar.名称);
-          $('#cusAge').val(defChar.年龄);
-          $('#cusHeight').val(defChar.身高);
-          $('#cusLoc').val(defChar.当前地点);
-          $('#cusApp').val(defChar.外观);
-          $('#cusBg').val(defChar.角色背景);
-          $('#cusAbi').val(defChar.性能力);
-          $('#cusFet').val(defChar.性癖);
-        } else {
-          $('#cusName').val('').focus();
-          $('#cusAge').val('');
-          $('#cusHeight').val('');
-          $('#cusLoc').val('');
-          $('#cusApp').val('');
-          $('#cusBg').val('');
-          $('#cusAbi').val('');
-          $('#cusFet').val('');
-        }
-      });
+    var txt = '【世界观设定】\n\n' + wd + '\n\n';
+    if (rules.length > 0) {
+      txt += '【用户自定义规则】\n' + rules.map(function(r) {
+        return '- ' + r.规则名 + ': ' + r.规则内容;
+      }).join('\n') + '\n\n';
+    }
+    txt += '【主角信息】\n' +
+      '- 姓名：' + c.姓名 + '\n' +
+      '- 性别：' + c.性别 + '\n' +
+      '- 年龄：' + c.年龄 + '\n' +
+      '- 外观：' + c.外观 + '\n' +
+      '- 角色背景：' + c.角色背景 + '\n' +
+      '- 当前地点：' + c.当前地点 + '\n' +
+      '- 性格（荣格八维）：主导=' + c.主导 + ' / 辅助=' + c.辅助 + ' / 第三=' + c.第三 + ' / 劣势=' + c.劣势 + '\n' +
+      '- 核心特征：' + c.核心特征 + '\n\n';
+    var plot = $('#openingPlot').val().trim();
+    if (plot) {
+      txt += '【开场剧情要求】\n' + plot + '\n\n';
+    }
+    $('#confirmContent').text(txt);
+  }
 
-      // Pre-fill default character on init
-      $('#cusName').val(defChar.名称);
-      $('#cusAge').val(defChar.年龄);
-      $('#cusHeight').val(defChar.身高);
-      $('#cusLoc').val(defChar.当前地点);
-      $('#cusApp').val(defChar.外观);
-      $('#cusBg').val(defChar.角色背景);
-      $('#cusAbi').val(defChar.性能力);
-      $('#cusFet').val(defChar.性癖);
+  function writeVar(data) {
+    try {
+      var ctx = window.SillyTavern.getContext();
+      ctx.chatMetadata.variables['stat_data'] = JSON.stringify(data);
+      return true;
+    } catch(e) { console.error('writeVar:', e); return false; }
+  }
 
-      // Navigation
-      $('#btnGoS2').on('click', function() { showStep(2); });
-      $('#btnBackS1').on('click', function() { showStep(1); });
-      $('#btnGoS3').on('click', function() { showStep(3); renderConfirm(); });
-      $('#btnBackS2').on('click', function() { showStep(2); });
+  function sendStackedCmd(text) {
+    try {
+      var current = '';
+      try { current = window.parent.$('#send_textarea').val() || ''; } catch(e) {}
+      var separator = current.trim() ? '\n\n==========\n\n' : '';
+      var newText = current + separator + text;
+      triggerSlash('/setinput ' + newText);
+      if (typeof toastr !== 'undefined') toastr.success('已添加到输入框');
+    } catch(e) {
+      var el = document.createElement('div');
+      el.className = 'cmd-box';
+      el.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#112240;border:1px solid #233554;padding:16px;z-index:99999;max-width:90%;max-height:80%;overflow:auto;border-radius:8px;color:#ccd6f6;';
+      el.innerHTML = '<div style="color:#e94560;font-weight:bold;margin-bottom:8px;">请复制以下命令并发送：</div>' +
+        '<textarea readonly style="width:100%;min-height:120px;background:#0a192f;border:1px solid #233554;color:#ccd6f6;padding:8px;font-family:inherit;font-size:12px;" onclick="this.select()">' + esc(text) + '</textarea>' +
+        '<button class="btn btn-primary btn-sm" style="margin-top:8px;" id="btnCloseCmd">关闭</button>';
+      document.body.appendChild(el);
+      $(document).one('click', '#btnCloseCmd', function() { $(el).remove(); });
+    }
+  }
 
-      function renderConfirm() {
-        var wd = $('#worldDesc').val().trim();
-        var c = {
-          名称: $('#cusName').val().trim() || '未命名',
-          年龄: $('#cusAge').val() || '--',
-          身高: $('#cusHeight').val().trim() || '--',
-          当前地点: $('#cusLoc').val().trim() || '--',
-          外观: $('#cusApp').val().trim() || '--',
-          角色背景: $('#cusBg').val().trim() || '--',
-          性能力: $('#cusAbi').val().trim() || '--',
-          性癖: $('#cusFet').val().trim() || '--'
-        };
-        var isDef = mode === 'def';
-        var locs = parseLocations();
+  $('#btnConfirm').on('click', function() {
+    var c = {
+      姓名: $('#cName').val().trim() || '未命名',
+      性别: $('#cGender').val(),
+      年龄: parseInt($('#cAge').val()) || 0,
+      当前地点: $('#cLoc').val().trim() || '未知',
+      外观: $('#cApp').val().trim() || '',
+      角色背景: $('#cBg').val().trim() || '',
+      性格: {
+        荣格八维: {
+          主导: $('#cMbti1').val() || null,
+          辅助: $('#cMbti2').val() || null,
+          第三: $('#cMbti3').val() || null,
+          劣势: $('#cMbti4').val() || null
+        },
+        核心特征: $('#cTrait').val().trim() || null
+      },
+      隐藏秘密: $('#cSecret').val().trim() || null
+    };
+    var wd = $('#worldDesc').val().trim();
+    var plot = $('#openingPlot').val().trim();
 
-        var txt = '【世界观设定】\n\n【世界描述】\n' + wd + '\n\n';
-        if (locs.length > 0) {
-          txt += '【重要地点】\n' + locs.map(function(loc) {
-            return '- ' + loc.名称 + '：' + loc.描述 + (loc.距离 ? '（' + loc.距离 + '）' : '');
-          }).join('\n') + '\n\n';
-        }
-        if (rules.length > 0) {
-          txt += '【用户自定义规则】\n' + rules.map(function(r) {
-            return '- ' + r.规则名 + ': ' + r.规则内容;
-          }).join('\n') + '\n\n';
-        }
-        txt += '【主角信息】\n' +
-          '- 名称：' + c.名称 + '\n' +
-          '- 年龄：' + c.年龄 + '\n' +
-          '- 身高：' + c.身高 + '\n' +
-          '- 外观：' + c.外观 + '\n' +
-          '- 角色背景：' + c.角色背景 + '\n' +
-          '- 当前地点：' + c.当前地点 + '\n' +
-          '- 性能力：' + c.性能力 + '\n' +
-          '- 性癖：' + c.性癖 + '\n' +
-          '- 是否默认角色：' + isDef + '\n\n';
-        var plot = $('#openingPlot').val().trim();
-        if (plot) {
-          txt += '【开场剧情要求】\n' + plot + '\n\n';
-        }
-        txt += '【系统初始化指令 - 必须执行】\n' +
-          '请根据以上设定开始游戏，同时必须执行以下操作：\n' +
-          '1. 使用 JSON-Patch 初始化以下变量：\n' +
-          '   - /玩家：主角信息（名称、年龄、身高、外观、角色背景、当前地点、性能力、性癖、持有金钱、物品栏）\n' +
-          '   - /环境：当前日期=2005年4月1日，当前时间=08:00，天气=晴，地点=' + (c.当前地点 || '长乐公寓101室') + '\n' +
-          '   - /世界观/基础设定：城市名=春风市，年代=2005年，默认规则=见【世界描述】\n' +
-          '   - /世界观/用户自定义规则：从【用户自定义规则】中提取的所有规则\n' +
-          '   - /世界观/重要地点：从【世界描述】中提取的所有地点列表\n' +
-          '   - /世界观/过往事件：空数组\n' +
-          '   - /剧情/未来事件：空数组\n' +
-          '   - /NPC：空对象 {}（不预填任何NPC，由AI在剧情中自然引入）\n' +
-          '2. 输出 <StatusPlaceHolder/> 触发状态栏渲染\n' +
-          '3. 在 <UpdateVariable> 中输出所有初始化用的 JSON-Patch\n' +
-          '示例格式：<UpdateVariable><Analysis>Initialize all game variables</Analysis><JSONPatch>[{"op":"insert","path":"/玩家","value":{...}},{"op":"insert","path":"/环境","value":{...}},{"op":"insert","path":"/世界观","value":{...}}]</JSONPatch></UpdateVariable>';
+    var initData = {
+      宿主: c,
+      身体: {
+        性别: c.性别,
+        贞操状态: { 处女: c.性别 === '女' || c.性别 === '扶她' ? true : null, 口腔处女: true, 肛门处女: true, 阴茎处男: c.性别 === '男' || c.性别 === '扶她' ? true : null },
+        穿着: { 上衣: null, 下装: null, 足部: null, 内衣: null, 内裤: null },
+        即时状态: { 小穴: null, 子宫: null, 屁穴: null, 体液: null, 阴茎: null, 前列腺: null, 尿道: null, 精液: null }
+      },
+      堕落计数: {},
+      心理: { 对系统态度: '好奇期待', 羁绊值: 0 },
+      任务: {
+        主线: { 标题: '待发布', 描述: '暂无', 条件: '暂无', 失败惩罚: null, 时间限制: null, 奖励: { 积分: 0, 物品: {} }, 完成: false },
+        支线: {},
+        持续: { 标题: '待发布', 描述: '暂无', 条件: '暂无', 失败惩罚: null, 时间限制: null, 奖励: { 积分: 0, 物品: {} }, 完成次数: 0, 启用: false }
+      },
+      系统: { 积分: 0, 当前日期: '未知', 当前时间: '未知', 羁绊完成人数: 0 },
+      商城: { 在售: {}, 背包: {}, 抽奖: { 允许AI更新: false, 槽位: Array.from({length:10},()=>({名称:null,概率:0,描述:null})) } },
+      宿主能力: null,
+      NPC: null
+    };
 
-        $('#confirmContent').text(txt);
-      }
+    writeVar(initData);
 
-      // Command stacking - append to existing input instead of replacing
-      function sendStackedCmd(text) {
-        try {
-          var current = '';
-          try { current = window.parent.$('#send_textarea').val() || ''; } catch(e) {}
-          var separator = current.trim() ? '\n\n==========\n\n' : '';
-          var newText = current + separator + text;
-          triggerSlash('/setinput ' + newText);
-          if (typeof toastr !== 'undefined') toastr.success('已添加到输入框');
-        } catch(e) {
-          var el = document.createElement('div');
-          el.className = 'cmd-box';
-          el.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#112240;border:1px solid #233554;padding:16px;z-index:99999;max-width:90%;max-height:80%;overflow:auto;border-radius:8px;color:#ccd6f6;';
-          el.innerHTML = '<div style="color:#e94560;font-weight:bold;margin-bottom:8px;">请复制以下命令并发送：</div>' +
-            '<textarea readonly style="width:100%;min-height:120px;background:#0a192f;border:1px solid #233554;color:#ccd6f6;padding:8px;font-family:inherit;font-size:12px;" onclick="this.select()">' + esc(text) + '</textarea>' +
-            '<button class="btn btn-primary btn-sm" style="margin-top:8px;" id="btnCloseCmd">关闭</button>';
-          document.body.appendChild(el);
-          $(document).one('click', '#btnCloseCmd', function() { $(el).remove(); });
-        }
-      }
+    var cmdText = '【世界观设定】\n\n' + wd + '\n\n';
+    if (rules.length > 0) {
+      cmdText += '【用户自定义规则】\n' + rules.map(function(r) { return '- ' + r.规则名 + ': ' + r.规则内容; }).join('\n') + '\n\n';
+    }
+    cmdText += '【主角信息】\n' +
+      '- 姓名：' + c.姓名 + '\n' +
+      '- 性别：' + c.性别 + '\n' +
+      '- 年龄：' + c.年龄 + '\n' +
+      '- 外观：' + c.外观 + '\n' +
+      '- 角色背景：' + c.角色背景 + '\n' +
+      '- 当前地点：' + c.当前地点 + '\n' +
+      '- 性格（荣格八维）：主导=' + (c.性格.荣格八维.主导||'--') + ' / 辅助=' + (c.性格.荣格八维.辅助||'--') + ' / 第三=' + (c.性格.荣格八维.第三||'--') + ' / 劣势=' + (c.性格.荣格八维.劣势||'--') + '\n' +
+      '- 核心特征：' + (c.性格.核心特征||'--') + '\n\n';
+    if (plot) {
+      cmdText += '【开场剧情要求】\n' + plot + '\n\n';
+    }
+    cmdText += '请基于以上设定开始游戏，输出一段开场剧情。在回复末尾输出 <StatusPlaceHolderImpl/>';
 
-      // Direct variable write API
-      function writeVar(data) {
-        try {
-          var ctx = window.SillyTavern.getContext();
-          ctx.chatMetadata.variables['stat_data'] = JSON.stringify(data);
-          return true;
-        } catch(e) { console.error('writeVar:', e); return false; }
-      }
-
-      $('#btnConfirm').on('click', function() {
-        var c = {
-          名称: $('#cusName').val().trim() || '未命名',
-          年龄: parseInt($('#cusAge').val()) || 0,
-          身高: $('#cusHeight').val().trim() || '',
-          当前地点: $('#cusLoc').val().trim() || '长乐公寓101室',
-          外观: $('#cusApp').val().trim() || '',
-          角色背景: $('#cusBg').val().trim() || '',
-          性能力: $('#cusAbi').val().trim() || '',
-          性癖: $('#cusFet').val().trim() || '',
-          持有金钱: 0,
-          物品栏: []
-        };
-        var wd = $('#worldDesc').val().trim();
-        var plot = $('#openingPlot').val().trim();
-        var locs = parseLocations();
-
-        // Build initial data structure
-        var initData = {
-          玩家: c,
-          环境: {
-            当前日期: '2005年4月1日',
-            当前时间: '08:00',
-            天气: '晴',
-            地点: c.当前地点 || '长乐公寓101室',
-            当前交互角色ID: ''
-          },
-          世界观: {
-            基础设定: {
-              城市名: '春风市',
-              年代: '2005年',
-              默认规则: wd.substring(0, 100) + '...'
-            },
-            用户自定义规则: rules,
-            重要地点: locs,
-            过往事件: []
-          },
-          NPC: {},
-          剧情: {
-            未来事件: []
-          }
-        };
-
-        // Write variables directly
-        writeVar(initData);
-
-        // Build command text for AI
-        var cmdText = '【世界观设定】\n\n【世界描述】\n' + wd + '\n\n';
-        if (locs.length > 0) {
-          cmdText += '【重要地点】\n' + locs.map(function(loc) {
-            return '- ' + loc.名称 + '：' + loc.描述 + (loc.距离 ? '（' + loc.距离 + '）' : '');
-          }).join('\n') + '\n\n';
-        }
-        if (rules.length > 0) {
-          cmdText += '【用户自定义规则】\n' + rules.map(function(r) { return '- ' + r.规则名 + ': ' + r.规则内容; }).join('\n') + '\n\n';
-        }
-        cmdText += '【主角信息】\n' +
-          '- 名称：' + c.名称 + '\n' +
-          '- 年龄：' + c.年龄 + '\n' +
-          '- 身高：' + c.身高 + '\n' +
-          '- 外观：' + c.外观 + '\n' +
-          '- 角色背景：' + c.角色背景 + '\n' +
-          '- 当前地点：' + c.当前地点 + '\n' +
-          '- 性能力：' + c.性能力 + '\n' +
-          '- 性癖：' + c.性癖 + '\n\n';
-        if (plot) {
-          cmdText += '【开场剧情要求】\n' + plot + '\n\n';
-        }
-        cmdText += '请基于以上设定开始游戏，输出一段开场剧情。在回复末尾输出 <StatusPlaceHolder/>';
-
-        // ALWAYS send command text to input so AI knows the setup
-        sendStackedCmd(cmdText);
-        if (typeof toastr !== 'undefined') toastr.success('游戏已初始化，变量已保存');
-      });
-    });
-  </script>
+    sendStackedCmd(cmdText);
+    if (typeof toastr !== 'undefined') toastr.success('游戏已初始化，变量已保存');
+  });
+});
+</script>
 </body></html>
