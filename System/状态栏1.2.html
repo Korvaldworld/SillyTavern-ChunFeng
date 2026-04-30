@@ -789,7 +789,17 @@ function showEditPopup(editType) {
         var val = $(this).val();
         updateVar(path, val);
       });
-      sendCmd('【角色更新】已更新' + (titleMap[editType] || '信息'));
+      var changes = [];
+      $('.edit-field-input').each(function() {
+        var path = $(this).data('path');
+        var val = $(this).val();
+        if (val) {
+          var label = path.split('.').pop();
+          changes.push(label + '：' + val);
+        }
+      });
+      var cmdText = '【角色更新】已更新' + (titleMap[editType] || '信息') + '\n' + changes.join('\n');
+      sendCmd(cmdText);
     }
     overlay.remove();
     renderAll();
@@ -999,7 +1009,49 @@ $('#btn-save-main').on('click', function() {
   };
   writeVar(data);
   $('#add-main-overlay').removeClass('active');
-  sendCmd('【角色管理】已添加主要角色：' + ($('#am-name').val() || id));
+
+  // Build comprehensive command text with ALL fields
+  var cmdLines = ['【添加主要角色】'];
+  cmdLines.push('角色ID：' + id);
+  cmdLines.push('— 基础信息 —');
+  cmdLines.push('名称：' + ($('#am-name').val() || '未命名'));
+  cmdLines.push('性别：' + ($('#am-gender').val() || '未设定'));
+  cmdLines.push('年龄：' + ($('#am-age').val() || '未设定'));
+  cmdLines.push('身高：' + ($('#am-height').val() || '未设定'));
+  cmdLines.push('体重：' + ($('#am-weight').val() || '未设定'));
+  cmdLines.push('身份：' + ($('#am-identity').val() || '未设定'));
+  cmdLines.push('经济情况：' + ($('#am-economy').val() || '未设定'));
+  cmdLines.push('居住地：' + ($('#am-residence').val() || '未设定'));
+  cmdLines.push('与主角关系：' + ($('#am-relation').val() || '未设定'));
+  cmdLines.push('背景经历：' + ($('#am-background').val() || '未设定'));
+  cmdLines.push('— 初始态度 —');
+  cmdLines.push('好感度：' + ($('#am-favor').val() || '0'));
+  cmdLines.push('厌恶度：' + ($('#am-hate').val() || '0'));
+  cmdLines.push('堕落度：' + ($('#am-corrupt').val() || '0'));
+  cmdLines.push('— 外貌特征 —');
+  cmdLines.push('面部：' + ($('#am-face').val() || '未设定'));
+  cmdLines.push('头发：' + ($('#am-hair').val() || '未设定'));
+  cmdLines.push('妆容：' + ($('#am-makeup').val() || '未设定'));
+  cmdLines.push('皮肤：' + ($('#am-skin').val() || '未设定'));
+  cmdLines.push('特征：' + ($('#am-features').val() || '未设定'));
+  cmdLines.push('— 体型特征 —');
+  cmdLines.push('整体体型：' + ($('#am-body').val() || '未设定'));
+  cmdLines.push('胸部：' + ($('#am-breast').val() || '未设定'));
+  cmdLines.push('腰部：' + ($('#am-waist').val() || '未设定'));
+  cmdLines.push('手部：' + ($('#am-hands').val() || '未设定'));
+  cmdLines.push('臀部：' + ($('#am-hips').val() || '未设定'));
+  cmdLines.push('腿部：' + ($('#am-legs').val() || '未设定'));
+  cmdLines.push('足部：' + ($('#am-feet').val() || '未设定'));
+  cmdLines.push('— 性格特质 —');
+  cmdLines.push('核心特质：' + ($('#am-core').val() || '未设定'));
+  cmdLines.push('正面特质：' + ($('#am-positive').val() || '未设定'));
+  cmdLines.push('负面特质：' + ($('#am-negative').val() || '未设定'));
+  cmdLines.push('行为习惯：' + ($('#am-habits').val() || '未设定'));
+  cmdLines.push('情绪反应：' + ($('#am-emotion').val() || '未设定'));
+  cmdLines.push('社交态度：' + ($('#am-social').val() || '未设定'));
+  cmdLines.push('请根据以上信息开始塑造该角色，并自然融入剧情中。');
+
+  sendCmd(cmdLines.join('\n'));
   currentRoleId = id;
   renderAll();
   openNpcPanel();
@@ -1023,7 +1075,18 @@ $('#btn-save-minor').on('click', function() {
   };
   writeVar(data);
   $('#add-minor-overlay').removeClass('active');
-  sendCmd('【角色管理】已添加次要角色：' + ($('#an-name').val() || id));
+
+  var cmdLines = ['【添加次要角色】'];
+  cmdLines.push('角色ID：' + id);
+  cmdLines.push('名称：' + ($('#an-name').val() || '未命名'));
+  cmdLines.push('性别：' + ($('#an-gender').val() || '未设定'));
+  cmdLines.push('年龄：' + ($('#an-age').val() || '未设定'));
+  cmdLines.push('身份：' + ($('#an-identity').val() || '未设定'));
+  cmdLines.push('与主角关系：' + ($('#an-relation').val() || '未设定'));
+  cmdLines.push('背景简介：' + ($('#an-background').val() || '未设定'));
+  cmdLines.push('请根据以上信息在剧情中自然引入该角色。');
+
+  sendCmd(cmdLines.join('\n'));
   openNpcPanel();
 });
 
@@ -1133,6 +1196,7 @@ $(function() {
       <button class="edit-btn" id="btn-close-add-main">关闭</button>
     </div>
     <div class="form-grid" id="add-main-form">
+      <div class="form-field full" style="grid-column:span 2;border-bottom:1px solid var(--border);padding-bottom:4px;margin-bottom:4px;"><label style="font-size:.8rem;font-weight:700;color:var(--ink);">— 基础信息 —</label></div>
       <div class="form-field"><label>角色ID</label><input id="am-id" placeholder="如NPC1"/></div>
       <div class="form-field"><label>名称</label><input id="am-name"/></div>
       <div class="form-field"><label>性别</label><select id="am-gender"><option value="">--</option><option>男</option><option>女</option></select></div>
@@ -1144,11 +1208,20 @@ $(function() {
       <div class="form-field"><label>居住地</label><input id="am-residence"/></div>
       <div class="form-field"><label>与主角关系</label><input id="am-relation"/></div>
       <div class="form-field full"><label>背景经历</label><textarea id="am-background" rows="2"></textarea></div>
-      <div class="form-field full"><label>面部</label><input id="am-face"/></div>
+
+      <div class="form-field full" style="grid-column:span 2;border-bottom:1px solid var(--border);padding-bottom:4px;margin-bottom:4px;margin-top:8px;"><label style="font-size:.8rem;font-weight:700;color:var(--ink);">— 初始态度 —</label></div>
+      <div class="form-field"><label>好感度</label><input id="am-favor" type="number" value="0"/></div>
+      <div class="form-field"><label>厌恶度</label><input id="am-hate" type="number" value="0"/></div>
+      <div class="form-field"><label>堕落度</label><input id="am-corrupt" type="number" value="0"/></div>
+
+      <div class="form-field full" style="grid-column:span 2;border-bottom:1px solid var(--border);padding-bottom:4px;margin-bottom:4px;margin-top:8px;"><label style="font-size:.8rem;font-weight:700;color:var(--ink);">— 外貌特征 —</label></div>
+      <div class="form-field"><label>面部</label><input id="am-face"/></div>
       <div class="form-field"><label>头发</label><input id="am-hair"/></div>
       <div class="form-field"><label>妆容</label><input id="am-makeup"/></div>
       <div class="form-field"><label>皮肤</label><input id="am-skin"/></div>
-      <div class="form-field"><label>特征</label><input id="am-features"/></div>
+      <div class="form-field full"><label>特征</label><input id="am-features"/></div>
+
+      <div class="form-field full" style="grid-column:span 2;border-bottom:1px solid var(--border);padding-bottom:4px;margin-bottom:4px;margin-top:8px;"><label style="font-size:.8rem;font-weight:700;color:var(--ink);">— 体型特征 —</label></div>
       <div class="form-field"><label>整体体型</label><input id="am-body"/></div>
       <div class="form-field"><label>胸部</label><input id="am-breast"/></div>
       <div class="form-field"><label>腰部</label><input id="am-waist"/></div>
@@ -1156,13 +1229,16 @@ $(function() {
       <div class="form-field"><label>臀部</label><input id="am-hips"/></div>
       <div class="form-field"><label>腿部</label><input id="am-legs"/></div>
       <div class="form-field"><label>足部</label><input id="am-feet"/></div>
+
+      <div class="form-field full" style="grid-column:span 2;border-bottom:1px solid var(--border);padding-bottom:4px;margin-bottom:4px;margin-top:8px;"><label style="font-size:.8rem;font-weight:700;color:var(--ink);">— 性格特质 —</label></div>
       <div class="form-field full"><label>核心特质</label><input id="am-core"/></div>
       <div class="form-field"><label>正面特质</label><input id="am-positive"/></div>
       <div class="form-field"><label>负面特质</label><input id="am-negative"/></div>
       <div class="form-field"><label>行为习惯</label><input id="am-habits"/></div>
       <div class="form-field"><label>情绪反应</label><input id="am-emotion"/></div>
       <div class="form-field"><label>社交态度</label><input id="am-social"/></div>
-      <div class="form-field full" style="text-align:right;margin-top:6px;">
+
+      <div class="form-field full" style="text-align:right;margin-top:10px;">
         <button class="edit-btn" id="btn-save-main">保存</button>
       </div>
     </div>
