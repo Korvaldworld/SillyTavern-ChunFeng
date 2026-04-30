@@ -1,712 +1,801 @@
-<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><style>
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>状态栏</title>
+<style>
+:root {
+  --bg-paper: #f0f0f0;
+  --bg-window: #e2e2e2;
+  --bg-panel: #f7f7f7;
+  --bg-inset: #dcdcdc;
+  --ink: #0c0c0c;
+  --ink-soft: #2b2b2b;
+  --ink-dim: #6a6a6a;
+  --border: #000000;
+  --border-light: #ffffff;
+  --shadow-hard: 2px 2px 0 #000000;
+  --shadow-soft: 1px 1px 0 #000000;
+  --accent: #000000;
+  --accent-rainbow: linear-gradient(90deg, #ff3b30, #ff9500, #ffcc00, #34c759, #5ac8fa, #007aff, #5856d6);
+  --font-ui: 'Chicago', 'Geneva', 'Pixelated MS Sans Serif', 'MS Sans Serif', 'Courier New', monospace;
+}
+
+:root[data-theme='dark'] {
+  --bg-paper: #1b1b1b;
+  --bg-window: #242424;
+  --bg-panel: #2a2a2a;
+  --bg-inset: #141414;
+  --ink: #d2d2d2;
+  --ink-soft: #b0b0b0;
+  --ink-dim: #8a8a8a;
+  --border: #4a4a4a;
+  --border-light: #2f2f2f;
+  --shadow-hard: 1px 1px 0 #0a0a0a;
+  --shadow-soft: 0 0 0 #000000;
+  --accent: #dcdcdc;
+}
+
 * { box-sizing: border-box; margin: 0; padding: 0; }
+
 body {
-  font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+  font-family: var(--font-ui);
   background: transparent;
-  color: #ccd6f6;
-  font-size: 11px;
-  line-height: 1.3;
-  padding: 2px;
+  color: var(--ink);
+  font-size: 13px;
+  line-height: 1.4;
 }
-.status-bar {
-  background: linear-gradient(180deg, #0a192f 0%, #112240 100%);
-  border: 1px solid #233554;
-  border-radius: 4px;
-  overflow: hidden;
+
+#app { width: 100%; padding: 8px; }
+
+.shell {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 8px;
+  border: 1px solid var(--border);
+  background: linear-gradient(135deg, rgba(0,0,0,0.06), transparent 55%), linear-gradient(0deg, var(--bg-window), var(--bg-paper));
+  box-shadow: var(--shadow-hard);
 }
-.env-bar {
-  background: rgba(15, 52, 96, 0.3);
-  padding: 4px 8px;
+
+/* ===== Header ===== */
+.header {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  padding: 8px;
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-soft);
+  position: relative;
+}
+.header::before {
+  content: "";
+  position: absolute;
+  right: 8px;
+  top: 6px;
+  width: 36px;
+  height: 6px;
+  background: var(--accent-rainbow);
+  border: 1px solid var(--border);
+}
+.header-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 4px 6px;
+  border: 1px solid var(--border);
+  background: var(--bg-paper);
+  box-shadow: var(--shadow-soft);
+}
+.header-label { font-size: .65rem; color: var(--ink-dim); text-transform: uppercase; letter-spacing: 1px; }
+.header-value { font-size: .85rem; font-weight: 700; }
+
+/* ===== Tabs ===== */
+.tab-bar {
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-soft);
+}
+.tab-btn {
+  flex: 1;
+  padding: 6px 8px;
+  border: 1px solid var(--border);
+  background: var(--bg-paper);
+  box-shadow: var(--shadow-soft);
+  font-family: var(--font-ui);
+  font-size: .75rem;
+  color: var(--ink);
+  cursor: pointer;
+  text-align: center;
+  transition: all .12s ease;
+}
+.tab-btn:hover { background: var(--bg-inset); }
+.tab-btn.active { background: var(--bg-inset); box-shadow: var(--shadow-hard); font-weight: 700; }
+
+/* ===== Tab Content ===== */
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+/* ===== Cards ===== */
+.card-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.card {
+  border: 1px solid var(--border);
+  background: var(--bg-window);
+  box-shadow: var(--shadow-soft);
+}
+.card-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  flex-wrap: wrap;
-  gap: 4px;
-  border-bottom: 1px solid #233554;
-  font-size: 11px;
-}
-.env-item { color: #8892b0; }
-.env-item strong { color: #64ffda; font-weight: normal; }
-
-.tabs {
-  display: flex;
-  gap: 1px;
-  background: #0a192f;
-  border-bottom: 1px solid #233554;
-}
-.tab {
-  flex: 1;
-  padding: 5px 2px;
-  background: rgba(15, 52, 96, 0.2);
-  border: none;
-  color: #8892b0;
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-panel);
   cursor: pointer;
-  font-size: 10px;
-  font-family: inherit;
-  text-align: center;
-  transition: all 0.15s;
 }
-.tab:hover { background: rgba(15, 52, 96, 0.4); }
-.tab.active {
-  background: rgba(15, 52, 96, 0.6);
-  color: #64ffda;
-  border-bottom: 1px solid #64ffda;
+.card-title { font-size: .75rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; }
+.card-toggle { font-size: .7rem; color: var(--ink-dim); }
+.card-body { padding: 8px; }
+.card-body.collapsed { display: none; }
+
+/* ===== Info Rows ===== */
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px 6px;
+  border: 1px solid var(--border);
+  background: var(--bg-paper);
+  box-shadow: var(--shadow-soft);
+  margin-bottom: 4px;
 }
+.info-row:last-child { margin-bottom: 0; }
+.info-label { font-size: .7rem; color: var(--ink-dim); }
+.info-value { font-size: .8rem; font-weight: 700; }
+.info-value.null { color: var(--ink-dim); font-weight: normal; font-style: italic; }
 
-.tab-content { display: none; padding: 6px 8px; max-height: 320px; overflow: auto; }
-.tab-content.active { display: block; }
-
+/* ===== Section Title ===== */
 .section-title {
-  color: #64ffda;
-  font-size: 11px;
-  font-weight: bold;
-  margin: 6px 0 4px;
-  padding-bottom: 3px;
-  border-bottom: 1px solid rgba(15, 52, 96, 0.5);
+  font-size: .7rem;
+  color: var(--ink-soft);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin: 8px 0 4px;
+  padding-bottom: 2px;
+  border-bottom: 1px solid var(--border);
 }
 .section-title:first-child { margin-top: 0; }
 
-.info-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 4px;
-}
-.info-item {
-  background: rgba(15, 52, 96, 0.2);
-  padding: 4px 6px;
-  border-radius: 3px;
-  font-size: 10px;
-}
-.info-item label {
-  color: #64ffda;
-  font-size: 9px;
-  display: block;
-  margin-bottom: 1px;
-}
-.info-item .value { color: #ccd6f6; }
-
-.affinity-bar {
-  display: flex;
-  gap: 6px;
-  align-items: center;
-  flex-wrap: wrap;
-  margin-bottom: 4px;
-}
-.affinity-item {
-  background: rgba(10, 25, 47, 0.5);
-  padding: 3px 6px;
-  border-radius: 3px;
-  text-align: center;
-  min-width: 40px;
-}
-.affinity-value {
-  font-size: 12px;
-  font-weight: bold;
-}
-.affinity-label {
-  font-size: 9px;
-  color: #8892b0;
-}
-
-.npc-card {
-  background: rgba(15, 52, 96, 0.2);
-  border: 1px solid rgba(35, 53, 84, 0.5);
-  border-radius: 4px;
-  padding: 6px;
-  margin-bottom: 5px;
-}
-.npc-name {
-  color: #e94560;
-  font-weight: bold;
-  font-size: 12px;
-  margin-bottom: 2px;
-}
-.npc-sub {
-  color: #8892b0;
-  font-size: 10px;
-  margin-bottom: 4px;
-}
-
-.btn {
-  background: rgba(233, 69, 96, 0.15);
-  border: 1px solid rgba(233, 69, 96, 0.25);
-  color: #e94560;
-  padding: 2px 8px;
-  border-radius: 2px;
+/* ===== Edit Button ===== */
+.edit-btn {
+  padding: 2px 6px;
+  border: 1px solid var(--border);
+  background: var(--bg-panel);
+  box-shadow: var(--shadow-soft);
+  font-family: var(--font-ui);
+  font-size: .65rem;
+  color: var(--ink);
   cursor: pointer;
-  font-size: 10px;
-  font-family: inherit;
 }
-.btn:hover { background: rgba(233, 69, 96, 0.3); }
-.btn-sm { padding: 1px 5px; font-size: 9px; }
-.btn-primary { background: #e94560; color: white; border-color: #e94560; }
-.btn-secondary {
-  background: rgba(15, 52, 96, 0.3);
-  border: 1px solid #0f3460;
-  color: #64ffda;
-}
-.btn-secondary:hover { border-color: #64ffda; }
+.edit-btn:hover { background: var(--bg-inset); }
 
-.empty-state {
-  text-align: center;
-  color: #8892b0;
-  padding: 8px;
-  font-size: 10px;
-  font-style: italic;
-}
-
-.item-row {
+/* ===== NPC Selector ===== */
+.npc-selector {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 4px 6px;
-  background: rgba(15, 52, 96, 0.15);
-  border-radius: 3px;
-  margin-bottom: 3px;
+  gap: 4px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
 }
-.item-name { color: #64ffda; font-size: 10px; }
-.item-desc { color: #8892b0; font-size: 9px; }
+.npc-chip {
+  padding: 4px 8px;
+  border: 1px solid var(--border);
+  background: var(--bg-paper);
+  box-shadow: var(--shadow-soft);
+  font-family: var(--font-ui);
+  font-size: .72rem;
+  color: var(--ink);
+  cursor: pointer;
+}
+.npc-chip:hover { background: var(--bg-inset); }
+.npc-chip.active { background: var(--bg-inset); box-shadow: var(--shadow-hard); font-weight: 700; }
 
-.progress-bar {
-  height: 4px;
-  background: #0f3460;
-  border-radius: 2px;
-  overflow: hidden;
-  margin-top: 2px;
+/* ===== Mobile ===== */
+@media (max-width: 720px) {
+  .header { grid-template-columns: repeat(2, 1fr); }
+  .card-grid { grid-template-columns: 1fr; }
+  .tab-btn { font-size: .7rem; padding: 5px 4px; }
 }
-.progress-fill {
-  height: 100%;
-  border-radius: 2px;
-}
+</style>
+</head>
+<body>
 
-.mood-badge {
-  background: rgba(100, 255, 218, 0.12);
-  color: #64ffda;
-  padding: 1px 5px;
-  border-radius: 8px;
-  font-size: 9px;
-}
+<div id="app">
+<div class="shell">
 
-.popup-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.75);
-  z-index: 9999;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 8px;
-}
-.popup-panel {
-  background: #112240;
-  border: 1px solid #233554;
-  border-radius: 6px;
-  width: 100%;
-  max-width: 500px;
-  max-height: 90vh;
-  display: flex;
-  flex-direction: column;
-}
-.popup-header {
-  padding: 8px 12px;
-  border-bottom: 1px solid #233554;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-.popup-title { color: #64ffda; font-size: 13px; font-weight: bold; }
-.popup-close { background: transparent; border: none; color: #e94560; font-size: 18px; cursor: pointer; }
-.popup-content { padding: 10px 12px; overflow: auto; flex: 1; }
-
-.form-row { margin-bottom: 6px; }
-.form-row label { display: block; color: #64ffda; font-size: 10px; margin-bottom: 2px; }
-.form-input, .form-textarea {
-  width: 100%;
-  padding: 4px 6px;
-  background: rgba(10, 25, 47, 0.6);
-  border: 1px solid #0f3460;
-  color: #ccd6f6;
-  border-radius: 3px;
-  font-family: inherit;
-  font-size: 11px;
-}
-.form-textarea { min-height: 40px; resize: vertical; }
-.field-wrap { display: flex; gap: 6px; align-items: center; }
-
-@media (max-width: 600px) {
-  .info-grid { grid-template-columns: 1fr; }
-  .tab { font-size: 9px; padding: 4px 1px; }
-}
-</style></head><body>
-<div class="status-bar">
-  <div class="env-bar">
-    <div class="env-item">📅<strong id="eDate">--</strong></div>
-    <div class="env-item">🕐<strong id="eTime">--</strong></div>
-    <div class="env-item">📍<strong id="eLoc">--</strong></div>
-    <div class="env-item">💰<strong id="ePoints">0</strong></div>
-    <div class="env-item">❤️<strong id="eBond">0</strong></div>
+<!-- Header -->
+<div class="header" id="header">
+  <div class="header-item">
+    <span class="header-label">日期</span>
+    <span class="header-value" id="h-date">--</span>
   </div>
-
-  <div class="tabs">
-    <button class="tab active" data-tab="host">主角</button>
-    <button class="tab" data-tab="body">身体</button>
-    <button class="tab" data-tab="tasks">任务</button>
-    <button class="tab" data-tab="npcs">角色</button>
-    <button class="tab" data-tab="shop">商城</button>
-    <button class="tab" data-tab="ability">能力</button>
+  <div class="header-item">
+    <span class="header-label">时间</span>
+    <span class="header-value" id="h-time">--</span>
   </div>
-
-  <!-- 主角 -->
-  <div class="tab-content active" id="tab-host">
-    <div class="section-title">👤 基本信息</div>
-    <div class="info-grid" id="hostInfo">
-      <div class="empty-state">加载中...</div>
-    </div>
-    <div class="section-title">🧠 心理状态</div>
-    <div id="hostMental">
-      <div class="empty-state">加载中...</div>
-    </div>
+  <div class="header-item">
+    <span class="header-label">地点</span>
+    <span class="header-value" id="h-loc">--</span>
   </div>
-
-  <!-- 身体 -->
-  <div class="tab-content" id="tab-body">
-    <div class="section-title">👕 穿着</div>
-    <div id="bodyCloth"></div>
-    <div class="section-title">🔒 贞操状态</div>
-    <div id="bodyVirgin"></div>
-    <div class="section-title">⚡ 即时状态</div>
-    <div id="bodyInstant"></div>
-  </div>
-
-  <!-- 任务 -->
-  <div class="tab-content" id="tab-tasks">
-    <div class="section-title">📌 主线任务</div>
-    <div id="taskMain"></div>
-    <div class="section-title">📋 支线任务</div>
-    <div id="taskSide"></div>
-    <div class="section-title">🔄 持续任务</div>
-    <div id="taskDaily"></div>
-  </div>
-
-  <!-- NPC -->
-  <div class="tab-content" id="tab-npcs">
-    <div id="npcList">
-      <div class="empty-state">暂无角色</div>
-    </div>
-  </div>
-
-  <!-- 商城 -->
-  <div class="tab-content" id="tab-shop">
-    <div class="section-title">🎒 背包</div>
-    <div id="shopBag"></div>
-    <div class="section-title">🏪 在售商品</div>
-    <div id="shopSale"></div>
-  </div>
-
-  <!-- 能力 -->
-  <div class="tab-content" id="tab-ability">
-    <div class="section-title">📊 属性点</div>
-    <div id="abiStats"></div>
-    <div class="section-title">✨ 能力列表</div>
-    <div id="abiList"></div>
+  <div class="header-item">
+    <span class="header-label">当前交互</span>
+    <span class="header-value" id="h-char">无</span>
   </div>
 </div>
 
-<div id="popupOverlay" style="display:none"></div>
+<!-- Tab Bar -->
+<div class="tab-bar">
+  <button class="tab-btn active" data-tab="role">角色/信息</button>
+  <button class="tab-btn" data-tab="psych">性格/心理/堕落</button>
+  <button class="tab-btn" data-tab="body">身体状态</button>
+  <button class="tab-btn" data-tab="goal">目标</button>
+</div>
+
+<!-- Tab: 角色/信息 -->
+<div class="tab-content active" id="tab-role">
+  <div class="npc-selector" id="role-npc-selector">
+    <span style="font-size:.7rem;color:var(--ink-dim);padding:4px 0;">主要角色：</span>
+  </div>
+  <div class="card-grid">
+    <!-- 基础状态 -->
+    <div class="card">
+      <div class="card-header" data-card="basic">
+        <span class="card-title">基础状态</span>
+        <span class="card-toggle">▼</span>
+      </div>
+      <div class="card-body" id="card-basic">
+        <div class="info-row"><span class="info-label">名称</span><span class="info-value null" id="r-name">--</span></div>
+        <div class="info-row"><span class="info-label">性别</span><span class="info-value null" id="r-gender">--</span></div>
+        <div class="info-row"><span class="info-label">年龄</span><span class="info-value null" id="r-age">--</span></div>
+        <div class="info-row"><span class="info-label">身高</span><span class="info-value null" id="r-height">--</span></div>
+        <div class="info-row"><span class="info-label">体重</span><span class="info-value null" id="r-weight">--</span></div>
+        <div class="info-row"><span class="info-label">身份</span><span class="info-value null" id="r-identity">--</span></div>
+        <div class="info-row"><span class="info-label">经济情况</span><span class="info-value null" id="r-economy">--</span></div>
+        <div class="info-row"><span class="info-label">居住地</span><span class="info-value null" id="r-residence">--</span></div>
+        <div class="info-row"><span class="info-label">与主角关系</span><span class="info-value null" id="r-relation">--</span></div>
+        <div class="info-row"><span class="info-label">背景经历</span><span class="info-value null" id="r-background">--</span></div>
+        <div style="margin-top:6px;text-align:right;"><button class="edit-btn" data-edit="basic">编辑</button></div>
+      </div>
+    </div>
+    <!-- 外貌特征 -->
+    <div class="card">
+      <div class="card-header" data-card="face">
+        <span class="card-title">外貌特征</span>
+        <span class="card-toggle">▼</span>
+      </div>
+      <div class="card-body" id="card-face">
+        <div class="info-row"><span class="info-label">面部</span><span class="info-value null" id="r-face">--</span></div>
+        <div class="info-row"><span class="info-label">头发</span><span class="info-value null" id="r-hair">--</span></div>
+        <div class="info-row"><span class="info-label">妆容</span><span class="info-value null" id="r-makeup">--</span></div>
+        <div class="info-row"><span class="info-label">皮肤</span><span class="info-value null" id="r-skin">--</span></div>
+        <div class="info-row"><span class="info-label">特征</span><span class="info-value null" id="r-features">--</span></div>
+        <div style="margin-top:6px;text-align:right;"><button class="edit-btn" data-edit="face">编辑</button></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Tab: 性格/心理/堕落 -->
+<div class="tab-content" id="tab-psych">
+  <div class="npc-selector" id="psych-npc-selector">
+    <span style="font-size:.7rem;color:var(--ink-dim);padding:4px 0;">主要角色：</span>
+  </div>
+  <div class="card-grid">
+    <div class="card">
+      <div class="card-header" data-card="personality">
+        <span class="card-title">核心性格</span>
+        <span class="card-toggle">▼</span>
+      </div>
+      <div class="card-body" id="card-personality">
+        <div class="info-row"><span class="info-label">核心特质</span><span class="info-value null" id="p-core">--</span></div>
+        <div class="info-row"><span class="info-label">正面特质</span><span class="info-value null" id="p-positive">--</span></div>
+        <div class="info-row"><span class="info-label">负面特质</span><span class="info-value null" id="p-negative">--</span></div>
+        <div class="info-row"><span class="info-label">行为习惯</span><span class="info-value null" id="p-habits">--</span></div>
+        <div class="info-row"><span class="info-label">情绪反应</span><span class="info-value null" id="p-emotion">--</span></div>
+        <div class="info-row"><span class="info-label">社交态度</span><span class="info-value null" id="p-social">--</span></div>
+        <div style="margin-top:6px;text-align:right;"><button class="edit-btn" data-edit="personality">编辑</button></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header" data-card="status">
+        <span class="card-title">当前状态</span>
+        <span class="card-toggle">▼</span>
+      </div>
+      <div class="card-body" id="card-status">
+        <div class="info-row"><span class="info-label">好感度</span><span class="info-value null" id="s-favor">--</span></div>
+        <div class="info-row"><span class="info-label">厌恶度</span><span class="info-value null" id="s-hate">--</span></div>
+        <div class="info-row"><span class="info-label">堕落度</span><span class="info-value null" id="s-corrupt">--</span></div>
+        <div style="margin-top:6px;text-align:right;"><button class="edit-btn" data-edit="status">编辑</button></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Tab: 身体状态 -->
+<div class="tab-content" id="tab-body">
+  <div class="npc-selector" id="body-npc-selector">
+    <span style="font-size:.7rem;color:var(--ink-dim);padding:4px 0;">主要角色：</span>
+  </div>
+  <div class="card-grid">
+    <div class="card">
+      <div class="card-header" data-card="clothing">
+        <span class="card-title">穿着</span>
+        <span class="card-toggle">▼</span>
+      </div>
+      <div class="card-body" id="card-clothing">
+        <div class="info-row"><span class="info-label">上衣</span><span class="info-value null" id="b-top">--</span></div>
+        <div class="info-row"><span class="info-label">下装</span><span class="info-value null" id="b-bottom">--</span></div>
+        <div class="info-row"><span class="info-label">足部</span><span class="info-value null" id="b-feet">--</span></div>
+        <div class="info-row"><span class="info-label">内衣</span><span class="info-value null" id="b-underwear">--</span></div>
+        <div class="info-row"><span class="info-label">内裤</span><span class="info-value null" id="b-panties">--</span></div>
+        <div style="margin-top:6px;text-align:right;"><button class="edit-btn" data-edit="clothing">编辑</button></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header" data-card="figure">
+        <span class="card-title">体型特征</span>
+        <span class="card-toggle">▼</span>
+      </div>
+      <div class="card-body" id="card-figure">
+        <div class="info-row"><span class="info-label">整体体型</span><span class="info-value null" id="f-body">--</span></div>
+        <div class="info-row"><span class="info-label">胸部</span><span class="info-value null" id="f-breast">--</span></div>
+        <div class="info-row"><span class="info-label">腰部</span><span class="info-value null" id="f-waist">--</span></div>
+        <div class="info-row"><span class="info-label">手部</span><span class="info-value null" id="f-hands">--</span></div>
+        <div class="info-row"><span class="info-label">臀部</span><span class="info-value null" id="f-hips">--</span></div>
+        <div class="info-row"><span class="info-label">腿部</span><span class="info-value null" id="f-legs">--</span></div>
+        <div class="info-row"><span class="info-label">足部</span><span class="info-value null" id="f-feet">--</span></div>
+        <div style="margin-top:6px;text-align:right;"><button class="edit-btn" data-edit="figure">编辑</button></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header" data-card="virgin">
+        <span class="card-title">贞操状态</span>
+        <span class="card-toggle">▼</span>
+      </div>
+      <div class="card-body" id="card-virgin">
+        <div class="info-row"><span class="info-label">处女</span><span class="info-value null" id="v-vaginal">--</span></div>
+        <div class="info-row"><span class="info-label">口腔处女</span><span class="info-value null" id="v-oral">--</span></div>
+        <div class="info-row"><span class="info-label">肛门处女</span><span class="info-value null" id="v-anal">--</span></div>
+        <div class="info-row"><span class="info-label">阴茎处男</span><span class="info-value null" id="v-penis">--</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header" data-card="realtime">
+        <span class="card-title">即时状态</span>
+        <span class="card-toggle">▼</span>
+      </div>
+      <div class="card-body" id="card-realtime">
+        <div class="info-row"><span class="info-label">小穴</span><span class="info-value null" id="rt-vagina">--</span></div>
+        <div class="info-row"><span class="info-label">子宫</span><span class="info-value null" id="rt-womb">--</span></div>
+        <div class="info-row"><span class="info-label">屁穴</span><span class="info-value null" id="rt-anus">--</span></div>
+        <div class="info-row"><span class="info-label">体液</span><span class="info-value null" id="rt-fluid">--</span></div>
+        <div class="info-row"><span class="info-label">阴茎</span><span class="info-value null" id="rt-penis">--</span></div>
+        <div class="info-row"><span class="info-label">前列腺</span><span class="info-value null" id="rt-prostate">--</span></div>
+        <div class="info-row"><span class="info-label">尿道</span><span class="info-value null" id="rt-urethra">--</span></div>
+        <div class="info-row"><span class="info-label">精液</span><span class="info-value null" id="rt-semen">--</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Tab: 目标 -->
+<div class="tab-content" id="tab-goal">
+  <div class="card">
+    <div class="card-header" data-card="main-goal">
+      <span class="card-title">主线目标</span>
+      <span class="card-toggle">▼</span>
+    </div>
+    <div class="card-body" id="card-main-goal">
+      <div class="info-row"><span class="info-label">标题</span><span class="info-value null" id="g-main-title">待发布</span></div>
+      <div class="info-row"><span class="info-label">描述</span><span class="info-value null" id="g-main-desc">暂无</span></div>
+      <div class="info-row"><span class="info-label">条件</span><span class="info-value null" id="g-main-condition">暂无</span></div>
+      <div style="margin-top:6px;text-align:right;"><button class="edit-btn" data-edit="main-goal">编辑</button></div>
+    </div>
+  </div>
+  <div class="section-title">支线目标</div>
+  <div id="side-goals-list">
+    <div class="info-row" style="opacity:.6;"><span class="info-label">暂无支线目标</span></div>
+  </div>
+  <div style="margin-top:6px;text-align:right;"><button class="edit-btn" data-edit="side-goal">添加支线</button></div>
+</div>
+
+</div>
+</div>
 
 <script>
+// ===================== Variable API =====================
+function readVar() {
+  try {
+    var c = window.SillyTavern.getContext();
+    var r = c.chatMetadata.variables['stat_data'];
+    if (r) return typeof r === 'string' ? JSON.parse(r) : r;
+  } catch(e) {}
+  return {};
+}
+function writeVar(data) {
+  try {
+    var ctx = window.SillyTavern.getContext();
+    ctx.chatMetadata.variables['stat_data'] = JSON.stringify(data);
+    return true;
+  } catch(e) { return false; }
+}
+function getVal(path, def) {
+  var data = readVar(), keys = path.split('.');
+  for (var i = 0; i < keys.length; i++) {
+    if (data == null) return def;
+    data = data[keys[i]];
+  }
+  return data !== undefined ? data : def;
+}
+function updateVar(path, value) {
+  var data = readVar(), keys = path.split('.'), obj = data;
+  for (var i = 0; i < keys.length - 1; i++) {
+    if (!obj[keys[i]]) obj[keys[i]] = {};
+    obj = obj[keys[i]];
+  }
+  obj[keys[keys.length - 1]] = value;
+  return writeVar(data);
+}
+
+// ===================== Helpers =====================
+function esc(t) { return $('<div>').text(t || '').html(); }
+function displayVal(v) { return v !== null && v !== undefined && v !== '' ? esc(v) : '<span class="null">--</span>'; }
+function sendCmd(text) {
+  try {
+    var cur = '';
+    try { cur = window.parent.$('#send_textarea').val() || ''; } catch(e) {}
+    var sep = cur.trim() ? '\n\n---\n\n' : '';
+    triggerSlash('/setinput ' + cur + sep + text);
+  } catch(e) {}
+}
+
+// ===================== Current Role ID =====================
+var currentRoleId = '';
+function getMainRoles() {
+  var data = readVar();
+  var npcs = data.NPC || {};
+  var mains = [];
+  Object.keys(npcs).forEach(function(k) {
+    if (npcs[k] && npcs[k]._类型 === '主要') mains.push(k);
+  });
+  return mains;
+}
+function renderNpcSelectors() {
+  var mains = getMainRoles();
+  ['role', 'psych', 'body'].forEach(function(tab) {
+    var container = $('#' + tab + '-npc-selector');
+    container.html('<span style="font-size:.7rem;color:var(--ink-dim);padding:4px 0;">主要角色：</span>');
+    if (mains.length === 0) {
+      container.append('<span style="font-size:.7rem;color:var(--ink-dim);padding:4px 0;">暂无主要角色</span>');
+      return;
+    }
+    mains.forEach(function(id) {
+      var name = getVal('NPC.' + id + '.基础.名称', id);
+      var chip = $('<button class="npc-chip">' + esc(name) + '</button>');
+      if (id === currentRoleId) chip.addClass('active');
+      chip.on('click', function() {
+        currentRoleId = id;
+        renderNpcSelectors();
+        renderAll();
+      });
+      container.append(chip);
+    });
+  });
+}
+
+// ===================== Header =====================
+function renderHeader() {
+  var env = getVal('环境', {});
+  $('#h-date').text(env.当前日期 || '--');
+  $('#h-time').text(env.当前时间 || '--');
+  $('#h-loc').text(env.地点 || '--');
+  var charName = '无';
+  if (currentRoleId) {
+    charName = getVal('NPC.' + currentRoleId + '.基础.名称', currentRoleId);
+  }
+  $('#h-char').text(charName);
+}
+
+// ===================== Role/Info Tab =====================
+function renderRoleTab() {
+  if (!currentRoleId) return;
+  var p = 'NPC.' + currentRoleId + '.基础.';
+  $('#r-name').html(displayVal(getVal(p + '名称')));
+  $('#r-gender').html(displayVal(getVal(p + '性别')));
+  $('#r-age').html(displayVal(getVal(p + '年龄')));
+  $('#r-height').html(displayVal(getVal(p + '身高')));
+  $('#r-weight').html(displayVal(getVal(p + '体重')));
+  $('#r-identity').html(displayVal(getVal(p + '身份')));
+  $('#r-economy').html(displayVal(getVal(p + '经济情况')));
+  $('#r-residence').html(displayVal(getVal(p + '居住地')));
+  $('#r-relation').html(displayVal(getVal(p + '与主角关系')));
+  $('#r-background').html(displayVal(getVal(p + '背景经历')));
+
+  p = 'NPC.' + currentRoleId + '.外貌.';
+  $('#r-face').html(displayVal(getVal(p + '面部')));
+  $('#r-hair').html(displayVal(getVal(p + '头发')));
+  $('#r-makeup').html(displayVal(getVal(p + '妆容')));
+  $('#r-skin').html(displayVal(getVal(p + '皮肤')));
+  $('#r-features').html(displayVal(getVal(p + '特征')));
+}
+
+// ===================== Psych Tab =====================
+function renderPsychTab() {
+  if (!currentRoleId) return;
+  var p = 'NPC.' + currentRoleId + '.性格.';
+  $('#p-core').html(displayVal(getVal(p + '核心特质')));
+  $('#p-positive').html(displayVal(getVal(p + '正面特质')));
+  $('#p-negative').html(displayVal(getVal(p + '负面特质')));
+  $('#p-habits').html(displayVal(getVal(p + '行为习惯')));
+  $('#p-emotion').html(displayVal(getVal(p + '情绪反应')));
+  $('#p-social').html(displayVal(getVal(p + '社交态度')));
+
+  p = 'NPC.' + currentRoleId + '.状态.';
+  $('#s-favor').html(displayVal(getVal(p + '好感度')));
+  $('#s-hate').html(displayVal(getVal(p + '厌恶度')));
+  $('#s-corrupt').html(displayVal(getVal(p + '堕落度')));
+}
+
+// ===================== Body Tab =====================
+function renderBodyTab() {
+  if (!currentRoleId) return;
+  var p = 'NPC.' + currentRoleId + '.穿着.';
+  $('#b-top').html(displayVal(getVal(p + '上衣')));
+  $('#b-bottom').html(displayVal(getVal(p + '下装')));
+  $('#b-feet').html(displayVal(getVal(p + '足部')));
+  $('#b-underwear').html(displayVal(getVal(p + '内衣')));
+  $('#b-panties').html(displayVal(getVal(p + '内裤')));
+
+  p = 'NPC.' + currentRoleId + '.体型.';
+  $('#f-body').html(displayVal(getVal(p + '整体体型')));
+  $('#f-breast').html(displayVal(getVal(p + '胸部')));
+  $('#f-waist').html(displayVal(getVal(p + '腰部')));
+  $('#f-hands').html(displayVal(getVal(p + '手部')));
+  $('#f-hips').html(displayVal(getVal(p + '臀部')));
+  $('#f-legs').html(displayVal(getVal(p + '腿部')));
+  $('#f-feet').html(displayVal(getVal(p + '足部')));
+
+  p = 'NPC.' + currentRoleId + '.贞操.';
+  $('#v-vaginal').html(displayVal(getVal(p + '处女')));
+  $('#v-oral').html(displayVal(getVal(p + '口腔处女')));
+  $('#v-anal').html(displayVal(getVal(p + '肛门处女')));
+  $('#v-penis').html(displayVal(getVal(p + '阴茎处男')));
+
+  p = 'NPC.' + currentRoleId + '.即时.';
+  $('#rt-vagina').html(displayVal(getVal(p + '小穴')));
+  $('#rt-womb').html(displayVal(getVal(p + '子宫')));
+  $('#rt-anus').html(displayVal(getVal(p + '屁穴')));
+  $('#rt-fluid').html(displayVal(getVal(p + '体液')));
+  $('#rt-penis').html(displayVal(getVal(p + '阴茎')));
+  $('#rt-prostate').html(displayVal(getVal(p + '前列腺')));
+  $('#rt-urethra').html(displayVal(getVal(p + '尿道')));
+  $('#rt-semen').html(displayVal(getVal(p + '精液')));
+}
+
+// ===================== Goal Tab =====================
+function renderGoalTab() {
+  var p = '目标.主线.';
+  $('#g-main-title').html(displayVal(getVal(p + '标题', '待发布')));
+  $('#g-main-desc').html(displayVal(getVal(p + '描述', '暂无')));
+  $('#g-main-condition').html(displayVal(getVal(p + '条件', '暂无')));
+
+  var sides = getVal('目标.支线', {});
+  var list = $('#side-goals-list');
+  var hasAny = false;
+  var html = '';
+  Object.keys(sides).forEach(function(k) {
+    var s = sides[k];
+    if (!s) return;
+    hasAny = true;
+    html += '<div class="info-row">' +
+      '<span class="info-label">' + esc(s.标题 || k) + '</span>' +
+      '<span class="info-value">' + esc(s.条件 || '--') + '</span>' +
+      '</div>';
+  });
+  if (!hasAny) {
+    html = '<div class="info-row" style="opacity:.6;"><span class="info-label">暂无支线目标</span></div>';
+  }
+  list.html(html);
+}
+
+// ===================== Edit Popup =====================
+var editFields = {
+  'basic': ['基础.名称','基础.性别','基础.年龄','基础.身高','基础.体重','基础.身份','基础.经济情况','基础.居住地','基础.与主角关系','基础.背景经历'],
+  'face': ['外貌.面部','外貌.头发','外貌.妆容','外貌.皮肤','外貌.特征'],
+  'personality': ['性格.核心特质','性格.正面特质','性格.负面特质','性格.行为习惯','性格.情绪反应','性格.社交态度'],
+  'status': ['状态.好感度','状态.厌恶度','状态.堕落度'],
+  'figure': ['体型.整体体型','体型.胸部','体型.腰部','体型.手部','体型.臀部','体型.腿部','体型.足部'],
+  'clothing': ['穿着.上衣','穿着.下装','穿着.足部','穿着.内衣','穿着.内裤'],
+  'main-goal': ['目标.主线.标题','目标.主线.描述','目标.主线.条件']
+};
+
+function showEditPopup(editType) {
+  if (!currentRoleId && editType !== 'main-goal' && editType !== 'side-goal') {
+    alert('请先选择一个主要角色');
+    return;
+  }
+  var fields = editFields[editType] || [];
+  var titleMap = {
+    'basic': '编辑基础状态', 'face': '编辑外貌特征', 'personality': '编辑性格',
+    'status': '编辑当前状态', 'figure': '编辑体型', 'clothing': '编辑穿着',
+    'main-goal': '编辑主线目标', 'side-goal': '添加支线目标'
+  };
+  var html = '<div style="display:flex;flex-direction:column;gap:8px;">';
+  fields.forEach(function(f) {
+    var label = f.split('.')[1];
+    var path = editType === 'main-goal' ? f : 'NPC.' + currentRoleId + '.' + f;
+    var val = getVal(path, '');
+    html += '<div style="display:flex;flex-direction:column;gap:3px;">' +
+      '<label style="font-size:.7rem;color:var(--ink-dim);">' + label + '</label>' +
+      '<input class="edit-field-input" data-path="' + path + '" value="' + esc(val) + '" style="padding:4px 6px;border:1px solid var(--border);background:var(--bg-window);font-family:var(--font-ui);font-size:.75rem;color:var(--ink);" />' +
+      '</div>';
+  });
+  if (editType === 'side-goal') {
+    html += '<div style="display:flex;flex-direction:column;gap:3px;">' +
+      '<label style="font-size:.7rem;color:var(--ink-dim);">支线编号</label>' +
+      '<input id="side-goal-id" value="支线1" style="padding:4px 6px;border:1px solid var(--border);background:var(--bg-window);font-family:var(--font-ui);font-size:.75rem;color:var(--ink);" />' +
+      '</div>' +
+      '<div style="display:flex;flex-direction:column;gap:3px;">' +
+      '<label style="font-size:.7rem;color:var(--ink-dim);">标题</label>' +
+      '<input id="side-goal-title" style="padding:4px 6px;border:1px solid var(--border);background:var(--bg-window);font-family:var(--font-ui);font-size:.75rem;color:var(--ink);" />' +
+      '</div>' +
+      '<div style="display:flex;flex-direction:column;gap:3px;">' +
+      '<label style="font-size:.7rem;color:var(--ink-dim);">描述</label>' +
+      '<input id="side-goal-desc" style="padding:4px 6px;border:1px solid var(--border);background:var(--bg-window);font-family:var(--font-ui);font-size:.75rem;color:var(--ink);" />' +
+      '</div>' +
+      '<div style="display:flex;flex-direction:column;gap:3px;">' +
+      '<label style="font-size:.7rem;color:var(--ink-dim);">条件</label>' +
+      '<input id="side-goal-condition" style="padding:4px 6px;border:1px solid var(--border);background:var(--bg-window);font-family:var(--font-ui);font-size:.75rem;color:var(--ink);" />' +
+      '</div>';
+  }
+  html += '</div><div style="margin-top:10px;text-align:right;">' +
+    '<button class="edit-btn" id="btn-edit-cancel">取消</button> ' +
+    '<button class="edit-btn" id="btn-edit-save">保存</button>' +
+    '</div>';
+
+  var overlay = $('<div style="position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;padding:16px;z-index:1000;"></div>');
+  var panel = $('<div style="width:min(480px,96%);max-height:90vh;overflow:auto;background:var(--bg-paper);border:1px solid var(--border);box-shadow:var(--shadow-hard);padding:12px;"></div>');
+  panel.html('<div style="font-size:.85rem;font-weight:700;margin-bottom:10px;">' + (titleMap[editType] || '编辑') + '</div>' + html);
+  overlay.append(panel);
+  $('body').append(overlay);
+
+  overlay.on('click', function(e) { if (e.target === overlay[0]) overlay.remove(); });
+  $('#btn-edit-cancel').on('click', function() { overlay.remove(); });
+  $('#btn-edit-save').on('click', function() {
+    if (editType === 'side-goal') {
+      var id = $('#side-goal-id').val().trim() || '支线1';
+      var data = readVar();
+      if (!data.目标) data.目标 = {};
+      if (!data.目标.支线) data.目标.支线 = {};
+      data.目标.支线[id] = {
+        标题: $('#side-goal-title').val(),
+        描述: $('#side-goal-desc').val(),
+        条件: $('#side-goal-condition').val(),
+        完成: false
+      };
+      writeVar(data);
+      sendCmd('【目标更新】已添加支线目标：' + id);
+    } else {
+      $('.edit-field-input').each(function() {
+        var path = $(this).data('path');
+        var val = $(this).val();
+        updateVar(path, val);
+      });
+      sendCmd('【角色更新】已更新' + (titleMap[editType] || '信息'));
+    }
+    overlay.remove();
+    renderAll();
+  });
+}
+
+// ===================== Clothing Edit (Special) =====================
+function showClothingEdit() {
+  if (!currentRoleId) { alert('请先选择一个主要角色'); return; }
+  var items = ['上衣', '下装', '足部', '内衣', '内裤'];
+  var html = '<div style="display:flex;flex-direction:column;gap:8px;">';
+  items.forEach(function(item) {
+    var path = 'NPC.' + currentRoleId + '.穿着.' + item;
+    var val = getVal(path, '');
+    html += '<div style="display:flex;flex-direction:column;gap:3px;">' +
+      '<label style="font-size:.7rem;color:var(--ink-dim);">' + item + '</label>' +
+      '<input class="cloth-field-input" data-item="' + item + '" value="' + esc(val) + '" style="padding:4px 6px;border:1px solid var(--border);background:var(--bg-window);font-family:var(--font-ui);font-size:.75rem;color:var(--ink);" />' +
+      '</div>';
+  });
+  html += '</div><div style="margin-top:10px;text-align:right;">' +
+    '<button class="edit-btn" id="btn-cloth-cancel">取消</button> ' +
+    '<button class="edit-btn" id="btn-cloth-save">确认换装</button>' +
+    '</div>';
+
+  var overlay = $('<div style="position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;padding:16px;z-index:1000;"></div>');
+  var panel = $('<div style="width:min(400px,96%);background:var(--bg-paper);border:1px solid var(--border);box-shadow:var(--shadow-hard);padding:12px;"></div>');
+  panel.html('<div style="font-size:.85rem;font-weight:700;margin-bottom:10px;">编辑穿着</div>' + html);
+  overlay.append(panel);
+  $('body').append(overlay);
+
+  overlay.on('click', function(e) { if (e.target === overlay[0]) overlay.remove(); });
+  $('#btn-cloth-cancel').on('click', function() { overlay.remove(); });
+  $('#btn-cloth-save').on('click', function() {
+    var changes = [];
+    $('.cloth-field-input').each(function() {
+      var item = $(this).data('item');
+      var val = $(this).val();
+      var path = 'NPC.' + currentRoleId + '.穿着.' + item;
+      updateVar(path, val);
+      if (val) changes.push(item + '=' + val);
+    });
+    if (changes.length > 0) {
+      sendCmd('【换装更新】已更新' + getVal('NPC.' + currentRoleId + '.基础.名称', currentRoleId) + '的穿着：' + changes.join('，'));
+    }
+    overlay.remove();
+    renderAll();
+  });
+}
+
+// ===================== Render All =====================
+function renderAll() {
+  renderHeader();
+  renderNpcSelectors();
+  renderRoleTab();
+  renderPsychTab();
+  renderBodyTab();
+  renderGoalTab();
+}
+
+// ===================== Event Bindings =====================
 $(function() {
-  // === API ===
-  function readVar() {
-    try {
-      var c = window.SillyTavern.getContext();
-      var r = c.chatMetadata.variables['stat_data'];
-      if (r) return typeof r === 'string' ? JSON.parse(r) : r;
-    } catch(e) {}
-    return {};
-  }
-  function writeVar(data) {
-    try {
-      var ctx = window.SillyTavern.getContext();
-      ctx.chatMetadata.variables['stat_data'] = JSON.stringify(data);
-      return true;
-    } catch(e) { return false; }
-  }
-  function updateVar(path, value) {
-    var data = readVar();
-    var keys = path.split('.');
-    var obj = data;
-    for (var i = 0; i < keys.length - 1; i++) {
-      if (!obj[keys[i]]) obj[keys[i]] = {};
-      obj = obj[keys[i]];
-    }
-    obj[keys[keys.length - 1]] = value;
-    return writeVar(data);
-  }
-  function getVal(path, def) {
-    var data = readVar();
-    var keys = path.split('.');
-    var obj = data;
-    for (var i = 0; i < keys.length; i++) {
-      if (obj == null) return def;
-      obj = obj[keys[i]];
-    }
-    return obj !== undefined ? obj : def;
-  }
-  function sendCmd(text) {
-    try {
-      var cur = '';
-      try { cur = window.parent.$('#send_textarea').val() || ''; } catch(e) {}
-      var sep = cur.trim() ? '\n\n---\n\n' : '';
-      triggerSlash('/setinput ' + cur + sep + text);
-    } catch(e) {}
-  }
-  function esc(t) { return $('<div>').text(t || '').html(); }
-
-  // === Popup ===
-  function openPopup(tt, html) {
-    $('#popupOverlay').html(
-      '<div class="popup-overlay"><div class="popup-panel">' +
-      '<div class="popup-header"><span class="popup-title">' + esc(tt) + '</span><button class="popup-close" data-act="close">&times;</button></div>' +
-      '<div class="popup-content">' + html + '</div></div></div>'
-    ).show();
-  }
-  function closePopup() { $('#popupOverlay').hide().empty(); }
-  $(document).on('click', '[data-act="close"]', closePopup);
-
-  // === Tab Switch ===
-  $(document).on('click', '.tab', function() {
-    $('.tab').removeClass('active');
+  // Tab switching
+  $('.tab-btn').on('click', function() {
+    var tab = $(this).data('tab');
+    $('.tab-btn').removeClass('active');
     $(this).addClass('active');
     $('.tab-content').removeClass('active');
-    $('#tab-' + $(this).data('tab')).addClass('active');
+    $('#tab-' + tab).addClass('active');
   });
 
-  // === Render Host ===
-  function renderHost() {
-    var h = getVal('宿主', {});
-    var mental = getVal('心理', {});
-    var sys = getVal('系统', {});
-    $('#eDate').text(sys.当前日期 || '--');
-    $('#eTime').text(sys.当前时间 || '--');
-    $('#eLoc').text(h.当前地点 || '--');
-    $('#ePoints').text(sys.积分 || 0);
-    $('#eBond').text(mental.羁绊值 || 0);
+  // Card collapse
+  $(document).on('click', '.card-header', function() {
+    var card = $(this).data('card');
+    $('#card-' + card).toggleClass('collapsed');
+    $(this).find('.card-toggle').text($('#card-' + card).hasClass('collapsed') ? '▶' : '▼');
+  });
 
-    var mbti = h.性格 && h.性格.荣格八维 ? h.性格.荣格八维 : {};
-    var info =
-      '<div class="info-item"><label>姓名</label><div class="value">' + esc(h.姓名) + '</div></div>' +
-      '<div class="info-item"><label>性别</label><div class="value">' + esc(h.性别) + '</div></div>' +
-      '<div class="info-item"><label>年龄</label><div class="value">' + (h.年龄 || '--') + '</div></div>' +
-      '<div class="info-item"><label>地点</label><div class="value">' + esc(h.当前地点) + '</div></div>' +
-      '<div class="info-item"><label>主导</label><div class="value">' + esc(mbti.主导) + '</div></div>' +
-      '<div class="info-item"><label>辅助</label><div class="value">' + esc(mbti.辅助) + '</div></div>' +
-      '<div class="info-item"><label>第三</label><div class="value">' + esc(mbti.第三) + '</div></div>' +
-      '<div class="info-item"><label>劣势</label><div class="value">' + esc(mbti.劣势) + '</div></div>';
-    $('#hostInfo').html(info);
-
-    var bond = mental.羁绊值 || 0;
-    var bondColor = bond < 30 ? '#e94560' : bond < 70 ? '#ffd93d' : '#64ffda';
-    $('#hostMental').html(
-      '<div class="info-grid">' +
-      '<div class="info-item"><label>对系统态度</label><div class="value">' + esc(mental.对系统态度 || '--') + '</div></div>' +
-      '<div class="info-item"><label>羁绊值</label><div class="value" style="color:' + bondColor + '">' + bond + '/100</div></div>' +
-      '</div>' +
-      '<div class="progress-bar"><div class="progress-fill" style="width:' + bond + '%;background:' + bondColor + '"></div></div>'
-    );
-  }
-
-  // === Render Body ===
-  function renderBody() {
-    var b = getVal('身体', {});
-    var v = b.贞操状态 || {};
-    var c = b.穿着 || {};
-    var i = b.即时状态 || {};
-
-    var cloth =
-      '<div class="info-grid">' +
-      '<div class="info-item"><label>上衣</label><div class="value">' + esc(c.上衣 || '无') + '</div></div>' +
-      '<div class="info-item"><label>下装</label><div class="value">' + esc(c.下装 || '无') + '</div></div>' +
-      '<div class="info-item"><label>足部</label><div class="value">' + esc(c.足部 || '无') + '</div></div>' +
-      '<div class="info-item"><label>内衣</label><div class="value">' + esc(c.内衣 || '无') + '</div></div>' +
-      '<div class="info-item"><label>内裤</label><div class="value">' + esc(c.内裤 || '无') + '</div></div>' +
-      '</div>';
-    $('#bodyCloth').html(cloth);
-
-    var virginItems = '';
-    if (v.处女 !== null && v.处女 !== undefined) virginItems += '<div class="info-item"><label>处女</label><div class="value">' + (v.处女 ? '是' : '否') + '</div></div>';
-    if (v.口腔处女 !== null && v.口腔处女 !== undefined) virginItems += '<div class="info-item"><label>口腔处女</label><div class="value">' + (v.口腔处女 ? '是' : '否') + '</div></div>';
-    if (v.肛门处女 !== null && v.肛门处女 !== undefined) virginItems += '<div class="info-item"><label>肛门处女</label><div class="value">' + (v.肛门处女 ? '是' : '否') + '</div></div>';
-    if (v.阴茎处男 !== null && v.阴茎处男 !== undefined) virginItems += '<div class="info-item"><label>阴茎处男</label><div class="value">' + (v.阴茎处男 ? '是' : '否') + '</div></div>';
-    $('#bodyVirgin').html(virginItems || '<div class="empty-state">暂无数据</div>');
-
-    var instantItems = '';
-    if (i.小穴) instantItems += '<div class="info-item"><label>小穴</label><div class="value">' + esc(i.小穴) + '</div></div>';
-    if (i.子宫) instantItems += '<div class="info-item"><label>子宫</label><div class="value">' + esc(i.子宫) + '</div></div>';
-    if (i.屁穴) instantItems += '<div class="info-item"><label>屁穴</label><div class="value">' + esc(i.屁穴) + '</div></div>';
-    if (i.体液) instantItems += '<div class="info-item"><label>体液</label><div class="value">' + esc(i.体液) + '</div></div>';
-    if (i.阴茎) instantItems += '<div class="info-item"><label>阴茎</label><div class="value">' + esc(i.阴茎) + '</div></div>';
-    if (i.前列腺) instantItems += '<div class="info-item"><label>前列腺</label><div class="value">' + esc(i.前列腺) + '</div></div>';
-    if (i.尿道) instantItems += '<div class="info-item"><label>尿道</label><div class="value">' + esc(i.尿道) + '</div></div>';
-    if (i.精液) instantItems += '<div class="info-item"><label>精液</label><div class="value">' + esc(i.精液) + '</div></div>';
-    $('#bodyInstant').html(instantItems || '<div class="empty-state">暂无数据</div>');
-  }
-
-  // === Render Tasks ===
-  function renderTasks() {
-    var t = getVal('任务', {});
-    var main = t.主线 || {};
-    var side = t.支线 || {};
-    var daily = t.持续 || {};
-
-    var mainHtml = main.标题 && main.标题 !== '待发布' ?
-      '<div class="npc-card">' +
-      '<div style="color:#e94560;font-weight:bold;font-size:11px;">' + esc(main.标题) + (main.完成 ? ' <span style="color:#64ffda">[已完成]</span>' : '') + '</div>' +
-      '<div style="color:#a8b2d1;font-size:10px;margin-top:2px;">' + esc(main.描述) + '</div>' +
-      '<div style="color:#8892b0;font-size:9px;margin-top:2px;">条件: ' + esc(main.条件) + '</div>' +
-      (main.奖励 && main.奖励.积分 ? '<div style="color:#ffd93d;font-size:9px;">奖励积分: ' + main.奖励.积分 + '</div>' : '') +
-      '</div>' : '<div class="empty-state">暂无主线任务</div>';
-    $('#taskMain').html(mainHtml);
-
-    var sideKeys = Object.keys(side);
-    if (sideKeys.length === 0) {
-      $('#taskSide').html('<div class="empty-state">暂无支线任务</div>');
+  // Edit buttons
+  $(document).on('click', '.edit-btn', function() {
+    var type = $(this).data('edit');
+    if (type === 'clothing') {
+      showClothingEdit();
     } else {
-      $('#taskSide').html(sideKeys.map(function(k) {
-        var s = side[k];
-        return '<div class="npc-card">' +
-          '<div style="color:#e94560;font-weight:bold;font-size:11px;">' + esc(k) + ': ' + esc(s.标题) + (s.完成 ? ' <span style="color:#64ffda">[已完成]</span>' : '') + '</div>' +
-          '<div style="color:#a8b2d1;font-size:10px;margin-top:2px;">' + esc(s.描述) + '</div>' +
-          '</div>';
-      }).join(''));
+      showEditPopup(type);
     }
+  });
 
-    var dailyHtml = daily.标题 && daily.标题 !== '待发布' ?
-      '<div class="npc-card">' +
-      '<div style="color:#e94560;font-weight:bold;font-size:11px;">' + esc(daily.标题) + (!daily.启用 ? ' <span style="color:#8892b0">[未启用]</span>' : '') + '</div>' +
-      '<div style="color:#a8b2d1;font-size:10px;margin-top:2px;">' + esc(daily.描述) + '</div>' +
-      '<div style="color:#8892b0;font-size:9px;margin-top:2px;">完成次数: ' + (daily.完成次数 || 0) + '</div>' +
-      '</div>' : '<div class="empty-state">暂无持续任务</div>';
-    $('#taskDaily').html(dailyHtml);
+  // Theme
+  function applyTheme(isDark) {
+    document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
   }
+  applyTheme(localStorage.getItem('system-dark-mode') === 'true');
 
-  // === Render NPCs ===
-  function renderNPCs() {
-    var npcs = getVal('NPC', {});
-    var keys = Object.keys(npcs).filter(function(k) { return npcs[k] && npcs[k].名称; });
-    if (keys.length === 0) {
-      $('#npcList').html('<div class="empty-state">暂无交互角色</div>');
-      return;
-    }
-    $('#npcList').html(keys.map(function(k) {
-      var n = npcs[k];
-      var fav = n.好感度 || 0;
-      var hate = n.厌恶度 || 0;
-      var cor = n.堕落度 || 0;
-      var ple = n.快感 || 0;
-      var mbti = n.角色 && n.角色.性格 && n.角色.性格.荣格八维 ? n.角色.性格.荣格八维 : {};
-      return '<div class="npc-card">' +
-        '<div class="npc-name">' + esc(n.名称) + ' <span style="color:#8892b0;font-size:10px;font-weight:normal">(' + esc(k) + ')</span></div>' +
-        '<div class="npc-sub">' + (n.角色 && n.角色.年龄 ? n.角色.年龄 + '岁 · ' : '') + esc(n.关系 || n.角色 && n.角色.职业 || '未知') + '</div>' +
-        '<div class="affinity-bar">' +
-        '<div class="affinity-item"><div class="affinity-value" style="color:#ff6b6b">' + fav + '</div><div class="affinity-label">好感</div></div>' +
-        '<div class="affinity-item"><div class="affinity-value" style="color:#ffd93d">' + hate + '</div><div class="affinity-label">厌恶</div></div>' +
-        '<div class="affinity-item"><div class="affinity-value" style="color:#c084fc">' + cor + '</div><div class="affinity-label">堕落</div></div>' +
-        '<div class="affinity-item"><div class="affinity-value" style="color:#ff9f43">' + ple + '</div><div class="affinity-label">快感</div></div>' +
-        '<div style="margin-left:auto"><span class="mood-badge">' + esc(n.情绪状态 || '平静') + '</span></div>' +
-        '<button class="btn btn-sm btn-edit-npc" data-npc="' + esc(k) + '">编辑</button>' +
-        '</div>' +
-        '<div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:4px;">' +
-        '<button class="btn btn-secondary btn-sm btn-npc-detail" data-npc="' + esc(k) + '">📋详情</button>' +
-        '<button class="btn btn-secondary btn-sm btn-npc-cloth" data-npc="' + esc(k) + '">👗服装</button>' +
-        '<button class="btn btn-secondary btn-sm btn-npc-aff" data-npc="' + esc(k) + '">❤️好感</button>' +
-        '</div></div>';
-    }).join(''));
-  }
-
-  // === Render Shop ===
-  function renderShop() {
-    var shop = getVal('商城', {});
-    var bag = shop.背包 || {};
-    var sale = shop.在售 || {};
-
-    var bagKeys = Object.keys(bag);
-    if (bagKeys.length === 0) {
-      $('#shopBag').html('<div class="empty-state">背包为空</div>');
-    } else {
-      $('#shopBag').html(bagKeys.map(function(k) {
-        var item = bag[k];
-        return '<div class="item-row">' +
-          '<div><div class="item-name">' + esc(k) + '</div><div class="item-desc">' + esc(item.描述 || '') + ' · 来源:' + esc(item.来源 || '') + '</div></div>' +
-          '<span style="color:#e94560;font-size:11px;">×' + (item.数量 || 0) + '</span>' +
-          '</div>';
-      }).join(''));
-    }
-
-    var saleKeys = Object.keys(sale);
-    if (saleKeys.length === 0) {
-      $('#shopSale').html('<div class="empty-state">暂无商品</div>');
-    } else {
-      $('#shopSale').html(saleKeys.map(function(k) {
-        var item = sale[k];
-        return '<div class="item-row">' +
-          '<div><div class="item-name">' + esc(k) + '</div><div class="item-desc">' + esc(item.描述 || '') + '</div></div>' +
-          '<span style="color:#ffd93d;font-size:11px;">💰' + (item.价格 || 0) + ' · 库存' + (item.库存 || 0) + '</span>' +
-          '</div>';
-      }).join(''));
-    }
-  }
-
-  // === Render Ability ===
-  function renderAbility() {
-    var abi = getVal('宿主能力', {});
-    if (!abi) {
-      $('#abiStats').html('<div class="empty-state">能力系统未初始化</div>');
-      $('#abiList').html('');
-      return;
-    }
-    var stats = abi.属性点 || {};
-    var abilities = abi.能力 || {};
-
-    var statNames = ['力量', '敏捷', '体质', '智力', '感知', '魅力'];
-    $('#abiStats').html('<div class="info-grid">' + statNames.map(function(s) {
-      var val = stats[s];
-      return '<div class="info-item"><label>' + s + '</label><div class="value">' + (val !== null && val !== undefined ? val : '--') + '/100</div></div>';
-    }).join('') + '</div>');
-
-    var abiKeys = Object.keys(abilities);
-    if (abiKeys.length === 0) {
-      $('#abiList').html('<div class="empty-state">暂无能力</div>');
-    } else {
-      $('#abiList').html(abiKeys.map(function(k) {
-        return '<div class="item-row"><div class="item-name">' + esc(k) + '</div><div class="item-desc">' + esc(abilities[k] || '') + '</div></div>';
-      }).join(''));
-    }
-  }
-
-  // === NPC Detail Popup ===
-  $(document).on('click', '.btn-npc-detail', function() {
-    var id = $(this).data('npc');
-    var n = getVal('NPC.' + id, {});
-    var role = n.角色 || {};
-    var mbti = role.性格 && role.性格.荣格八维 ? role.性格.荣格八维 : {};
-    var v = role.贞操状态 || {};
-    var html = '<div class="info-grid">' +
-      '<div class="info-item"><label>姓名</label><div class="value">' + esc(role.姓名 || n.姓名) + '</div></div>' +
-      '<div class="info-item"><label>性别</label><div class="value">' + esc(role.性别) + '</div></div>' +
-      '<div class="info-item"><label>年龄</label><div class="value">' + (role.年龄 || '--') + '</div></div>' +
-      '<div class="info-item"><label>关系</label><div class="value">' + esc(n.关系 || '--') + '</div></div>' +
-      '</div>' +
-      '<div class="section-title">性格</div>' +
-      '<div class="info-grid">' +
-      '<div class="info-item"><label>主导</label><div class="value">' + esc(mbti.主导) + '</div></div>' +
-      '<div class="info-item"><label>辅助</label><div class="value">' + esc(mbti.辅助) + '</div></div>' +
-      '<div class="info-item"><label>第三</label><div class="value">' + esc(mbti.第三) + '</div></div>' +
-      '<div class="info-item"><label>劣势</label><div class="value">' + esc(mbti.劣势) + '</div></div>' +
-      '</div>' +
-      '<div style="margin-top:4px;color:#a8b2d1;font-size:10px;">核心特征: ' + esc(role.性格 && role.性格.核心特征 || '--') + '</div>' +
-      '<div class="section-title">状态</div>' +
-      '<div class="affinity-bar">' +
-      '<div class="affinity-item"><div class="affinity-value" style="color:#ff6b6b">' + (n.好感度 || 0) + '</div><div class="affinity-label">好感</div></div>' +
-      '<div class="affinity-item"><div class="affinity-value" style="color:#ffd93d">' + (n.厌恶度 || 0) + '</div><div class="affinity-label">厌恶</div></div>' +
-      '<div class="affinity-item"><div class="affinity-value" style="color:#c084fc">' + (n.堕落度 || 0) + '</div><div class="affinity-label">堕落</div></div>' +
-      '<div class="affinity-item"><div class="affinity-value" style="color:#ff9f43">' + (n.快感 || 0) + '</div><div class="affinity-label">快感</div></div>' +
-      '</div>' +
-      '<div style="margin-top:4px;color:#a8b2d1;font-size:10px;">情绪: ' + esc(n.情绪状态 || '平静') + '</div>';
-    openPopup('角色详情: ' + esc(n.名称 || id), html);
-  });
-
-  // === NPC Clothing Popup ===
-  $(document).on('click', '.btn-npc-cloth', function() {
-    var id = $(this).data('npc');
-    var n = getVal('NPC.' + id, {});
-    var html = '<div class="form-row"><label>当前服装</label><textarea class="form-textarea" id="npcClothInput">' + esc(n.服装 || '') + '</textarea></div>' +
-      '<button class="btn btn-primary btn-sm" id="btnSaveNpcCloth" data-npc="' + esc(id) + '">更新服装</button>';
-    openPopup('服装: ' + esc(n.名称 || id), html);
-  });
-  $(document).on('click', '#btnSaveNpcCloth', function() {
-    var id = $(this).data('npc');
-    var val = $('#npcClothInput').val();
-    updateVar('NPC.' + id + '.服装', val);
-    sendCmd('【服装更新】已更新 ' + id + ' 的服装');
-    render(); closePopup();
-  });
-
-  // === NPC Affinity Popup ===
-  $(document).on('click', '.btn-npc-aff', function() {
-    var id = $(this).data('npc');
-    var n = getVal('NPC.' + id, {});
-    var html = '<div class="info-grid">' +
-      '<div class="form-row"><label>好感度</label><input class="form-input" id="affFav" type="number" value="' + (n.好感度 || 0) + '"></div>' +
-      '<div class="form-row"><label>厌恶度</label><input class="form-input" id="affHate" type="number" value="' + (n.厌恶度 || 0) + '"></div>' +
-      '<div class="form-row"><label>堕落度</label><input class="form-input" id="affCor" type="number" value="' + (n.堕落度 || 0) + '"></div>' +
-      '<div class="form-row"><label>快感</label><input class="form-input" id="affPle" type="number" value="' + (n.快感 || 0) + '"></div>' +
-      '</div>' +
-      '<div class="form-row" style="margin-top:6px;"><label>情绪状态</label><input class="form-input" id="affMood" value="' + esc(n.情绪状态 || '平静') + '"></div>' +
-      '<button class="btn btn-primary btn-sm" style="margin-top:8px;" id="btnSaveAff" data-npc="' + esc(id) + '">保存</button>';
-    openPopup('好感度: ' + esc(n.名称 || id), html);
-  });
-  $(document).on('click', '#btnSaveAff', function() {
-    var id = $(this).data('npc');
-    updateVar('NPC.' + id + '.好感度', parseInt($('#affFav').val()) || 0);
-    updateVar('NPC.' + id + '.厌恶度', parseInt($('#affHate').val()) || 0);
-    updateVar('NPC.' + id + '.堕落度', parseInt($('#affCor').val()) || 0);
-    updateVar('NPC.' + id + '.快感', parseInt($('#affPle').val()) || 0);
-    updateVar('NPC.' + id + '.情绪状态', $('#affMood').val());
-    sendCmd('【好感度更新】已更新 ' + id + ' 的好感度');
-    render(); closePopup();
-  });
-
-  // === NPC Editor ===
-  $(document).on('click', '.btn-edit-npc', function() {
-    var id = $(this).data('npc');
-    var n = getVal('NPC.' + id, {});
-    var role = n.角色 || {};
-    var html = '<div class="form-row"><label>名称</label><input class="form-input" id="enName" value="' + esc(role.姓名 || n.姓名 || '') + '"></div>' +
-      '<div class="form-row"><label>关系</label><input class="form-input" id="enRel" value="' + esc(n.关系 || '') + '"></div>' +
-      '<div class="form-row"><label>外貌</label><textarea class="form-textarea" id="enLook">' + esc(n.外貌 || '') + '</textarea></div>' +
-      '<div class="form-row"><label>身材</label><textarea class="form-textarea" id="enBody">' + esc(n.身材 || '') + '</textarea></div>' +
-      '<div class="form-row"><label>性格</label><textarea class="form-textarea" id="enPerson">' + esc(n.性格 || '') + '</textarea></div>' +
-      '<button class="btn btn-primary btn-sm" style="margin-top:8px;" id="btnSaveNpcEdit" data-npc="' + esc(id) + '">保存</button>';
-    openPopup('编辑: ' + esc(n.名称 || id), html);
-  });
-  $(document).on('click', '#btnSaveNpcEdit', function() {
-    var id = $(this).data('npc');
-    updateVar('NPC.' + id + '.角色.姓名', $('#enName').val());
-    updateVar('NPC.' + id + '.关系', $('#enRel').val());
-    updateVar('NPC.' + id + '.外貌', $('#enLook').val());
-    updateVar('NPC.' + id + '.身材', $('#enBody').val());
-    updateVar('NPC.' + id + '.性格', $('#enPerson').val());
-    sendCmd('【角色更新】已更新 ' + id + ' 的信息');
-    render(); closePopup();
-  });
-
-  // === Main Render ===
-  function render() {
-    renderHost();
-    renderBody();
-    renderTasks();
-    renderNPCs();
-    renderShop();
-    renderAbility();
-  }
-  render();
-
-  // === Show only latest ===
-  (function showOnlyLatest() {
-    try {
-      var parentDoc = window.parent.document;
-      var allBars = parentDoc.querySelectorAll('.status-bar');
-      if (allBars.length <= 1) return;
-      var thisBar = document.querySelector('.status-bar');
-      var myIndex = -1;
-      for (var i = 0; i < allBars.length; i++) { if (allBars[i] === thisBar) { myIndex = i; break; } }
-      if (myIndex >= 0 && myIndex < allBars.length - 1) {
-        var container = thisBar.closest('.mes,.mes_text,.chat-row,.message-row,div[class*="mes"]');
-        if (container) container.style.display = 'none';
-      }
-    } catch(e) {}
-  })();
+  // Initial render
+  renderAll();
 });
 </script>
-</body></html>
+
+</body>
+</html>
