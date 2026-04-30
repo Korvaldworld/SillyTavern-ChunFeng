@@ -112,7 +112,7 @@
                     "id": "667c29df-fd4c-45d3-a74a-2cf9ca2d0c3d",
                     "scriptName": "3.状态栏",
                     "findRegex": "<StatusPlaceHolderImpl/>",
-                    "replaceString": "```html\n<body>\n  <script>\n    $('body').load('https://testingcf.jsdelivr.net/gh/emo-lsp/SillyTavern@refs/heads/main/System/状态栏1.2.html')\n  </script>\n  </body>\n```",
+                    "replaceString": "```html\n<body>\n  <script>\n    $('body').load('https://testingcf.jsdelivr.net/gh/Korvaldworld/SillyTavern-ChunFeng@refs/heads/main/System/状态栏1.2.html')\n  </script>\n  </body>\n```",
                     "trimStrings": [],
                     "placement": [
                         2
