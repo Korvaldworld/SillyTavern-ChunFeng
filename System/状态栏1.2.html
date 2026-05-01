@@ -6,23 +6,6 @@
 <title>状态栏</title>
 <style>
 :root {
-  --bg-paper: #f0f0f0;
-  --bg-window: #e2e2e2;
-  --bg-panel: #f7f7f7;
-  --bg-inset: #dcdcdc;
-  --ink: #0c0c0c;
-  --ink-soft: #2b2b2b;
-  --ink-dim: #6a6a6a;
-  --border: #000000;
-  --border-light: #ffffff;
-  --shadow-hard: 2px 2px 0 #000000;
-  --shadow-soft: 1px 1px 0 #000000;
-  --accent: #000000;
-  --accent-rainbow: linear-gradient(90deg, #ff3b30, #ff9500, #ffcc00, #34c759, #5ac8fa, #007aff, #5856d6);
-  --font-ui: 'Chicago', 'Geneva', 'Pixelated MS Sans Serif', 'MS Sans Serif', 'Courier New', monospace;
-}
-
-:root[data-theme='dark'] {
   --bg-paper: #1b1b1b;
   --bg-window: #242424;
   --bg-panel: #2a2a2a;
@@ -35,6 +18,8 @@
   --shadow-hard: 1px 1px 0 #0a0a0a;
   --shadow-soft: 0 0 0 #000000;
   --accent: #dcdcdc;
+  --accent-rainbow: linear-gradient(90deg, #ff3b30, #ff9500, #ffcc00, #34c759, #5ac8fa, #007aff, #5856d6);
+  --font-ui: 'Chicago', 'Geneva', 'Pixelated MS Sans Serif', 'MS Sans Serif', 'Courier New', monospace;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -174,7 +159,7 @@ body {
 }
 .section-title:first-child { margin-top: 0; }
 
-/* ===== Edit Button ===== */
+/* ===== Buttons ===== */
 .edit-btn {
   padding: 2px 6px;
   border: 1px solid var(--border);
@@ -186,6 +171,7 @@ body {
   cursor: pointer;
 }
 .edit-btn:hover { background: var(--bg-inset); }
+.edit-btn:disabled { opacity: .4; cursor: not-allowed; }
 
 /* ===== NPC Selector ===== */
 .npc-selector {
@@ -193,6 +179,7 @@ body {
   gap: 4px;
   margin-bottom: 8px;
   flex-wrap: wrap;
+  align-items: center;
 }
 .npc-chip {
   padding: 4px 8px;
@@ -207,8 +194,8 @@ body {
 .npc-chip:hover { background: var(--bg-inset); }
 .npc-chip.active { background: var(--bg-inset); box-shadow: var(--shadow-hard); font-weight: 700; }
 
-/* ===== NPC Panel ===== */
-.npc-panel-overlay {
+/* ===== Overlays ===== */
+.overlay {
   position: fixed;
   inset: 0;
   background: rgba(0,0,0,.45);
@@ -218,8 +205,8 @@ body {
   padding: 16px;
   z-index: 1000;
 }
-.npc-panel-overlay.active { display: flex; }
-.npc-panel {
+.overlay.active { display: flex; }
+.panel {
   width: min(640px, 96%);
   max-height: 90vh;
   overflow: auto;
@@ -231,48 +218,27 @@ body {
   flex-direction: column;
   gap: 10px;
 }
-.npc-panel-header {
+.panel-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding-bottom: 8px;
   border-bottom: 1px solid var(--border);
 }
-.npc-panel-title { font-size: .9rem; font-weight: 700; }
-.npc-panel-actions { display: flex; gap: 6px; flex-wrap: wrap; }
-.npc-list { display: flex; flex-direction: column; gap: 6px; }
-.npc-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 6px 8px;
-  border: 1px solid var(--border);
-  background: var(--bg-paper);
-  box-shadow: var(--shadow-soft);
-  cursor: pointer;
-}
-.npc-item:hover { background: var(--bg-inset); }
-.npc-item.active { background: var(--bg-inset); box-shadow: var(--shadow-hard); }
-.npc-item-name { font-size: .8rem; font-weight: 700; }
-.npc-item-type { font-size: .65rem; color: var(--ink-dim); margin-left: 6px; }
-.npc-item-rel { font-size: .7rem; color: var(--ink-dim); }
-.npc-item-actions { display: flex; gap: 4px; }
-.npc-mini-btn {
-  padding: 2px 6px;
-  border: 1px solid var(--border);
-  background: var(--bg-panel);
-  font-family: var(--font-ui);
-  font-size: .65rem;
-  color: var(--ink);
-  cursor: pointer;
-}
-.relation-list { display: flex; flex-direction: column; gap: 6px; }
-.relation-item {
-  padding: 6px 8px;
-  border: 1px solid var(--border);
-  background: var(--bg-paper);
-  box-shadow: var(--shadow-soft);
+.panel-title { font-size: .9rem; font-weight: 700; }
+.panel-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+
+/* ===== Forms ===== */
+.form-group-title {
   font-size: .75rem;
+  font-weight: 700;
+  color: var(--ink-soft);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin: 10px 0 6px;
+  padding: 4px 6px;
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
 }
 .form-grid {
   display: grid;
@@ -293,7 +259,46 @@ body {
   font-size: .75rem;
   color: var(--ink);
 }
+.form-field textarea { resize: vertical; min-height: 40px; }
 .form-field.full { grid-column: span 2; }
+
+/* ===== NPC List ===== */
+.npc-list { display: flex; flex-direction: column; gap: 6px; }
+.npc-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 8px;
+  border: 1px solid var(--border);
+  background: var(--bg-paper);
+  box-shadow: var(--shadow-soft);
+  cursor: pointer;
+}
+.npc-item:hover { background: var(--bg-inset); }
+.npc-item.active { background: var(--bg-inset); box-shadow: var(--shadow-hard); }
+.npc-item-name { font-size: .8rem; font-weight: 700; }
+.npc-item-type { font-size: .65rem; color: var(--ink-dim); margin-left: 6px; }
+.npc-item-rel { font-size: .7rem; color: var(--ink-dim); }
+.npc-item-actions { display: flex; gap: 4px; }
+.mini-btn {
+  padding: 2px 6px;
+  border: 1px solid var(--border);
+  background: var(--bg-panel);
+  font-family: var(--font-ui);
+  font-size: .65rem;
+  color: var(--ink);
+  cursor: pointer;
+}
+.mini-btn:hover { background: var(--bg-inset); }
+
+.relation-list { display: flex; flex-direction: column; gap: 6px; }
+.relation-item {
+  padding: 6px 8px;
+  border: 1px solid var(--border);
+  background: var(--bg-paper);
+  box-shadow: var(--shadow-soft);
+  font-size: .75rem;
+}
 
 /* ===== Mobile ===== */
 @media (max-width: 720px) {
@@ -302,7 +307,7 @@ body {
   .tab-btn { font-size: .7rem; padding: 5px 4px; }
   .form-grid { grid-template-columns: 1fr; }
   .form-field.full { grid-column: span 1; }
-  .npc-panel { width: 100%; max-height: 100vh; }
+  .panel { width: 100%; max-height: 100vh; }
 }
 </style>
 </head>
@@ -313,22 +318,11 @@ body {
 
 <!-- Header -->
 <div class="header" id="header">
-  <div class="header-item">
-    <span class="header-label">日期</span>
-    <span class="header-value" id="h-date">--</span>
-  </div>
-  <div class="header-item">
-    <span class="header-label">时间</span>
-    <span class="header-value" id="h-time">--</span>
-  </div>
-  <div class="header-item">
-    <span class="header-label">地点</span>
-    <span class="header-value" id="h-loc">--</span>
-  </div>
-  <div class="header-item">
-    <span class="header-label">当前交互</span>
-    <span class="header-value" id="h-char">无</span>
-  </div>
+  <div class="header-item"><span class="header-label">日期</span><span class="header-value" id="h-date">--</span></div>
+  <div class="header-item"><span class="header-label">时间</span><span class="header-value" id="h-time">--</span></div>
+  <div class="header-item"><span class="header-label">地点</span><span class="header-value" id="h-loc">--</span></div>
+  <div class="header-item"><span class="header-label">天气</span><span class="header-value" id="h-weather">--</span></div>
+  <div class="header-item"><span class="header-label">当前交互</span><span class="header-value" id="h-char">无</span></div>
 </div>
 
 <!-- Tab Bar -->
@@ -337,20 +331,15 @@ body {
   <button class="tab-btn" data-tab="psych">性格/心理/堕落</button>
   <button class="tab-btn" data-tab="body">身体状态</button>
   <button class="tab-btn" data-tab="goal">目标</button>
+  <button class="tab-btn" id="btn-npc-panel" style="margin-left:auto;">角色管理</button>
 </div>
 
 <!-- Tab: 角色/信息 -->
 <div class="tab-content active" id="tab-role">
-  <div class="npc-selector" id="role-npc-selector">
-    <span style="font-size:.7rem;color:var(--ink-dim);padding:4px 0;">主要角色：</span>
-  </div>
+  <div class="npc-selector" id="role-npc-selector"><span style="font-size:.7rem;color:var(--ink-dim);padding:4px 0;">主要角色：</span></div>
   <div class="card-grid">
-    <!-- 基础状态 -->
     <div class="card">
-      <div class="card-header" data-card="basic">
-        <span class="card-title">基础状态</span>
-        <span class="card-toggle">▼</span>
-      </div>
+      <div class="card-header" data-card="basic"><span class="card-title">基础状态</span><span class="card-toggle">▼</span></div>
       <div class="card-body" id="card-basic">
         <div class="info-row"><span class="info-label">名称</span><span class="info-value null" id="r-name">--</span></div>
         <div class="info-row"><span class="info-label">性别</span><span class="info-value null" id="r-gender">--</span></div>
@@ -365,12 +354,8 @@ body {
         <div style="margin-top:6px;text-align:right;"><button class="edit-btn" data-edit="basic">编辑</button></div>
       </div>
     </div>
-    <!-- 外貌特征 -->
     <div class="card">
-      <div class="card-header" data-card="face">
-        <span class="card-title">外貌特征</span>
-        <span class="card-toggle">▼</span>
-      </div>
+      <div class="card-header" data-card="face"><span class="card-title">外貌特征</span><span class="card-toggle">▼</span></div>
       <div class="card-body" id="card-face">
         <div class="info-row"><span class="info-label">面部</span><span class="info-value null" id="r-face">--</span></div>
         <div class="info-row"><span class="info-label">头发</span><span class="info-value null" id="r-hair">--</span></div>
@@ -380,20 +365,35 @@ body {
         <div style="margin-top:6px;text-align:right;"><button class="edit-btn" data-edit="face">编辑</button></div>
       </div>
     </div>
+    <div class="card">
+      <div class="card-header" data-card="style"><span class="card-title">服装风格</span><span class="card-toggle">▼</span></div>
+      <div class="card-body" id="card-style">
+        <div class="info-row"><span class="info-label">搭配风格</span><span class="info-value null" id="r-style">--</span></div>
+        <div class="info-row"><span class="info-label">丝袜搭配</span><span class="info-value null" id="r-stockings">--</span></div>
+        <div class="info-row"><span class="info-label">居家搭配</span><span class="info-value null" id="r-home">--</span></div>
+        <div class="info-row"><span class="info-label">鞋子搭配</span><span class="info-value null" id="r-shoes">--</span></div>
+        <div style="margin-top:6px;text-align:right;"><button class="edit-btn" data-edit="style">编辑</button></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header" data-card="sexual"><span class="card-title">性特质</span><span class="card-toggle">▼</span></div>
+      <div class="card-body" id="card-sexual">
+        <div class="info-row"><span class="info-label">敏感点</span><span class="info-value null" id="r-sensitive">--</span></div>
+        <div class="info-row"><span class="info-label">接受程度</span><span class="info-value null" id="r-acceptance">--</span></div>
+        <div class="info-row"><span class="info-label">身体反应</span><span class="info-value null" id="r-reaction">--</span></div>
+        <div class="info-row"><span class="info-label">行为偏好</span><span class="info-value null" id="r-preference">--</span></div>
+        <div style="margin-top:6px;text-align:right;"><button class="edit-btn" data-edit="sexual">编辑</button></div>
+      </div>
+    </div>
   </div>
 </div>
 
 <!-- Tab: 性格/心理/堕落 -->
 <div class="tab-content" id="tab-psych">
-  <div class="npc-selector" id="psych-npc-selector">
-    <span style="font-size:.7rem;color:var(--ink-dim);padding:4px 0;">主要角色：</span>
-  </div>
+  <div class="npc-selector" id="psych-npc-selector"><span style="font-size:.7rem;color:var(--ink-dim);padding:4px 0;">主要角色：</span></div>
   <div class="card-grid">
     <div class="card">
-      <div class="card-header" data-card="personality">
-        <span class="card-title">核心性格</span>
-        <span class="card-toggle">▼</span>
-      </div>
+      <div class="card-header" data-card="personality"><span class="card-title">核心性格</span><span class="card-toggle">▼</span></div>
       <div class="card-body" id="card-personality">
         <div class="info-row"><span class="info-label">核心特质</span><span class="info-value null" id="p-core">--</span></div>
         <div class="info-row"><span class="info-label">正面特质</span><span class="info-value null" id="p-positive">--</span></div>
@@ -405,10 +405,7 @@ body {
       </div>
     </div>
     <div class="card">
-      <div class="card-header" data-card="status">
-        <span class="card-title">当前状态</span>
-        <span class="card-toggle">▼</span>
-      </div>
+      <div class="card-header" data-card="status"><span class="card-title">当前状态</span><span class="card-toggle">▼</span></div>
       <div class="card-body" id="card-status">
         <div class="info-row"><span class="info-label">好感度</span><span class="info-value null" id="s-favor">--</span></div>
         <div class="info-row"><span class="info-label">厌恶度</span><span class="info-value null" id="s-hate">--</span></div>
@@ -421,29 +418,21 @@ body {
 
 <!-- Tab: 身体状态 -->
 <div class="tab-content" id="tab-body">
-  <div class="npc-selector" id="body-npc-selector">
-    <span style="font-size:.7rem;color:var(--ink-dim);padding:4px 0;">主要角色：</span>
-  </div>
+  <div class="npc-selector" id="body-npc-selector"><span style="font-size:.7rem;color:var(--ink-dim);padding:4px 0;">主要角色：</span></div>
   <div class="card-grid">
     <div class="card">
-      <div class="card-header" data-card="clothing">
-        <span class="card-title">穿着</span>
-        <span class="card-toggle">▼</span>
-      </div>
+      <div class="card-header" data-card="clothing"><span class="card-title">穿着</span><span class="card-toggle">▼</span></div>
       <div class="card-body" id="card-clothing">
         <div class="info-row"><span class="info-label">上衣</span><span class="info-value null" id="b-top">--</span></div>
         <div class="info-row"><span class="info-label">下装</span><span class="info-value null" id="b-bottom">--</span></div>
         <div class="info-row"><span class="info-label">足部</span><span class="info-value null" id="b-feet">--</span></div>
         <div class="info-row"><span class="info-label">内衣</span><span class="info-value null" id="b-underwear">--</span></div>
         <div class="info-row"><span class="info-label">内裤</span><span class="info-value null" id="b-panties">--</span></div>
-        <div style="margin-top:6px;text-align:right;"><button class="edit-btn" data-edit="clothing">编辑</button></div>
+        <div style="margin-top:6px;text-align:right;"><button class="edit-btn" data-edit="clothing">编辑穿着</button></div>
       </div>
     </div>
     <div class="card">
-      <div class="card-header" data-card="figure">
-        <span class="card-title">体型特征</span>
-        <span class="card-toggle">▼</span>
-      </div>
+      <div class="card-header" data-card="figure"><span class="card-title">体型特征</span><span class="card-toggle">▼</span></div>
       <div class="card-body" id="card-figure">
         <div class="info-row"><span class="info-label">整体体型</span><span class="info-value null" id="f-body">--</span></div>
         <div class="info-row"><span class="info-label">胸部</span><span class="info-value null" id="f-breast">--</span></div>
@@ -456,10 +445,7 @@ body {
       </div>
     </div>
     <div class="card">
-      <div class="card-header" data-card="virgin">
-        <span class="card-title">贞操状态</span>
-        <span class="card-toggle">▼</span>
-      </div>
+      <div class="card-header" data-card="virgin"><span class="card-title">贞操状态</span><span class="card-toggle">▼</span></div>
       <div class="card-body" id="card-virgin">
         <div class="info-row"><span class="info-label">处女</span><span class="info-value null" id="v-vaginal">--</span></div>
         <div class="info-row"><span class="info-label">口腔处女</span><span class="info-value null" id="v-oral">--</span></div>
@@ -468,10 +454,7 @@ body {
       </div>
     </div>
     <div class="card">
-      <div class="card-header" data-card="realtime">
-        <span class="card-title">即时状态</span>
-        <span class="card-toggle">▼</span>
-      </div>
+      <div class="card-header" data-card="realtime"><span class="card-title">即时状态</span><span class="card-toggle">▼</span></div>
       <div class="card-body" id="card-realtime">
         <div class="info-row"><span class="info-label">小穴</span><span class="info-value null" id="rt-vagina">--</span></div>
         <div class="info-row"><span class="info-label">子宫</span><span class="info-value null" id="rt-womb">--</span></div>
@@ -489,10 +472,7 @@ body {
 <!-- Tab: 目标 -->
 <div class="tab-content" id="tab-goal">
   <div class="card">
-    <div class="card-header" data-card="main-goal">
-      <span class="card-title">主线目标</span>
-      <span class="card-toggle">▼</span>
-    </div>
+    <div class="card-header" data-card="main-goal"><span class="card-title">主线目标</span><span class="card-toggle">▼</span></div>
     <div class="card-body" id="card-main-goal">
       <div class="info-row"><span class="info-label">标题</span><span class="info-value null" id="g-main-title">待发布</span></div>
       <div class="info-row"><span class="info-label">描述</span><span class="info-value null" id="g-main-desc">暂无</span></div>
@@ -501,13 +481,126 @@ body {
     </div>
   </div>
   <div class="section-title">支线目标</div>
-  <div id="side-goals-list">
-    <div class="info-row" style="opacity:.6;"><span class="info-label">暂无支线目标</span></div>
-  </div>
+  <div id="side-goals-list"><div class="info-row" style="opacity:.6;"><span class="info-label">暂无支线目标</span></div></div>
   <div style="margin-top:6px;text-align:right;"><button class="edit-btn" data-edit="side-goal">添加支线</button></div>
 </div>
 
 </div>
+</div>
+
+<!-- NPC Panel -->
+<div class="overlay" id="npc-panel-overlay">
+  <div class="panel">
+    <div class="panel-header"><span class="panel-title">角色管理</span>
+      <div class="panel-actions">
+        <button class="edit-btn" id="btn-add-main-npc">+添加主要角色</button>
+        <button class="edit-btn" id="btn-add-minor-npc">+添加次要角色</button>
+        <button class="edit-btn" id="btn-relation">+角色关系</button>
+        <button class="edit-btn" id="btn-close-npc-panel">关闭</button>
+      </div>
+    </div>
+    <div class="npc-list" id="npc-list">加载中...</div>
+  </div>
+</div>
+
+<!-- Add Main NPC -->
+<div class="overlay" id="add-main-overlay">
+  <div class="panel" style="width:min(520px,96%);">
+    <div class="panel-header"><span class="panel-title">添加主要角色</span><button class="edit-btn" id="btn-close-add-main">关闭</button></div>
+    <div id="add-main-form">
+      <div class="form-group-title">— 基础信息 —</div>
+      <div class="form-grid">
+        <div class="form-field"><label>角色ID</label><input id="am-id" placeholder="如NPC1"/></div>
+        <div class="form-field"><label>名称</label><input id="am-name"/></div>
+        <div class="form-field"><label>性别</label><select id="am-gender"><option value="">--</option><option>男</option><option>女</option></select></div>
+        <div class="form-field"><label>年龄</label><input id="am-age"/></div>
+        <div class="form-field"><label>身高</label><input id="am-height"/></div>
+        <div class="form-field"><label>体重</label><input id="am-weight"/></div>
+        <div class="form-field"><label>身份</label><input id="am-identity"/></div>
+        <div class="form-field"><label>经济情况</label><input id="am-economy"/></div>
+        <div class="form-field"><label>居住地</label><input id="am-residence"/></div>
+        <div class="form-field"><label>与主角关系</label><input id="am-relation"/></div>
+        <div class="form-field full"><label>背景经历</label><textarea id="am-background" rows="2"></textarea></div>
+      </div>
+      <div class="form-group-title">— 初始态度 —</div>
+      <div class="form-grid">
+        <div class="form-field"><label>好感度</label><input id="am-favor" type="number" value="0"/></div>
+        <div class="form-field"><label>厌恶度</label><input id="am-hate" type="number" value="0"/></div>
+        <div class="form-field"><label>堕落度</label><input id="am-corrupt" type="number" value="0"/></div>
+      </div>
+      <div class="form-group-title">— 外貌特征 —</div>
+      <div class="form-grid">
+        <div class="form-field"><label>面部</label><input id="am-face"/></div>
+        <div class="form-field"><label>头发</label><input id="am-hair"/></div>
+        <div class="form-field"><label>妆容</label><input id="am-makeup"/></div>
+        <div class="form-field"><label>皮肤</label><input id="am-skin"/></div>
+        <div class="form-field full"><label>特征</label><input id="am-features"/></div>
+      </div>
+      <div class="form-group-title">— 体型特征 —</div>
+      <div class="form-grid">
+        <div class="form-field"><label>整体体型</label><input id="am-body"/></div>
+        <div class="form-field"><label>胸部</label><input id="am-breast"/></div>
+        <div class="form-field"><label>腰部</label><input id="am-waist"/></div>
+        <div class="form-field"><label>手部</label><input id="am-hands"/></div>
+        <div class="form-field"><label>臀部</label><input id="am-hips"/></div>
+        <div class="form-field"><label>腿部</label><input id="am-legs"/></div>
+        <div class="form-field"><label>足部</label><input id="am-feet"/></div>
+      </div>
+      <div class="form-group-title">— 服装风格 —</div>
+      <div class="form-grid">
+        <div class="form-field"><label>搭配风格</label><input id="am-style"/></div>
+        <div class="form-field"><label>丝袜搭配</label><input id="am-stockings"/></div>
+        <div class="form-field"><label>居家搭配</label><input id="am-home"/></div>
+        <div class="form-field"><label>鞋子搭配</label><input id="am-shoes"/></div>
+      </div>
+      <div class="form-group-title">— 性格特质 —</div>
+      <div class="form-grid">
+        <div class="form-field full"><label>核心特质</label><input id="am-core"/></div>
+        <div class="form-field"><label>正面特质</label><input id="am-positive"/></div>
+        <div class="form-field"><label>负面特质</label><input id="am-negative"/></div>
+        <div class="form-field"><label>行为习惯</label><input id="am-habits"/></div>
+        <div class="form-field"><label>情绪反应</label><input id="am-emotion"/></div>
+        <div class="form-field"><label>社交态度</label><input id="am-social"/></div>
+      </div>
+      <div class="form-group-title">— 性特质 —</div>
+      <div class="form-grid">
+        <div class="form-field"><label>敏感点</label><input id="am-sensitive"/></div>
+        <div class="form-field"><label>接受程度</label><input id="am-acceptance"/></div>
+        <div class="form-field"><label>身体反应</label><input id="am-reaction"/></div>
+        <div class="form-field"><label>行为偏好</label><input id="am-preference"/></div>
+      </div>
+      <div style="margin-top:10px;text-align:right;"><button class="edit-btn" id="btn-save-main">保存</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- Add Minor NPC -->
+<div class="overlay" id="add-minor-overlay">
+  <div class="panel" style="width:min(400px,96%);">
+    <div class="panel-header"><span class="panel-title">添加次要角色</span><button class="edit-btn" id="btn-close-add-minor">关闭</button></div>
+    <div id="add-minor-form">
+      <div class="form-grid">
+        <div class="form-field"><label>角色ID</label><input id="an-id" placeholder="如NPC7"/></div>
+        <div class="form-field"><label>名称</label><input id="an-name"/></div>
+        <div class="form-field"><label>性别</label><select id="an-gender"><option value="">--</option><option>男</option><option>女</option></select></div>
+        <div class="form-field"><label>年龄</label><input id="an-age"/></div>
+        <div class="form-field"><label>身份</label><input id="an-identity"/></div>
+        <div class="form-field"><label>与主角关系</label><input id="an-relation"/></div>
+        <div class="form-field full"><label>背景简介</label><textarea id="an-background" rows="2"></textarea></div>
+      </div>
+      <div style="margin-top:10px;text-align:right;"><button class="edit-btn" id="btn-save-minor">保存</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- Relation Panel -->
+<div class="overlay" id="relation-overlay">
+  <div class="panel">
+    <div class="panel-header"><span class="panel-title">角色关系</span>
+      <div class="panel-actions"><button class="edit-btn" id="btn-add-relation">添加关系</button><button class="edit-btn" id="btn-close-relation">关闭</button></div>
+    </div>
+    <div class="relation-list" id="relation-list">暂无角色关系</div>
+  </div>
 </div>
 
 <script>
@@ -554,7 +647,7 @@ function sendCmd(text) {
     try { cur = window.parent.$('#send_textarea').val() || ''; } catch(e) {}
     var sep = cur.trim() ? '\n\n---\n\n' : '';
     triggerSlash('/setinput ' + cur + sep + text);
-  } catch(e) {}
+  } catch(e) { console.error('sendCmd:', e); }
 }
 
 // ===================== Current Role ID =====================
@@ -597,6 +690,7 @@ function renderHeader() {
   $('#h-date').text(env.当前日期 || '--');
   $('#h-time').text(env.当前时间 || '--');
   $('#h-loc').text(env.地点 || '--');
+  $('#h-weather').text(env.天气 || '--');
   var charName = '无';
   if (currentRoleId) {
     charName = getVal('NPC.' + currentRoleId + '.基础.名称', currentRoleId);
@@ -606,7 +700,10 @@ function renderHeader() {
 
 // ===================== Role/Info Tab =====================
 function renderRoleTab() {
-  if (!currentRoleId) return;
+  if (!currentRoleId) {
+    $('#tab-role .info-value').html('<span class="null">--</span>');
+    return;
+  }
   var p = 'NPC.' + currentRoleId + '.基础.';
   $('#r-name').html(displayVal(getVal(p + '名称')));
   $('#r-gender').html(displayVal(getVal(p + '性别')));
@@ -625,11 +722,26 @@ function renderRoleTab() {
   $('#r-makeup').html(displayVal(getVal(p + '妆容')));
   $('#r-skin').html(displayVal(getVal(p + '皮肤')));
   $('#r-features').html(displayVal(getVal(p + '特征')));
+
+  p = 'NPC.' + currentRoleId + '.风格.';
+  $('#r-style').html(displayVal(getVal(p + '搭配风格')));
+  $('#r-stockings').html(displayVal(getVal(p + '丝袜搭配')));
+  $('#r-home').html(displayVal(getVal(p + '居家搭配')));
+  $('#r-shoes').html(displayVal(getVal(p + '鞋子搭配')));
+
+  p = 'NPC.' + currentRoleId + '.性特质.';
+  $('#r-sensitive').html(displayVal(getVal(p + '敏感点')));
+  $('#r-acceptance').html(displayVal(getVal(p + '接受程度')));
+  $('#r-reaction').html(displayVal(getVal(p + '身体反应')));
+  $('#r-preference').html(displayVal(getVal(p + '行为偏好')));
 }
 
 // ===================== Psych Tab =====================
 function renderPsychTab() {
-  if (!currentRoleId) return;
+  if (!currentRoleId) {
+    $('#tab-psych .info-value').html('<span class="null">--</span>');
+    return;
+  }
   var p = 'NPC.' + currentRoleId + '.性格.';
   $('#p-core').html(displayVal(getVal(p + '核心特质')));
   $('#p-positive').html(displayVal(getVal(p + '正面特质')));
@@ -646,7 +758,10 @@ function renderPsychTab() {
 
 // ===================== Body Tab =====================
 function renderBodyTab() {
-  if (!currentRoleId) return;
+  if (!currentRoleId) {
+    $('#tab-body .info-value').html('<span class="null">--</span>');
+    return;
+  }
   var p = 'NPC.' + currentRoleId + '.穿着.';
   $('#b-top').html(displayVal(getVal(p + '上衣')));
   $('#b-bottom').html(displayVal(getVal(p + '下装')));
@@ -707,126 +822,123 @@ function renderGoalTab() {
 }
 
 // ===================== Edit Popup =====================
-var editFields = {
-  'basic': ['基础.名称','基础.性别','基础.年龄','基础.身高','基础.体重','基础.身份','基础.经济情况','基础.居住地','基础.与主角关系','基础.背景经历'],
-  'face': ['外貌.面部','外貌.头发','外貌.妆容','外貌.皮肤','外貌.特征'],
-  'personality': ['性格.核心特质','性格.正面特质','性格.负面特质','性格.行为习惯','性格.情绪反应','性格.社交态度'],
-  'status': ['状态.好感度','状态.厌恶度','状态.堕落度'],
-  'figure': ['体型.整体体型','体型.胸部','体型.腰部','体型.手部','体型.臀部','体型.腿部','体型.足部'],
-  'clothing': ['穿着.上衣','穿着.下装','穿着.足部','穿着.内衣','穿着.内裤'],
-  'main-goal': ['目标.主线.标题','目标.主线.描述','目标.主线.条件']
+var editConfigs = {
+  'basic': { title: '编辑基础状态', fields: [
+    {label:'名称', path:'基础.名称'}, {label:'性别', path:'基础.性别'},
+    {label:'年龄', path:'基础.年龄'}, {label:'身高', path:'基础.身高'},
+    {label:'体重', path:'基础.体重'}, {label:'身份', path:'基础.身份'},
+    {label:'经济情况', path:'基础.经济情况'}, {label:'居住地', path:'基础.居住地'},
+    {label:'与主角关系', path:'基础.与主角关系'}, {label:'背景经历', path:'基础.背景经历', full:true}
+  ]},
+  'face': { title: '编辑外貌特征', fields: [
+    {label:'面部', path:'外貌.面部'}, {label:'头发', path:'外貌.头发'},
+    {label:'妆容', path:'外貌.妆容'}, {label:'皮肤', path:'外貌.皮肤'},
+    {label:'特征', path:'外貌.特征', full:true}
+  ]},
+  'style': { title: '编辑服装风格', fields: [
+    {label:'搭配风格', path:'风格.搭配风格'}, {label:'丝袜搭配', path:'风格.丝袜搭配'},
+    {label:'居家搭配', path:'风格.居家搭配'}, {label:'鞋子搭配', path:'风格.鞋子搭配'}
+  ]},
+  'sexual': { title: '编辑性特质', fields: [
+    {label:'敏感点', path:'性特质.敏感点'}, {label:'接受程度', path:'性特质.接受程度'},
+    {label:'身体反应', path:'性特质.身体反应'}, {label:'行为偏好', path:'性特质.行为偏好'}
+  ]},
+  'personality': { title: '编辑性格', fields: [
+    {label:'核心特质', path:'性格.核心特质', full:true}, {label:'正面特质', path:'性格.正面特质'},
+    {label:'负面特质', path:'性格.负面特质'}, {label:'行为习惯', path:'性格.行为习惯'},
+    {label:'情绪反应', path:'性格.情绪反应'}, {label:'社交态度', path:'性格.社交态度'}
+  ]},
+  'status': { title: '编辑当前状态', fields: [
+    {label:'好感度', path:'状态.好感度'}, {label:'厌恶度', path:'状态.厌恶度'}, {label:'堕落度', path:'状态.堕落度'}
+  ]},
+  'figure': { title: '编辑体型', fields: [
+    {label:'整体体型', path:'体型.整体体型'}, {label:'胸部', path:'体型.胸部'},
+    {label:'腰部', path:'体型.腰部'}, {label:'手部', path:'体型.手部'},
+    {label:'臀部', path:'体型.臀部'}, {label:'腿部', path:'体型.腿部'}, {label:'足部', path:'体型.足部'}
+  ]},
+  'main-goal': { title: '编辑主线目标', fields: [
+    {label:'标题', path:'目标.主线.标题', absolute:true}, {label:'描述', path:'目标.主线.描述', absolute:true},
+    {label:'条件', path:'目标.主线.条件', absolute:true}
+  ]}
 };
 
 function showEditPopup(editType) {
-  if (!currentRoleId && editType !== 'main-goal' && editType !== 'side-goal') {
-    alert('请先选择一个主要角色');
+  var cfg = editConfigs[editType];
+  if (!cfg) return;
+  if (!currentRoleId && editType !== 'main-goal') {
+    // Instead of alert, show a message in the popup
+    var overlay = $('<div class="overlay active" style="display:flex;"></div>');
+    var panel = $('<div class="panel" style="width:min(360px,96%);"></div>');
+    panel.html('<div class="panel-header"><span class="panel-title">提示</span></div>' +
+      '<div style="padding:12px;font-size:.85rem;">请先添加或选择一个主要角色</div>' +
+      '<div style="text-align:right;padding-top:8px;"><button class="edit-btn" id="btn-ok">确定</button></div>');
+    overlay.append(panel);
+    $('body').append(overlay);
+    overlay.on('click', function(e) { if (e.target === overlay[0]) overlay.remove(); });
+    $('#btn-ok').on('click', function() { overlay.remove(); });
     return;
   }
-  var fields = editFields[editType] || [];
-  var titleMap = {
-    'basic': '编辑基础状态', 'face': '编辑外貌特征', 'personality': '编辑性格',
-    'status': '编辑当前状态', 'figure': '编辑体型', 'clothing': '编辑穿着',
-    'main-goal': '编辑主线目标', 'side-goal': '添加支线目标'
-  };
-  var html = '<div style="display:flex;flex-direction:column;gap:8px;">';
-  fields.forEach(function(f) {
-    var label = f.split('.')[1];
-    var path = editType === 'main-goal' ? f : 'NPC.' + currentRoleId + '.' + f;
+
+  var html = '<div class="form-grid">';
+  cfg.fields.forEach(function(f) {
+    var path = f.absolute ? f.path : 'NPC.' + currentRoleId + '.' + f.path;
     var val = getVal(path, '');
-    html += '<div style="display:flex;flex-direction:column;gap:3px;">' +
-      '<label style="font-size:.7rem;color:var(--ink-dim);">' + label + '</label>' +
-      '<input class="edit-field-input" data-path="' + path + '" value="' + esc(val) + '" style="padding:4px 6px;border:1px solid var(--border);background:var(--bg-window);font-family:var(--font-ui);font-size:.75rem;color:var(--ink);" />' +
-      '</div>';
+    var cls = f.full ? 'form-field full' : 'form-field';
+    html += '<div class="' + cls + '"><label>' + f.label + '</label>' +
+      '<input class="edit-field-input" data-path="' + path + '" value="' + esc(val) + '" /></div>';
   });
-  if (editType === 'side-goal') {
-    html += '<div style="display:flex;flex-direction:column;gap:3px;">' +
-      '<label style="font-size:.7rem;color:var(--ink-dim);">支线编号</label>' +
-      '<input id="side-goal-id" value="支线1" style="padding:4px 6px;border:1px solid var(--border);background:var(--bg-window);font-family:var(--font-ui);font-size:.75rem;color:var(--ink);" />' +
-      '</div>' +
-      '<div style="display:flex;flex-direction:column;gap:3px;">' +
-      '<label style="font-size:.7rem;color:var(--ink-dim);">标题</label>' +
-      '<input id="side-goal-title" style="padding:4px 6px;border:1px solid var(--border);background:var(--bg-window);font-family:var(--font-ui);font-size:.75rem;color:var(--ink);" />' +
-      '</div>' +
-      '<div style="display:flex;flex-direction:column;gap:3px;">' +
-      '<label style="font-size:.7rem;color:var(--ink-dim);">描述</label>' +
-      '<input id="side-goal-desc" style="padding:4px 6px;border:1px solid var(--border);background:var(--bg-window);font-family:var(--font-ui);font-size:.75rem;color:var(--ink);" />' +
-      '</div>' +
-      '<div style="display:flex;flex-direction:column;gap:3px;">' +
-      '<label style="font-size:.7rem;color:var(--ink-dim);">条件</label>' +
-      '<input id="side-goal-condition" style="padding:4px 6px;border:1px solid var(--border);background:var(--bg-window);font-family:var(--font-ui);font-size:.75rem;color:var(--ink);" />' +
-      '</div>';
-  }
   html += '</div><div style="margin-top:10px;text-align:right;">' +
     '<button class="edit-btn" id="btn-edit-cancel">取消</button> ' +
-    '<button class="edit-btn" id="btn-edit-save">保存</button>' +
-    '</div>';
+    '<button class="edit-btn" id="btn-edit-save">保存</button></div>';
 
-  var overlay = $('<div style="position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;padding:16px;z-index:1000;"></div>');
-  var panel = $('<div style="width:min(480px,96%);max-height:90vh;overflow:auto;background:var(--bg-paper);border:1px solid var(--border);box-shadow:var(--shadow-hard);padding:12px;"></div>');
-  panel.html('<div style="font-size:.85rem;font-weight:700;margin-bottom:10px;">' + (titleMap[editType] || '编辑') + '</div>' + html);
+  var overlay = $('<div class="overlay active" style="display:flex;"></div>');
+  var panel = $('<div class="panel" style="width:min(480px,96%);"></div>');
+  panel.html('<div class="panel-header"><span class="panel-title">' + cfg.title + '</span></div>' + html);
   overlay.append(panel);
   $('body').append(overlay);
 
   overlay.on('click', function(e) { if (e.target === overlay[0]) overlay.remove(); });
   $('#btn-edit-cancel').on('click', function() { overlay.remove(); });
   $('#btn-edit-save').on('click', function() {
-    if (editType === 'side-goal') {
-      var id = $('#side-goal-id').val().trim() || '支线1';
-      var data = readVar();
-      if (!data.目标) data.目标 = {};
-      if (!data.目标.支线) data.目标.支线 = {};
-      data.目标.支线[id] = {
-        标题: $('#side-goal-title').val(),
-        描述: $('#side-goal-desc').val(),
-        条件: $('#side-goal-condition').val(),
-        完成: false
-      };
-      writeVar(data);
-      sendCmd('【目标更新】已添加支线目标：' + id);
-    } else {
-      $('.edit-field-input').each(function() {
-        var path = $(this).data('path');
-        var val = $(this).val();
-        updateVar(path, val);
-      });
-      var changes = [];
-      $('.edit-field-input').each(function() {
-        var path = $(this).data('path');
-        var val = $(this).val();
-        if (val) {
-          var label = path.split('.').pop();
-          changes.push(label + '：' + val);
-        }
-      });
-      var cmdText = '【角色更新】已更新' + (titleMap[editType] || '信息') + '\n' + changes.join('\n');
-      sendCmd(cmdText);
-    }
+    var changes = [];
+    $('.edit-field-input').each(function() {
+      var path = $(this).data('path');
+      var val = $(this).val();
+      updateVar(path, val);
+      var label = $(this).closest('.form-field').find('label').text();
+      if (val) changes.push(label + '=' + val);
+    });
+    // Build detailed command
+    var charName = currentRoleId ? getVal('NPC.' + currentRoleId + '.基础.名称', currentRoleId) : '';
+    var cmdText = '【' + cfg.title + '】' + (charName ? '角色：' + charName : '');
+    if (changes.length > 0) cmdText += '\n更新内容：' + changes.join('，');
+    sendCmd(cmdText);
     overlay.remove();
     renderAll();
   });
 }
 
-// ===================== Clothing Edit (Special) =====================
+// ===================== Clothing Edit =====================
 function showClothingEdit() {
-  if (!currentRoleId) { alert('请先选择一个主要角色'); return; }
+  if (!currentRoleId) {
+    showEditPopup('status'); // triggers the no-role message
+    return;
+  }
   var items = ['上衣', '下装', '足部', '内衣', '内裤'];
-  var html = '<div style="display:flex;flex-direction:column;gap:8px;">';
+  var html = '<div class="form-grid">';
   items.forEach(function(item) {
     var path = 'NPC.' + currentRoleId + '.穿着.' + item;
     var val = getVal(path, '');
-    html += '<div style="display:flex;flex-direction:column;gap:3px;">' +
-      '<label style="font-size:.7rem;color:var(--ink-dim);">' + item + '</label>' +
-      '<input class="cloth-field-input" data-item="' + item + '" value="' + esc(val) + '" style="padding:4px 6px;border:1px solid var(--border);background:var(--bg-window);font-family:var(--font-ui);font-size:.75rem;color:var(--ink);" />' +
-      '</div>';
+    html += '<div class="form-field"><label>' + item + '</label>' +
+      '<input class="cloth-field-input" data-item="' + item + '" value="' + esc(val) + '" /></div>';
   });
   html += '</div><div style="margin-top:10px;text-align:right;">' +
     '<button class="edit-btn" id="btn-cloth-cancel">取消</button> ' +
-    '<button class="edit-btn" id="btn-cloth-save">确认换装</button>' +
-    '</div>';
+    '<button class="edit-btn" id="btn-cloth-save">确认换装</button></div>';
 
-  var overlay = $('<div style="position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;padding:16px;z-index:1000;"></div>');
-  var panel = $('<div style="width:min(400px,96%);background:var(--bg-paper);border:1px solid var(--border);box-shadow:var(--shadow-hard);padding:12px;"></div>');
-  panel.html('<div style="font-size:.85rem;font-weight:700;margin-bottom:10px;">编辑穿着</div>' + html);
+  var overlay = $('<div class="overlay active" style="display:flex;"></div>');
+  var panel = $('<div class="panel" style="width:min(400px,96%);"></div>');
+  panel.html('<div class="panel-header"><span class="panel-title">编辑穿着</span></div>' + html);
   overlay.append(panel);
   $('body').append(overlay);
 
@@ -842,60 +954,50 @@ function showClothingEdit() {
       if (val) changes.push(item + '=' + val);
     });
     if (changes.length > 0) {
-      sendCmd('【换装更新】已更新' + getVal('NPC.' + currentRoleId + '.基础.名称', currentRoleId) + '的穿着：' + changes.join('，'));
+      var charName = getVal('NPC.' + currentRoleId + '.基础.名称', currentRoleId);
+      sendCmd('【换装更新】角色：' + charName + '\n穿着变更：' + changes.join('，'));
     }
     overlay.remove();
     renderAll();
   });
 }
 
-// ===================== Render All =====================
-function renderAll() {
-  renderHeader();
-  renderNpcSelectors();
-  renderRoleTab();
-  renderPsychTab();
-  renderBodyTab();
-  renderGoalTab();
+// ===================== Side Goal Add =====================
+function showSideGoalAdd() {
+  var html = '<div class="form-grid">' +
+    '<div class="form-field"><label>支线编号</label><input id="sg-id" value="支线1"/></div>' +
+    '<div class="form-field"><label>标题</label><input id="sg-title"/></div>' +
+    '<div class="form-field full"><label>描述</label><textarea id="sg-desc" rows="2"></textarea></div>' +
+    '<div class="form-field full"><label>条件</label><textarea id="sg-condition" rows="2"></textarea></div>' +
+    '</div><div style="margin-top:10px;text-align:right;">' +
+    '<button class="edit-btn" id="btn-sg-cancel">取消</button> ' +
+    '<button class="edit-btn" id="btn-sg-save">保存</button></div>';
+
+  var overlay = $('<div class="overlay active" style="display:flex;"></div>');
+  var panel = $('<div class="panel" style="width:min(420px,96%);"></div>');
+  panel.html('<div class="panel-header"><span class="panel-title">添加支线目标</span></div>' + html);
+  overlay.append(panel);
+  $('body').append(overlay);
+
+  overlay.on('click', function(e) { if (e.target === overlay[0]) overlay.remove(); });
+  $('#btn-sg-cancel').on('click', function() { overlay.remove(); });
+  $('#btn-sg-save').on('click', function() {
+    var id = $('#sg-id').val().trim() || '支线1';
+    var data = readVar();
+    if (!data.目标) data.目标 = {};
+    if (!data.目标.支线) data.目标.支线 = {};
+    data.目标.支线[id] = {
+      标题: $('#sg-title').val(),
+      描述: $('#sg-desc').val(),
+      条件: $('#sg-condition').val(),
+      完成: false
+    };
+    writeVar(data);
+    sendCmd('【目标更新】已添加支线目标：' + id + '\n标题：' + ($('#sg-title').val() || '无') + '\n条件：' + ($('#sg-condition').val() || '暂无'));
+    overlay.remove();
+    renderAll();
+  });
 }
-
-// ===================== Event Bindings =====================
-$(function() {
-  // Tab switching
-  $('.tab-btn').on('click', function() {
-    var tab = $(this).data('tab');
-    $('.tab-btn').removeClass('active');
-    $(this).addClass('active');
-    $('.tab-content').removeClass('active');
-    $('#tab-' + tab).addClass('active');
-  });
-
-  // Card collapse
-  $(document).on('click', '.card-header', function() {
-    var card = $(this).data('card');
-    $('#card-' + card).toggleClass('collapsed');
-    $(this).find('.card-toggle').text($('#card-' + card).hasClass('collapsed') ? '▶' : '▼');
-  });
-
-  // Edit buttons
-  $(document).on('click', '.edit-btn', function() {
-    var type = $(this).data('edit');
-    if (type === 'clothing') {
-      showClothingEdit();
-    } else {
-      showEditPopup(type);
-    }
-  });
-
-  // Theme
-  function applyTheme(isDark) {
-    document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
-  }
-  applyTheme(localStorage.getItem('system-dark-mode') === 'true');
-
-  // Initial render
-  renderAll();
-});
 
 // ===================== NPC Panel =====================
 function openNpcPanel() {
@@ -909,218 +1011,166 @@ function renderNpcList() {
   var npcs = data.NPC || {};
   var list = $('#npc-list');
   var html = '';
-  var hasAny = false;
+  var hasMain = false, hasMinor = false;
 
-  // 主要角色
   html += '<div class="section-title">主要角色</div>';
   Object.keys(npcs).forEach(function(k) {
     var n = npcs[k];
     if (!n || n._类型 !== '主要') return;
-    hasAny = true;
+    hasMain = true;
     var name = n.基础 && n.基础.名称 ? n.基础.名称 : k;
     var rel = n.基础 && n.基础.与主角关系 ? n.基础.与主角关系 : '--';
-    html += '<div class="npc-item ' + (k === currentRoleId ? 'active' : '') + '" data-npc="' + esc(k) + '">' +
-      '<div><span class="npc-item-name">' + esc(name) + '</span><span class="npc-item-type">[主要]</span></div>' +
-      '<div><span class="npc-item-rel">' + esc(rel) + '</span></div>' +
+    html += '<div class="npc-item ' + (k === currentRoleId ? 'active' : '') + '" data-npc="' + esc(k) + '" data-type="主要">' +
+      '<div><span class="npc-item-name">' + esc(name) + '</span><span class="npc-item-type">[主要]</span><div class="npc-item-rel">' + esc(rel) + '</div></div>' +
       '<div class="npc-item-actions">' +
-      '<button class="npc-mini-btn btn-set-current" data-npc="' + esc(k) + '">设为当前</button>' +
-      '<button class="npc-mini-btn btn-del-npc" data-npc="' + esc(k) + '">删除</button>' +
+      '<button class="mini-btn btn-set-current" data-npc="' + esc(k) + '">设为当前</button>' +
+      '<button class="mini-btn btn-edit-npc" data-npc="' + esc(k) + '">编辑</button>' +
+      '<button class="mini-btn btn-del-npc" data-npc="' + esc(k) + '">删除</button>' +
       '</div></div>';
   });
-  if (!hasAny) html += '<div style="font-size:.75rem;color:var(--ink-dim);padding:8px;">暂无主要角色</div>';
+  if (!hasMain) html += '<div style="font-size:.75rem;color:var(--ink-dim);padding:8px;">暂无主要角色</div>';
 
-  // 次要角色
   html += '<div class="section-title">次要角色</div>';
-  hasAny = false;
   Object.keys(npcs).forEach(function(k) {
     var n = npcs[k];
     if (!n || n._类型 !== '次要') return;
-    hasAny = true;
+    hasMinor = true;
     var name = n.基础 && n.基础.名称 ? n.基础.名称 : k;
-    html += '<div class="npc-item" data-npc="' + esc(k) + '">' +
+    html += '<div class="npc-item" data-npc="' + esc(k) + '" data-type="次要">' +
       '<div><span class="npc-item-name">' + esc(name) + '</span><span class="npc-item-type">[次要]</span></div>' +
       '<div class="npc-item-actions">' +
-      '<button class="npc-mini-btn btn-del-npc" data-npc="' + esc(k) + '">删除</button>' +
+      '<button class="mini-btn btn-view-minor" data-npc="' + esc(k) + '">查看</button>' +
+      '<button class="mini-btn btn-edit-minor" data-npc="' + esc(k) + '">编辑</button>' +
+      '<button class="mini-btn btn-del-npc" data-npc="' + esc(k) + '">删除</button>' +
       '</div></div>';
   });
-  if (!hasAny) html += '<div style="font-size:.75rem;color:var(--ink-dim);padding:8px;">暂无次要角色</div>';
+  if (!hasMinor) html += '<div style="font-size:.75rem;color:var(--ink-dim);padding:8px;">暂无次要角色</div>';
 
   list.html(html);
 }
 
-// NPC Panel buttons
-$('#btn-close-npc-panel').on('click', closeNpcPanel);
-$('#btn-add-main-npc').on('click', function() { closeNpcPanel(); $('#add-main-overlay').addClass('active'); });
-$('#btn-add-minor-npc').on('click', function() { closeNpcPanel(); $('#add-minor-overlay').addClass('active'); });
-$('#btn-relation').on('click', function() { closeNpcPanel(); openRelationPanel(); });
+// ===================== View/Edit Minor NPC =====================
+function viewMinorNpc(id) {
+  var n = getVal('NPC.' + id, {});
+  var b = n.基础 || {};
+  var html = '<div style="display:flex;flex-direction:column;gap:6px;font-size:.8rem;">' +
+    '<div class="info-row"><span class="info-label">名称</span><span class="info-value">' + displayVal(b.名称) + '</span></div>' +
+    '<div class="info-row"><span class="info-label">性别</span><span class="info-value">' + displayVal(b.性别) + '</span></div>' +
+    '<div class="info-row"><span class="info-label">年龄</span><span class="info-value">' + displayVal(b.年龄) + '</span></div>' +
+    '<div class="info-row"><span class="info-label">身份</span><span class="info-value">' + displayVal(b.身份) + '</span></div>' +
+    '<div class="info-row"><span class="info-label">与主角关系</span><span class="info-value">' + displayVal(b.与主角关系) + '</span></div>' +
+    '<div class="info-row"><span class="info-label">背景简介</span><span class="info-value">' + displayVal(b.背景简介) + '</span></div>' +
+    '</div><div style="margin-top:10px;text-align:right;"><button class="edit-btn" id="btn-view-ok">关闭</button></div>';
 
-// Close overlays
-$('#btn-close-add-main').on('click', function() { $('#add-main-overlay').removeClass('active'); });
-$('#btn-close-add-minor').on('click', function() { $('#add-minor-overlay').removeClass('active'); });
-$('#btn-close-relation').on('click', function() { $('#relation-overlay').removeClass('active'); });
+  var overlay = $('<div class="overlay active" style="display:flex;"></div>');
+  var panel = $('<div class="panel" style="width:min(360px,96%);"></div>');
+  panel.html('<div class="panel-header"><span class="panel-title">查看次要角色</span></div>' + html);
+  overlay.append(panel);
+  $('body').append(overlay);
+  overlay.on('click', function(e) { if (e.target === overlay[0]) overlay.remove(); });
+  $('#btn-view-ok').on('click', function() { overlay.remove(); });
+}
 
-// Save Main NPC
-$('#btn-save-main').on('click', function() {
+function editMinorNpc(id) {
+  var n = getVal('NPC.' + id, {});
+  var b = n.基础 || {};
+  var html = '<div class="form-grid">' +
+    '<div class="form-field"><label>名称</label><input id="em-name" value="' + esc(b.名称 || '') + '"/></div>' +
+    '<div class="form-field"><label>性别</label><select id="em-gender"><option value="">--</option><option>男</option><option>女</option></select></div>' +
+    '<div class="form-field"><label>年龄</label><input id="em-age" value="' + esc(b.年龄 || '') + '"/></div>' +
+    '<div class="form-field"><label>身份</label><input id="em-identity" value="' + esc(b.身份 || '') + '"/></div>' +
+    '<div class="form-field"><label>与主角关系</label><input id="em-relation" value="' + esc(b.与主角关系 || '') + '"/></div>' +
+    '<div class="form-field full"><label>背景简介</label><textarea id="em-background" rows="2">' + esc(b.背景简介 || '') + '</textarea></div>' +
+    '</div><div style="margin-top:10px;text-align:right;">' +
+    '<button class="edit-btn" id="btn-em-cancel">取消</button> ' +
+    '<button class="edit-btn" id="btn-em-save">保存</button></div>';
+
+  var overlay = $('<div class="overlay active" style="display:flex;"></div>');
+  var panel = $('<div class="panel" style="width:min(400px,96%);"></div>');
+  panel.html('<div class="panel-header"><span class="panel-title">编辑次要角色</span></div>' + html);
+  overlay.append(panel);
+  $('body').append(overlay);
+
+  $('#em-gender').val(b.性别 || '');
+  overlay.on('click', function(e) { if (e.target === overlay[0]) overlay.remove(); });
+  $('#btn-em-cancel').on('click', function() { overlay.remove(); });
+  $('#btn-em-save').on('click', function() {
+    var pathBase = 'NPC.' + id + '.基础.';
+    updateVar(pathBase + '名称', $('#em-name').val());
+    updateVar(pathBase + '性别', $('#em-gender').val());
+    updateVar(pathBase + '年龄', $('#em-age').val());
+    updateVar(pathBase + '身份', $('#em-identity').val());
+    updateVar(pathBase + '与主角关系', $('#em-relation').val());
+    updateVar(pathBase + '背景简介', $('#em-background').val());
+    var changes = [];
+    if ($('#em-name').val()) changes.push('名称=' + $('#em-name').val());
+    if ($('#em-identity').val()) changes.push('身份=' + $('#em-identity').val());
+    sendCmd('【角色更新】已更新次要角色 ' + id + '\n' + changes.join('，'));
+    overlay.remove();
+    renderNpcList();
+  });
+}
+
+// ===================== Save Main NPC =====================
+function saveMainNpc() {
   var id = $('#am-id').val().trim() || 'NPC1';
   var data = readVar();
   if (!data.NPC) data.NPC = {};
   data.NPC[id] = {
     _类型: '主要',
     基础: {
-      名称: $('#am-name').val(),
-      性别: $('#am-gender').val(),
-      年龄: $('#am-age').val(),
-      身高: $('#am-height').val(),
-      体重: $('#am-weight').val(),
-      身份: $('#am-identity').val(),
-      经济情况: $('#am-economy').val(),
-      居住地: $('#am-residence').val(),
-      与主角关系: $('#am-relation').val(),
-      背景经历: $('#am-background').val()
+      名称: $('#am-name').val(), 性别: $('#am-gender').val(), 年龄: $('#am-age').val(),
+      身高: $('#am-height').val(), 体重: $('#am-weight').val(), 身份: $('#am-identity').val(),
+      经济情况: $('#am-economy').val(), 居住地: $('#am-residence').val(),
+      与主角关系: $('#am-relation').val(), 背景经历: $('#am-background').val()
     },
-    外貌: {
-      面部: $('#am-face').val(),
-      头发: $('#am-hair').val(),
-      妆容: $('#am-makeup').val(),
-      皮肤: $('#am-skin').val(),
-      特征: $('#am-features').val()
-    },
-    体型: {
-      整体体型: $('#am-body').val(),
-      胸部: $('#am-breast').val(),
-      腰部: $('#am-waist').val(),
-      手部: $('#am-hands').val(),
-      臀部: $('#am-hips').val(),
-      腿部: $('#am-legs').val(),
-      足部: $('#am-feet').val()
-    },
-    性格: {
-      核心特质: $('#am-core').val(),
-      正面特质: $('#am-positive').val(),
-      负面特质: $('#am-negative').val(),
-      行为习惯: $('#am-habits').val(),
-      情绪反应: $('#am-emotion').val(),
-      社交态度: $('#am-social').val()
-    },
-    状态: { 好感度: 0, 厌恶度: 0, 堕落度: 0 },
+    外貌: { 面部: $('#am-face').val(), 头发: $('#am-hair').val(), 妆容: $('#am-makeup').val(), 皮肤: $('#am-skin').val(), 特征: $('#am-features').val() },
+    体型: { 整体体型: $('#am-body').val(), 胸部: $('#am-breast').val(), 腰部: $('#am-waist').val(), 手部: $('#am-hands').val(), 臀部: $('#am-hips').val(), 腿部: $('#am-legs').val(), 足部: $('#am-feet').val() },
+    风格: { 搭配风格: $('#am-style').val(), 丝袜搭配: $('#am-stockings').val(), 居家搭配: $('#am-home').val(), 鞋子搭配: $('#am-shoes').val() },
+    性格: { 核心特质: $('#am-core').val(), 正面特质: $('#am-positive').val(), 负面特质: $('#am-negative').val(), 行为习惯: $('#am-habits').val(), 情绪反应: $('#am-emotion').val(), 社交态度: $('#am-social').val() },
+    性特质: { 敏感点: $('#am-sensitive').val(), 接受程度: $('#am-acceptance').val(), 身体反应: $('#am-reaction').val(), 行为偏好: $('#am-preference').val() },
+    状态: { 好感度: parseInt($('#am-favor').val()) || 0, 厌恶度: parseInt($('#am-hate').val()) || 0, 堕落度: parseInt($('#am-corrupt').val()) || 0 },
     穿着: { 上衣: null, 下装: null, 足部: null, 内衣: null, 内裤: null },
     贞操: { 处女: null, 口腔处女: null, 肛门处女: null, 阴茎处男: null },
     即时: { 小穴: null, 子宫: null, 屁穴: null, 体液: null, 阴茎: null, 前列腺: null, 尿道: null, 精液: null }
   };
   writeVar(data);
+
+  // Build detailed command
+  var lines = [];
+  lines.push('【添加主要角色】角色ID：' + id);
+  lines.push('基础信息：名称=' + ($('#am-name').val() || '未命名') + '，性别=' + ($('#am-gender').val() || '--') + '，年龄=' + ($('#am-age').val() || '--') + '，身高=' + ($('#am-height').val() || '--') + '，体重=' + ($('#am-weight').val() || '--') + '，身份=' + ($('#am-identity').val() || '--'));
+  lines.push('外貌特征：面部=' + ($('#am-face').val() || '--') + '，头发=' + ($('#am-hair').val() || '--') + '，妆容=' + ($('#am-makeup').val() || '--') + '，皮肤=' + ($('#am-skin').val() || '--') + '，特征=' + ($('#am-features').val() || '--'));
+  lines.push('体型特征：整体体型=' + ($('#am-body').val() || '--') + '，胸部=' + ($('#am-breast').val() || '--') + '，腰部=' + ($('#am-waist').val() || '--') + '，手部=' + ($('#am-hands').val() || '--') + '，臀部=' + ($('#am-hips').val() || '--') + '，腿部=' + ($('#am-legs').val() || '--') + '，足部=' + ($('#am-feet').val() || '--'));
+  lines.push('服装风格：搭配风格=' + ($('#am-style').val() || '--') + '，丝袜搭配=' + ($('#am-stockings').val() || '--') + '，居家搭配=' + ($('#am-home').val() || '--') + '，鞋子搭配=' + ($('#am-shoes').val() || '--'));
+  lines.push('性格特质：核心特质=' + ($('#am-core').val() || '--') + '，正面特质=' + ($('#am-positive').val() || '--') + '，负面特质=' + ($('#am-negative').val() || '--') + '，行为习惯=' + ($('#am-habits').val() || '--') + '，情绪反应=' + ($('#am-emotion').val() || '--') + '，社交态度=' + ($('#am-social').val() || '--'));
+  lines.push('性特质：敏感点=' + ($('#am-sensitive').val() || '--') + '，接受程度=' + ($('#am-acceptance').val() || '--') + '，身体反应=' + ($('#am-reaction').val() || '--') + '，行为偏好=' + ($('#am-preference').val() || '--'));
+  lines.push('初始态度：好感度=' + ($('#am-favor').val() || 0) + '，厌恶度=' + ($('#am-hate').val() || 0) + '，堕落度=' + ($('#am-corrupt').val() || 0));
+  sendCmd(lines.join('\n'));
+
   $('#add-main-overlay').removeClass('active');
-
-  // Build comprehensive command text with ALL fields
-  var cmdLines = ['【添加主要角色】'];
-  cmdLines.push('角色ID：' + id);
-  cmdLines.push('— 基础信息 —');
-  cmdLines.push('名称：' + ($('#am-name').val() || '未命名'));
-  cmdLines.push('性别：' + ($('#am-gender').val() || '未设定'));
-  cmdLines.push('年龄：' + ($('#am-age').val() || '未设定'));
-  cmdLines.push('身高：' + ($('#am-height').val() || '未设定'));
-  cmdLines.push('体重：' + ($('#am-weight').val() || '未设定'));
-  cmdLines.push('身份：' + ($('#am-identity').val() || '未设定'));
-  cmdLines.push('经济情况：' + ($('#am-economy').val() || '未设定'));
-  cmdLines.push('居住地：' + ($('#am-residence').val() || '未设定'));
-  cmdLines.push('与主角关系：' + ($('#am-relation').val() || '未设定'));
-  cmdLines.push('背景经历：' + ($('#am-background').val() || '未设定'));
-  cmdLines.push('— 初始态度 —');
-  cmdLines.push('好感度：' + ($('#am-favor').val() || '0'));
-  cmdLines.push('厌恶度：' + ($('#am-hate').val() || '0'));
-  cmdLines.push('堕落度：' + ($('#am-corrupt').val() || '0'));
-  cmdLines.push('— 外貌特征 —');
-  cmdLines.push('面部：' + ($('#am-face').val() || '未设定'));
-  cmdLines.push('头发：' + ($('#am-hair').val() || '未设定'));
-  cmdLines.push('妆容：' + ($('#am-makeup').val() || '未设定'));
-  cmdLines.push('皮肤：' + ($('#am-skin').val() || '未设定'));
-  cmdLines.push('特征：' + ($('#am-features').val() || '未设定'));
-  cmdLines.push('— 体型特征 —');
-  cmdLines.push('整体体型：' + ($('#am-body').val() || '未设定'));
-  cmdLines.push('胸部：' + ($('#am-breast').val() || '未设定'));
-  cmdLines.push('腰部：' + ($('#am-waist').val() || '未设定'));
-  cmdLines.push('手部：' + ($('#am-hands').val() || '未设定'));
-  cmdLines.push('臀部：' + ($('#am-hips').val() || '未设定'));
-  cmdLines.push('腿部：' + ($('#am-legs').val() || '未设定'));
-  cmdLines.push('足部：' + ($('#am-feet').val() || '未设定'));
-  cmdLines.push('— 性格特质 —');
-  cmdLines.push('核心特质：' + ($('#am-core').val() || '未设定'));
-  cmdLines.push('正面特质：' + ($('#am-positive').val() || '未设定'));
-  cmdLines.push('负面特质：' + ($('#am-negative').val() || '未设定'));
-  cmdLines.push('行为习惯：' + ($('#am-habits').val() || '未设定'));
-  cmdLines.push('情绪反应：' + ($('#am-emotion').val() || '未设定'));
-  cmdLines.push('社交态度：' + ($('#am-social').val() || '未设定'));
-  cmdLines.push('请根据以上信息开始塑造该角色，并自然融入剧情中。');
-
-  sendCmd(cmdLines.join('\n'));
   currentRoleId = id;
   renderAll();
   openNpcPanel();
-});
+}
 
-// Save Minor NPC
-$('#btn-save-minor').on('click', function() {
+// ===================== Save Minor NPC =====================
+function saveMinorNpc() {
   var id = $('#an-id').val().trim() || 'NPC7';
   var data = readVar();
   if (!data.NPC) data.NPC = {};
   data.NPC[id] = {
     _类型: '次要',
     基础: {
-      名称: $('#an-name').val(),
-      性别: $('#an-gender').val(),
-      年龄: $('#an-age').val(),
-      身份: $('#an-identity').val(),
-      与主角关系: $('#an-relation').val(),
-      背景简介: $('#an-background').val()
+      名称: $('#an-name').val(), 性别: $('#an-gender').val(), 年龄: $('#an-age').val(),
+      身份: $('#an-identity').val(), 与主角关系: $('#an-relation').val(), 背景简介: $('#an-background').val()
     }
   };
   writeVar(data);
+  sendCmd('【添加次要角色】角色ID：' + id + '\n名称=' + ($('#an-name').val() || '未命名') + '，性别=' + ($('#an-gender').val() || '--') + '，年龄=' + ($('#an-age').val() || '--') + '，身份=' + ($('#an-identity').val() || '--') + '，与主角关系=' + ($('#an-relation').val() || '--') + '，背景简介=' + ($('#an-background').val() || '--'));
   $('#add-minor-overlay').removeClass('active');
-
-  var cmdLines = ['【添加次要角色】'];
-  cmdLines.push('角色ID：' + id);
-  cmdLines.push('名称：' + ($('#an-name').val() || '未命名'));
-  cmdLines.push('性别：' + ($('#an-gender').val() || '未设定'));
-  cmdLines.push('年龄：' + ($('#an-age').val() || '未设定'));
-  cmdLines.push('身份：' + ($('#an-identity').val() || '未设定'));
-  cmdLines.push('与主角关系：' + ($('#an-relation').val() || '未设定'));
-  cmdLines.push('背景简介：' + ($('#an-background').val() || '未设定'));
-  cmdLines.push('请根据以上信息在剧情中自然引入该角色。');
-
-  sendCmd(cmdLines.join('\n'));
   openNpcPanel();
-});
-
-// Set current / Delete NPC
-$(document).on('click', '.btn-set-current', function(e) {
-  e.stopPropagation();
-  currentRoleId = $(this).data('npc');
-  renderAll();
-  renderNpcList();
-});
-$(document).on('click', '.btn-del-npc', function(e) {
-  e.stopPropagation();
-  var id = $(this).data('npc');
-  if (!confirm('确定删除角色 ' + id + ' 吗？')) return;
-  var data = readVar();
-  if (data.NPC && data.NPC[id]) {
-    delete data.NPC[id];
-    writeVar(data);
-    if (currentRoleId === id) currentRoleId = '';
-    sendCmd('【角色管理】已删除角色：' + id);
-    renderAll();
-    renderNpcList();
-  }
-});
-$(document).on('click', '.npc-item', function() {
-  var id = $(this).data('npc');
-  var data = readVar();
-  var npc = data.NPC && data.NPC[id];
-  if (npc && npc._类型 === '主要') {
-    currentRoleId = id;
-    closeNpcPanel();
-    renderAll();
-  }
-});
+}
 
 // ===================== Relation Panel =====================
 function openRelationPanel() {
@@ -1138,148 +1188,142 @@ function renderRelationList() {
   list.html(rels.map(function(r, i) {
     return '<div class="relation-item">' +
       '<div>' + esc(r) + '</div>' +
-      '<div style="text-align:right;margin-top:4px;">' +
-      '<button class="npc-mini-btn btn-del-rel" data-idx="' + i + '">删除</button>' +
-      '</div></div>';
+      '<div style="text-align:right;margin-top:4px;"><button class="mini-btn btn-del-rel" data-idx="' + i + '">删除</button></div>' +
+      '</div>';
   }).join(''));
 }
-$('#btn-add-relation').on('click', function() {
-  var text = prompt('输入角色关系描述，例如：雪柔是雪婉的妹妹');
-  if (!text || !text.trim()) return;
-  var data = readVar();
-  if (!data.角色关系) data.角色关系 = [];
-  data.角色关系.push(text.trim());
-  writeVar(data);
-  sendCmd('【角色关系】已添加关系：' + text.trim());
-  renderRelationList();
-});
-$(document).on('click', '.btn-del-rel', function() {
-  var idx = $(this).data('idx');
-  var data = readVar();
-  if (data.角色关系 && data.角色关系[idx] !== undefined) {
-    data.角色关系.splice(idx, 1);
-    writeVar(data);
-    renderRelationList();
-  }
-});
 
-// ===================== Global NPC Panel Button =====================
-// Add a button to open NPC panel in header or tab bar
+// ===================== Render All =====================
+function renderAll() {
+  renderHeader();
+  renderNpcSelectors();
+  renderRoleTab();
+  renderPsychTab();
+  renderBodyTab();
+  renderGoalTab();
+}
+
+// ===================== Event Bindings =====================
 $(function() {
-  var npcBtn = $('<button class="tab-btn" id="btn-npc-panel" style="margin-left:auto;">角色管理</button>');
-  $('.tab-bar').append(npcBtn);
-  npcBtn.on('click', openNpcPanel);
+  // Tabs
+  $('.tab-btn').on('click', function() {
+    var tab = $(this).data('tab');
+    if (!tab) return;
+    $('.tab-btn').removeClass('active');
+    $(this).addClass('active');
+    $('.tab-content').removeClass('active');
+    $('#tab-' + tab).addClass('active');
+  });
+
+  // Card collapse
+  $(document).on('click', '.card-header', function() {
+    var card = $(this).data('card');
+    $('#card-' + card).toggleClass('collapsed');
+    $(this).find('.card-toggle').text($('#card-' + card).hasClass('collapsed') ? '▶' : '▼');
+  });
+
+  // Edit buttons
+  $(document).on('click', '.edit-btn', function() {
+    var type = $(this).data('edit');
+    if (!type) return;
+    if (type === 'clothing') showClothingEdit();
+    else if (type === 'side-goal') showSideGoalAdd();
+    else showEditPopup(type);
+  });
+
+  // NPC Panel buttons
+  $('#btn-npc-panel').on('click', openNpcPanel);
+  $('#btn-close-npc-panel').on('click', closeNpcPanel);
+  $('#btn-add-main-npc').on('click', function() { closeNpcPanel(); $('#add-main-overlay').addClass('active'); });
+  $('#btn-add-minor-npc').on('click', function() { closeNpcPanel(); $('#add-minor-overlay').addClass('active'); });
+  $('#btn-relation').on('click', function() { closeNpcPanel(); openRelationPanel(); });
+
+  // Close overlays
+  $('#btn-close-add-main').on('click', function() { $('#add-main-overlay').removeClass('active'); });
+  $('#btn-close-add-minor').on('click', function() { $('#add-minor-overlay').removeClass('active'); });
+  $('#btn-close-relation').on('click', function() { $('#relation-overlay').removeClass('active'); });
+
+  // Save NPCs
+  $('#btn-save-main').on('click', saveMainNpc);
+  $('#btn-save-minor').on('click', saveMinorNpc);
+
+  // NPC item interactions
+  $(document).on('click', '.btn-set-current', function(e) {
+    e.stopPropagation();
+    currentRoleId = $(this).data('npc');
+    closeNpcPanel();
+    renderAll();
+  });
+  $(document).on('click', '.btn-del-npc', function(e) {
+    e.stopPropagation();
+    var id = $(this).data('npc');
+    if (!confirm('确定删除角色 ' + id + ' 吗？')) return;
+    var data = readVar();
+    if (data.NPC && data.NPC[id]) {
+      delete data.NPC[id];
+      writeVar(data);
+      if (currentRoleId === id) currentRoleId = '';
+      sendCmd('【角色管理】已删除角色：' + id);
+      renderAll();
+      renderNpcList();
+    }
+  });
+  $(document).on('click', '.btn-edit-npc', function(e) {
+    e.stopPropagation();
+    var id = $(this).data('npc');
+    // For now, just open the edit panel with current values
+    currentRoleId = id;
+    showEditPopup('basic');
+  });
+  $(document).on('click', '.btn-view-minor', function(e) {
+    e.stopPropagation();
+    viewMinorNpc($(this).data('npc'));
+  });
+  $(document).on('click', '.btn-edit-minor', function(e) {
+    e.stopPropagation();
+    editMinorNpc($(this).data('npc'));
+  });
+  $(document).on('click', '.npc-item', function() {
+    var id = $(this).data('npc');
+    var type = $(this).data('type');
+    if (type === '主要') {
+      currentRoleId = id;
+      closeNpcPanel();
+      renderAll();
+    }
+  });
+
+  // Relation
+  $('#btn-add-relation').on('click', function() {
+    var text = prompt('输入角色关系描述，例如：雪柔是雪婉的妹妹');
+    if (!text || !text.trim()) return;
+    var data = readVar();
+    if (!data.角色关系) data.角色关系 = [];
+    data.角色关系.push(text.trim());
+    writeVar(data);
+    sendCmd('【角色关系】已添加关系：' + text.trim());
+    renderRelationList();
+  });
+  $(document).on('click', '.btn-del-rel', function() {
+    var idx = $(this).data('idx');
+    var data = readVar();
+    if (data.角色关系 && data.角色关系[idx] !== undefined) {
+      data.角色关系.splice(idx, 1);
+      writeVar(data);
+      renderRelationList();
+    }
+  });
+
+  // Theme
+  function applyTheme(isDark) {
+    document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
+  }
+  applyTheme(localStorage.getItem('system-dark-mode') === 'true');
+
+  // Initial render
+  renderAll();
 });
 </script>
-
-<!-- NPC Panel Overlay -->
-<div class="npc-panel-overlay" id="npc-panel-overlay">
-  <div class="npc-panel">
-    <div class="npc-panel-header">
-      <span class="npc-panel-title" id="npc-panel-title">角色管理</span>
-      <div class="npc-panel-actions">
-        <button class="edit-btn" id="btn-add-main-npc">+添加主要角色</button>
-        <button class="edit-btn" id="btn-add-minor-npc">+添加次要角色</button>
-        <button class="edit-btn" id="btn-relation">+角色关系</button>
-        <button class="edit-btn" id="btn-close-npc-panel">关闭</button>
-      </div>
-    </div>
-    <div class="npc-list" id="npc-list">加载中...</div>
-  </div>
-</div>
-
-<!-- Add Main NPC Form -->
-<div class="npc-panel-overlay" id="add-main-overlay">
-  <div class="npc-panel" style="width:min(520px,96%);">
-    <div class="npc-panel-header">
-      <span class="npc-panel-title">添加主要角色</span>
-      <button class="edit-btn" id="btn-close-add-main">关闭</button>
-    </div>
-    <div class="form-grid" id="add-main-form">
-      <div class="form-field full" style="grid-column:span 2;border-bottom:1px solid var(--border);padding-bottom:4px;margin-bottom:4px;"><label style="font-size:.8rem;font-weight:700;color:var(--ink);">— 基础信息 —</label></div>
-      <div class="form-field"><label>角色ID</label><input id="am-id" placeholder="如NPC1"/></div>
-      <div class="form-field"><label>名称</label><input id="am-name"/></div>
-      <div class="form-field"><label>性别</label><select id="am-gender"><option value="">--</option><option>男</option><option>女</option></select></div>
-      <div class="form-field"><label>年龄</label><input id="am-age"/></div>
-      <div class="form-field"><label>身高</label><input id="am-height"/></div>
-      <div class="form-field"><label>体重</label><input id="am-weight"/></div>
-      <div class="form-field"><label>身份</label><input id="am-identity"/></div>
-      <div class="form-field"><label>经济情况</label><input id="am-economy"/></div>
-      <div class="form-field"><label>居住地</label><input id="am-residence"/></div>
-      <div class="form-field"><label>与主角关系</label><input id="am-relation"/></div>
-      <div class="form-field full"><label>背景经历</label><textarea id="am-background" rows="2"></textarea></div>
-
-      <div class="form-field full" style="grid-column:span 2;border-bottom:1px solid var(--border);padding-bottom:4px;margin-bottom:4px;margin-top:8px;"><label style="font-size:.8rem;font-weight:700;color:var(--ink);">— 初始态度 —</label></div>
-      <div class="form-field"><label>好感度</label><input id="am-favor" type="number" value="0"/></div>
-      <div class="form-field"><label>厌恶度</label><input id="am-hate" type="number" value="0"/></div>
-      <div class="form-field"><label>堕落度</label><input id="am-corrupt" type="number" value="0"/></div>
-
-      <div class="form-field full" style="grid-column:span 2;border-bottom:1px solid var(--border);padding-bottom:4px;margin-bottom:4px;margin-top:8px;"><label style="font-size:.8rem;font-weight:700;color:var(--ink);">— 外貌特征 —</label></div>
-      <div class="form-field"><label>面部</label><input id="am-face"/></div>
-      <div class="form-field"><label>头发</label><input id="am-hair"/></div>
-      <div class="form-field"><label>妆容</label><input id="am-makeup"/></div>
-      <div class="form-field"><label>皮肤</label><input id="am-skin"/></div>
-      <div class="form-field full"><label>特征</label><input id="am-features"/></div>
-
-      <div class="form-field full" style="grid-column:span 2;border-bottom:1px solid var(--border);padding-bottom:4px;margin-bottom:4px;margin-top:8px;"><label style="font-size:.8rem;font-weight:700;color:var(--ink);">— 体型特征 —</label></div>
-      <div class="form-field"><label>整体体型</label><input id="am-body"/></div>
-      <div class="form-field"><label>胸部</label><input id="am-breast"/></div>
-      <div class="form-field"><label>腰部</label><input id="am-waist"/></div>
-      <div class="form-field"><label>手部</label><input id="am-hands"/></div>
-      <div class="form-field"><label>臀部</label><input id="am-hips"/></div>
-      <div class="form-field"><label>腿部</label><input id="am-legs"/></div>
-      <div class="form-field"><label>足部</label><input id="am-feet"/></div>
-
-      <div class="form-field full" style="grid-column:span 2;border-bottom:1px solid var(--border);padding-bottom:4px;margin-bottom:4px;margin-top:8px;"><label style="font-size:.8rem;font-weight:700;color:var(--ink);">— 性格特质 —</label></div>
-      <div class="form-field full"><label>核心特质</label><input id="am-core"/></div>
-      <div class="form-field"><label>正面特质</label><input id="am-positive"/></div>
-      <div class="form-field"><label>负面特质</label><input id="am-negative"/></div>
-      <div class="form-field"><label>行为习惯</label><input id="am-habits"/></div>
-      <div class="form-field"><label>情绪反应</label><input id="am-emotion"/></div>
-      <div class="form-field"><label>社交态度</label><input id="am-social"/></div>
-
-      <div class="form-field full" style="text-align:right;margin-top:10px;">
-        <button class="edit-btn" id="btn-save-main">保存</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- Add Minor NPC Form -->
-<div class="npc-panel-overlay" id="add-minor-overlay">
-  <div class="npc-panel" style="width:min(400px,96%);">
-    <div class="npc-panel-header">
-      <span class="npc-panel-title">添加次要角色</span>
-      <button class="edit-btn" id="btn-close-add-minor">关闭</button>
-    </div>
-    <div class="form-grid" id="add-minor-form">
-      <div class="form-field"><label>角色ID</label><input id="an-id" placeholder="如NPC7"/></div>
-      <div class="form-field"><label>名称</label><input id="an-name"/></div>
-      <div class="form-field"><label>性别</label><select id="an-gender"><option value="">--</option><option>男</option><option>女</option></select></div>
-      <div class="form-field"><label>年龄</label><input id="an-age"/></div>
-      <div class="form-field"><label>身份</label><input id="an-identity"/></div>
-      <div class="form-field"><label>与主角关系</label><input id="an-relation"/></div>
-      <div class="form-field full"><label>背景简介</label><textarea id="an-background" rows="2"></textarea></div>
-      <div class="form-field full" style="text-align:right;margin-top:6px;">
-        <button class="edit-btn" id="btn-save-minor">保存</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- Relation Panel -->
-<div class="npc-panel-overlay" id="relation-overlay">
-  <div class="npc-panel">
-    <div class="npc-panel-header">
-      <span class="npc-panel-title">角色关系</span>
-      <div class="npc-panel-actions">
-        <button class="edit-btn" id="btn-add-relation">添加关系</button>
-        <button class="edit-btn" id="btn-close-relation">关闭</button>
-      </div>
-    </div>
-    <div class="relation-list" id="relation-list">暂无角色关系</div>
-  </div>
-</div>
 
 </body>
 </html>
