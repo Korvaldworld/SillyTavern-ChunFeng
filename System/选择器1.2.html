@@ -835,8 +835,10 @@ function resetAll() {
 function applyTemplate(name) {
   const t = defaultTemplates[name];
   if (!t) return;
+  // 保留已有的世界观选择，只覆盖角色相关字段
+  var existingWorld = state.selections.world || '';
   state.selections = {
-    world: '',
+    world: existingWorld,
     name: t.name || '',
     gender: t.gender || '',
     age: t.age || '',
